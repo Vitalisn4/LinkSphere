@@ -1,0 +1,100 @@
+/* src/components/HomePage.css */
+
+/* General reset for margin and padding */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body styling */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+}
+
+/* Home page container */
+.home-container {
+  text-align: center;
+  max-width: 800px;
+  padding: 20px;
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  width: 90%;
+}
+
+/* Intro text styling */
+.intro-text h1 {
+  font-size: 36px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.intro-text p {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+/* Search bar styling */
+.search-bar-container {
+  margin-bottom: 20px;
+}
+
+.search-bar {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  outline: none;
+}
+
+.search-bar:focus {
+  border-color: #007bff;
+}
+
+/* Search results styling */
+.search-results {
+  margin-top: 20px;
+  padding: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.search-results .result-item {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.search-results .result-item:hover {
+  background-color: #e7f3ff;
+}
+
+.search-results .no-results {
+  padding: 20px;
+  color: #666;
+  text-align: center;
+}
+
+/* Responsive design: Adjust for small screens */
+@media (max-width: 600px) {
+  .home-container {
+    padding: 15px;
+  }
+
+  .search-bar {
+    width: 100%;
+  }
+}
