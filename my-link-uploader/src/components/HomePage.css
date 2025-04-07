@@ -1,5 +1,3 @@
-/* src/components/HomePage.css */
-
 /* General reset for margin and padding */
 * {
   margin: 0;
@@ -10,7 +8,7 @@
 /* Body styling */
 body {
   font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
+  background-color: #a03ece;
   height: 100vh;
   display: flex;
   justify-content: center;
@@ -22,27 +20,35 @@ body {
 .home-container {
   text-align: center;
   max-width: 800px;
-  padding: 20px;
-  background-color: white;
+  padding: 40px;
+  background-color: rgba(255, 255, 255, 0);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
+  border-radius: 50px;
   width: 90%;
 }
 
-/* Intro text styling */
+body {
+  background-color: #f3f4f6;
+  background-image: url('https://static.vecteezy.com/system/resources/thumbnails/002/417/493/small/3d-render-of-purple-ball-and-silk-photo.jpg');
+  min-height: 5vh;
+  background-size: cover;
+}
+
+
 .intro-text h1 {
-  font-size: 36px;
-  color: #333;
-  margin-bottom: 10px;
+  font-size: 100px;
+  color: #e6f1f1;
+  margin-bottom: 12px;
+  text-align: center;
 }
 
 .intro-text p {
-  font-size: 18px;
-  color: #666;
+  font-size: 30px;
+  color: hsl(288, 71%, 96%);
   margin-bottom: 20px;
+  text-align: center;
 }
 
-/* Search bar styling */
 .search-bar-container {
   margin-bottom: 20px;
 }
@@ -51,40 +57,40 @@ body {
   width: 100%;
   max-width: 400px;
   padding: 12px;
-  font-size: 16px;
-  border: 1px solid #ccc;
+  font-size: 20px;
+  border: 2px solid #e0dde0;
   border-radius: 25px;
   outline: none;
+  background-color: #10011300;
 }
 
 .search-bar:focus {
-  border-color: #007bff;
+  border-color: #ede6f0;
 }
 
-/* Search results styling */
 .search-results {
-  margin-top: 20px;
-  padding: 10px;
+  margin-top: 40px;
+  padding: 20px;
   max-height: 300px;
   overflow-y: auto;
-  border: 1px solid #ddd;
+  border: 2px solid #eee4ed;
   border-radius: 8px;
-  background-color: #f9f9f9;
+  background-color: #180f1a00;
 }
 
 .search-results .result-item {
   padding: 10px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid hsl(0, 0%, 87%);
   cursor: pointer;
 }
 
 .search-results .result-item:hover {
-  background-color: #e7f3ff;
+  background-color: #4c15b9;
 }
 
 .search-results .no-results {
   padding: 20px;
-  color: #666;
+  color: #555454;
   text-align: center;
 }
 

@@ -1,13 +1,12 @@
 import React, { useState } from "react";
-import "./HomePage.css"; // import the styles
+import "./HomePage.css"; 
 
-// Sample data (this can be replaced with real data from an API or database)
 const sampleData: string[] = [
-  "Traits",
+  "Traits in Rust",
   "Threads",
-  "Pattern",
-  "Enum",
-  "Options",
+  "Pattern matching",
+  "Enums",
+  "Options and their variants",
 ];
 
 // Type for search result item
@@ -39,10 +38,9 @@ const HomePage: React.FC = () => {
     <div className="home-container">
       {/* Intro Section */}
       <div className="intro-text">
-        <h1>Welcome to My Website!</h1>
-        <p>
-          Your go-to place for everything you need. Explore, search, and enjoy!
-        </p>
+        <h1>Welcome to LinkSphere!</h1>
+        <p>Love Getting more Leads?</p>
+        <p>Let's make your search easier than ever!</p>
       </div>
 
       {/* Search Bar */}
