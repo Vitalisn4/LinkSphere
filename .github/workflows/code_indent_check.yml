@@ -1,0 +1,28 @@
+name: Rust Formatting & Linting check
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+jobs:
+  lint:
+    name: Check Formatting & Linting
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Check Formatting
+        working-directory: ./backend
+        run: cargo fmt --check
+
+      - name: Run Clippy Linter
+        working-directory: ./backend
+        run: cargo clippy -- -D warnings
