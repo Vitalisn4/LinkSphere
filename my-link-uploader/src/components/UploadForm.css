@@ -93,5 +93,13 @@
   font-size: 0.875rem;
   margin-top: 0.25rem;
   display: block;
-  
+  text-align: center;
+}
+
+/* Success message styles */
+.success-text {
+  color: #34d399; /* green */
+  font-size: 1rem;
+  margin-top: 1rem;
+  text-align: center;
 }

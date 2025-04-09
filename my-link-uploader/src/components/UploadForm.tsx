@@ -1,5 +1,5 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
-import './components/UploadForm.css';
+import './UploadForm.css';
 
 interface FormData {
   link: string;
@@ -24,7 +24,9 @@ const UploadForm: React.FC = () => {
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Validate form data
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
 
@@ -42,22 +44,41 @@ const UploadForm: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Handle input changes
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: undefined })); // clear field error
+    setErrors((prev) => ({ ...prev, [name]: undefined })); // Clear field error
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  // Submit form
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
     if (!validate()) {
       return;
     }
 
-    console.log("Form submitted:", formData);
-    alert("Form submitted successfully!");
-    // Optionally reset form
-    setFormData({ link: "", topic: "", description: "", uploader: "" });
+    try {
+      // Make API call here
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setSuccessMessage("Link submitted successfully!");
+        setFormData({ link: "", topic: "", description: "", uploader: "" }); // Reset form
+      } else {
+        throw new Error("Failed to submit the link.");
+      }
+    } catch (error) {
+      setSuccessMessage(null); // Clear success message if error occurs
+      alert("Error submitting the form. Please try again.");
+    }
   };
 
   return (
@@ -121,6 +142,9 @@ const UploadForm: React.FC = () => {
 
         <button type="submit">Submit Link</button>
       </form>
+
+      {/* Display success message */}
+      {successMessage && <div className="success-text">{successMessage}</div>}
     </div>
   );
 };
