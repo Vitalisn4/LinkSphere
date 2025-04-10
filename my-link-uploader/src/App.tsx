@@ -1,5 +1,6 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import './components/UploadForm.css';
+import AdminDashboard from './components/AdminDashboard';
  // optional if you want to style it
 
 interface FormData {
@@ -16,6 +17,10 @@ const UploadForm: React.FC = () => {
     description: "",
     uploader: "",
   });
+    
+    const App: React.FC = () => {
+  return <AdminDashboard />;
+};
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -86,3 +91,4 @@ const UploadForm: React.FC = () => {
 };
 
 export default UploadForm;
+export default App;

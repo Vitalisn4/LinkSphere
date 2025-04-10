@@ -2,10 +2,9 @@ name: Rust Formatting & Linting check
 
 on:
   push:
-    branches: main
+    branches: [main, master]
   pull_request:
-    branches: main
-
+    branches: [main, master]
 jobs:
   lint:
     name: Check Formatting & Linting
@@ -21,7 +20,9 @@ jobs:
           components: rustfmt, clippy
 
       - name: Check Formatting
+        working-directory: ./backend
         run: cargo fmt --check
 
       - name: Run Clippy Linter
+        working-directory: ./backend
         run: cargo clippy -- -D warnings
