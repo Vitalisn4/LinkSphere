@@ -13,7 +13,7 @@ interface FormErrors {
   topic?: string;
   description?: string;
   uploader?: string;
-}
+} 
 
 const UploadForm: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
