@@ -20,7 +20,9 @@ jobs:
           components: rustfmt, clippy
 
       - name: Check Formatting
+        working-directory: ./backend
         run: cargo fmt --check
 
       - name: Run Clippy Linter
+        working-directory: ./backend
         run: cargo clippy -- -D warnings
