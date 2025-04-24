@@ -2,4 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    @apply antialiased;
+  }
 
+  body {
+    @apply min-h-screen bg-white text-gray-900 transition-colors duration-300;
+  }
+
+  body.dark {
+    @apply bg-gray-900 text-white;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-700 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-gray-600;
+  }
+
+  /* Focus styles */
+  :focus-visible {
+    @apply outline-none ring-2 ring-purple-500 ring-opacity-50;
+  }
+}
+
+/* Animations */
+@layer utilities {
+  .animate-gradient-x {
+    animation: gradient-x 15s ease infinite;
+  }
+
+  .animate-gradient-y {
+    animation: gradient-y 15s ease infinite;
+  }
+
+  .animate-gradient-xy {
+    animation: gradient-xy 15s ease infinite;
+  }
+}
