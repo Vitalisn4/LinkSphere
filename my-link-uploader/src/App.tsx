@@ -1,3 +1,7 @@
+
+import React from "react";
+import HomePage from "./components/HomePage";
+
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import './components/UploadForm.css';
 import AdminDashboard from './components/AdminDashboard';
@@ -33,7 +37,18 @@ const UploadForm: React.FC = () => {
     alert("Form submitted successfully!");
   };
 
+
+const App: React.FC = () => {
   return (
+
+    <div className="App">
+      <HomePage />
+    </div>
+  );
+};
+
+export default App;
+
     <div className="upload-form-container">
       <h1>Welcome to Link Upload</h1>
       <p className="form-description">
@@ -92,3 +107,4 @@ const UploadForm: React.FC = () => {
 
 export default UploadForm;
 // export default App;
+

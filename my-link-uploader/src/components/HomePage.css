@@ -1,0 +1,106 @@
+/* General reset for margin and padding */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body styling */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #a03ece;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+}
+
+/* Home page container */
+.home-container {
+  text-align: center;
+  max-width: 800px;
+  padding: 40px;
+  background-color: rgba(255, 255, 255, 0);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 50px;
+  width: 90%;
+}
+
+body {
+  background-color: #f3f4f6;
+  background-image: url('https://us.123rf.com/450wm/silentstock639/silentstock6392409/silentstock639240900080/235384659-edge-background-austria-graphic-and-label-element-of-impact-for-the-use-you-want-to-make-of-it.jpg?ver=6');
+  min-height: 5vh;
+  background-size: cover;
+}
+
+
+.intro-text h1 {
+  font-size: 100px;
+  color: #e6f1f1;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.intro-text p {
+  font-size: 30px;
+  color: hsl(288, 71%, 96%);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.search-bar-container {
+  margin-bottom: 20px;
+}
+
+.search-bar {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px;
+  font-size: 20px;
+  border: 2px solid #e0dde0;
+  border-radius: 25px;
+  outline: none;
+  background-color: #10011300;
+}
+
+.search-bar:focus {
+  border-color: #ede6f0;
+}
+
+.search-results {
+  margin-top: 40px;
+  padding: 20px;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 2px solid #eee4ed;
+  border-radius: 8px;
+  background-color: #180f1a00;
+}
+
+.search-results .result-item {
+  padding: 10px;
+  border-bottom: 1px solid hsl(0, 0%, 87%);
+  cursor: pointer;
+}
+
+.search-results .result-item:hover {
+  background-color: #4c15b9;
+}
+
+.search-results .no-results {
+  padding: 20px;
+  color: #555454;
+  text-align: center;
+}
+
+/* Responsive design: Adjust for small screens */
+@media (max-width: 600px) {
+  .home-container {
+    padding: 15px;
+  }
+
+  .search-bar {
+    width: 100%;
+  }
+}
