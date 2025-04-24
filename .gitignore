@@ -29,3 +29,5 @@ dist-ssr
 *.sln
 *.sw?
 *.zip
+*-lock.json
+*.lock
