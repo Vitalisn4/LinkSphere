@@ -29,11 +29,10 @@ body {
 
 body {
   background-color: #f3f4f6;
-  background-image: url('https://us.123rf.com/450wm/silentstock639/silentstock6392409/silentstock639240900080/235384659-edge-background-austria-graphic-and-label-element-of-impact-for-the-use-you-want-to-make-of-it.jpg?ver=6');
+  background-image: url("https://us.123rf.com/450wm/silentstock639/silentstock6392409/silentstock639240900080/235384659-edge-background-austria-graphic-and-label-element-of-impact-for-the-use-you-want-to-make-of-it.jpg?ver=6");
   min-height: 5vh;
   background-size: cover;
 }
-
 
 .intro-text h1 {
   font-size: 100px;
