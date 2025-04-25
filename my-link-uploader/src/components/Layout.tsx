@@ -20,7 +20,7 @@ export default function Layout({ children, toggleAuth, isAuthenticated }: Layout
     <div
       className={`min-h-screen transition-colors duration-300 ${
         theme === "dark"
-          ? "bg-gradient-to-br from-gray-900 via-purple-900/30 to-gray-900 text-white"
+          ? "bg-gray-900 text-white"
           : "bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 text-gray-900"
       }`}
     >
