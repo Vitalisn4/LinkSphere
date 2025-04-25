@@ -31,3 +31,4 @@ dist-ssr
 *.zip
 *-lock.json
 *.lock
+*.sql
