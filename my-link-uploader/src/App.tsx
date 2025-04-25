@@ -1,33 +1,51 @@
-import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import Home from "./pages/Home";
-import Upload  from "./pages/Upload";
-import ViewLinks from "./pages/ViewLinks";
-import Admin from "./pages/Admin";
-import "./App.css";
+"use client"
 
-function App() {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+import { useState, useEffect } from "react"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { ThemeProvider } from "./contexts/ThemeContext"
+import Layout from "./components/Layout"
+import HomePage from "./components/HomePage"
+import UploadForm from "./components/UploadForm"
+import AdminDashboard from "./components/AdminDashboard"
+import { AnimatePresence } from "framer-motion"
 
+export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  // Simulate authentication check
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
+    const checkAuth = () => {
+      const auth = localStorage.getItem("isAuthenticated")
+      setIsAuthenticated(auth === "true")
+    }
 
-  const toggleTheme = () =>
-    setTheme(prev => (prev === "light" ? "dark" : "light"));
+    checkAuth()
+
+    // For demo purposes only - in a real app, use proper authentication
+    window.addEventListener("storage", checkAuth)
+    return () => window.removeEventListener("storage", checkAuth)
+  }, [])
+
+  // For demo purposes - toggle authentication
+  const toggleAuth = () => {
+    const newState = !isAuthenticated
+    localStorage.setItem("isAuthenticated", String(newState))
+    setIsAuthenticated(newState)
+  }
 
   return (
-    <Router>
-      <Navbar toggleTheme={toggleTheme} />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/upload" element={<Upload />} />
-        <Route path="/view" element={<ViewLinks />} />
-        <Route path="/admin" element={<Admin />} />
-      </Routes>
-    </Router>
-  );
+    <BrowserRouter>
+      <ThemeProvider>
+        <AnimatePresence mode="wait">
+          <Layout toggleAuth={toggleAuth} isAuthenticated={isAuthenticated}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/upload" element={<UploadForm />} />
+              <Route path="/admin" element={isAuthenticated ? <AdminDashboard /> : <Navigate to="/" />} />
+            </Routes>
+          </Layout>
+        </AnimatePresence>
+      </ThemeProvider>
+    </BrowserRouter>
+  )
 }
-
-export default App;
