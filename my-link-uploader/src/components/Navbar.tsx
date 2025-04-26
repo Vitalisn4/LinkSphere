@@ -7,7 +7,9 @@ interface Props {
 export default function Navbar({ toggleTheme }: Props) {
   return (
     <nav className="flex justify-between items-center px-6 py-4 bg-gray-100 dark:bg-gray-900 shadow">
-      <div className="text-xl font-bold">🔗 LinkUploader</div>
+      <div className="flex items-center">
+        <img src="/logo.png" alt="LinkSphere Logo" className="h-8 w-auto mr-2" />
+      </div>
       <ul className="flex gap-4">
         <NavLink to="/" className="hover:underline">Home</NavLink>
         <NavLink to="/upload" className="hover:underline">Upload</NavLink>
