@@ -225,7 +225,7 @@ const HomePage: React.FC = () => {
                 className="bg-white/80 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-purple-100 dark:border-purple-900/30"
             >
                 <h2 className="text-xl font-semibold mb-4 flex items-center">
-                    <LinkIcon size={20} className="mr-2 text-purple-500" />
+                   <img src="/logo.png" alt="" className="h-8 w-auto mr-2" />
                     Available Links
                 </h2>
 
