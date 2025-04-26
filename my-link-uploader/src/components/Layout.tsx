@@ -27,9 +27,11 @@ export default function Layout({ children, toggleAuth, isAuthenticated }: Layout
       <header className="sticky top-0 z-50 backdrop-blur-md bg-opacity-70 border-b border-purple-500/20 dark:border-purple-500/10">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20 group-hover:shadow-purple-500/40 transition-all duration-300 group-hover:scale-105">
-              <LinkIcon size={20} className="text-white" />
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="LinkSphere Logo" 
+              className="h-10 w-auto group-hover:scale-105 transition-transform duration-300"
+            />
             <div>
               <h1 className="font-bold text-xl tracking-tight bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
                 LinkSphere
