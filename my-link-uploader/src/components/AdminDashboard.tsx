@@ -131,37 +131,45 @@ export default function AdminDashboard() {
         animate={{ width: isSidebarOpen ? 256 : 80 }}
       >
         {/* Logo */}
-         <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-           <div className="flex items-center space-x-2">
-             <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
-               <LinkIcon size={20} className="text-white" />
-             </div>
-             {isSidebarOpen && (
-               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                 <h1 className="font-bold text-xl tracking-tight bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">LinkSphere</h1>
-                 <p className="text-xs text-gray-500 dark:text-gray-400">Admin Dashboard</p>
-               </motion.div>
-             )}
-           </div>
-           <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
-             <Menu size={20} />
-           </button>
-         </div>
+        <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between h-16">
+          <div className="flex items-center space-x-2 overflow-hidden">
+             <img src="/logo.png" alt="LinkSphere Logo" className="h-10 w-auto flex-shrink-0" />
+            {isSidebarOpen && (
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2, delay: 0.1 }}
+              >
+                <h1 className="font-bold text-xl tracking-tight bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent whitespace-nowrap">
+                  LinkSphere
+                </h1>
+                <p className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">Admin Dashboard</p>
+              </motion.div>
+            )}
+          </div>
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors flex-shrink-0"
+          >
+            <Menu size={20} />
+          </button>
+        </div>
 
-         {/* User profile */}
-         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        {/* User profile */}
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-3">
-             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center shadow-md shadow-purple-500/20">
+             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center shadow-md shadow-purple-500/20 flex-shrink-0">
                <User size={20} className="text-white" />
              </div>
              {isSidebarOpen && (
-               <motion.div className="flex-1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                 <h3 className="font-medium text-gray-900 dark:text-white">Admin User</h3>
-                 <p className="text-xs text-gray-500 dark:text-gray-400">Administrator</p>
+               <motion.div className="flex-1 min-w-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                 <h3 className="font-medium text-gray-900 dark:text-white truncate">Admin User</h3>
+                 <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Administrator</p>
                </motion.div>
              )}
              {isSidebarOpen && (
-               <motion.button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors duration-200" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+               <motion.button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors duration-200 flex-shrink-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
                  <ChevronDown size={18} />
                </motion.button>
              )}
@@ -219,8 +227,8 @@ export default function AdminDashboard() {
               className="flex items-center space-x-4 mb-8"
               initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
             >
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
-                <LayoutDashboard size={26} className="text-white" />
+              <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/20 p-2">
+                <img src="/logo.png" alt="" className="w-full h-full object-contain" />
               </div>
               <div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">Dashboard</h1>
