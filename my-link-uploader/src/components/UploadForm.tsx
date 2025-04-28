@@ -152,8 +152,8 @@ export default function UploadForm() {
         transition={{ duration: 0.5 }}
       >
         <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-pink-500 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-purple-500/20 mb-4 p-2">
-            <img src="/logo.png" alt="" className="w-full h-full object-contain" />
+        <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-500 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-purple-500/20 mb-4">
+        <Link2 size={28} className="text-white" />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
             Share a Valuable Link
@@ -195,7 +195,7 @@ export default function UploadForm() {
             ref={formRef}
             className="space-y-6"
             onSubmit={handleSubmit}
-            animate={controls}
+            // animate={controls}
             variants={formVariants}
             initial="hidden"
             animate="visible"
