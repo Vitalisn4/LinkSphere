@@ -133,7 +133,9 @@ export default function AdminDashboard() {
         {/* Logo */}
         <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between h-16">
           <div className="flex items-center space-x-2 overflow-hidden">
-             <img src="/logo.png" alt="LinkSphere Logo" className="h-10 w-auto flex-shrink-0" />
+          <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
+               <LinkIcon size={20} className="text-white" />
+             </div>
             {isSidebarOpen && (
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
@@ -227,8 +229,8 @@ export default function AdminDashboard() {
               className="flex items-center space-x-4 mb-8"
               initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
             >
-              <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/20 p-2">
-                <img src="/logo.png" alt="" className="w-full h-full object-contain" />
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
+              <LayoutDashboard size={26} className="text-white" />
               </div>
               <div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">Dashboard</h1>
