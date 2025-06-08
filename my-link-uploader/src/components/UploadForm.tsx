@@ -8,25 +8,22 @@ import { Link2, Check, AlertCircle, ArrowLeft } from "lucide-react"
 import { Link } from "react-router-dom"
 
 interface FormData {
-  link: string
-  topic: string
+  url: string
+  title: string
   description: string
-  uploader: string
 }
 
 interface FormErrors {
-  link?: string
-  topic?: string
+  url?: string
+  title?: string
   description?: string
-  uploader?: string
 }
 
 export default function UploadForm() {
   const [formData, setFormData] = useState<FormData>({
-    link: "",
-    topic: "",
+    url: "",
+    title: "",
     description: "",
-    uploader: "",
   })
 
   const [errors, setErrors] = useState<FormErrors>({})
@@ -49,24 +46,20 @@ export default function UploadForm() {
   const validate = (): boolean => {
     const newErrors: FormErrors = {}
 
-    if (!formData.link) {
-      newErrors.link = "Link is required"
-    } else if (!/^https?:\/\/\S+$/.test(formData.link)) {
-      newErrors.link = "Enter a valid URL starting with http:// or https://"
+    if (!formData.url) {
+      newErrors.url = "Link is required"
+    } else if (!/^https?:\/\/\S+$/.test(formData.url)) {
+      newErrors.url = "Enter a valid URL starting with http:// or https://"
     }
 
-    if (!formData.topic) {
-      newErrors.topic = "Topic is required"
+    if (!formData.title) {
+      newErrors.title = "Topic is required"
     }
 
     if (!formData.description) {
       newErrors.description = "Description is required"
     } else if (formData.description.length < 10) {
       newErrors.description = "Description should be at least 10 characters"
-    }
-
-    if (!formData.uploader) {
-      newErrors.uploader = "Your name is required"
     }
 
     setErrors(newErrors)
@@ -100,11 +93,21 @@ export default function UploadForm() {
     setIsSubmitting(true)
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      const response = await fetch("http://localhost:8000/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
 
-      setSuccessMessage("Link submitted successfully!")
-      setFormData({ link: "", topic: "", description: "", uploader: "" })
+      if (response.ok) {
+        setSuccessMessage("Link submitted successfully!")
+        setFormData({ url: "", title: "", description: "" })
+      } else {
+        setSuccessMessage(null)
+        alert("Error submitting the form. Please try again.")
+      }
     } catch (error) {
       setSuccessMessage(null)
       alert("Error submitting the form. Please try again.")
@@ -195,40 +198,38 @@ export default function UploadForm() {
             ref={formRef}
             className="space-y-6"
             onSubmit={handleSubmit}
-            animate={controls}
             variants={formVariants}
-            initial="hidden"
             animate="visible"
           >
             <motion.div variants={itemVariants}>
               <label
                 className={`block mb-1.5 font-medium ${
-                  errors.link ? "text-red-500" : "text-gray-700 dark:text-gray-300"
+                  errors.url ? "text-red-500" : "text-gray-700 dark:text-gray-300"
                 }`}
               >
                 Link URL
               </label>
-              <div className={`relative ${focusedField === "link" ? "ring-2 ring-purple-500 ring-opacity-50" : ""}`}>
+              <div className={`relative ${focusedField === "url" ? "ring-2 ring-purple-500 ring-opacity-50" : ""}`}>
                 <input
                   ref={linkInputRef}
                   type="text"
-                  name="link"
-                  value={formData.link}
+                  name="url"
+                  value={formData.url}
                   onChange={handleChange}
-                  onFocus={() => setFocusedField("link")}
+                  onFocus={() => setFocusedField("url")}
                   onBlur={() => setFocusedField(null)}
                   className={`w-full px-4 py-3 rounded-lg bg-white dark:bg-gray-800 border ${
-                    errors.link
+                    errors.url
                       ? "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/10"
                       : "border-gray-300 dark:border-gray-700"
                   } focus:outline-none transition-colors duration-200`}
                   placeholder="https://example.com"
                 />
               </div>
-              {errors.link && (
+              {errors.url && (
                 <p className="mt-1.5 text-sm text-red-500 flex items-center">
                   <AlertCircle size={14} className="mr-1" />
-                  {errors.link}
+                  {errors.url}
                 </p>
               )}
             </motion.div>
@@ -236,31 +237,31 @@ export default function UploadForm() {
             <motion.div variants={itemVariants}>
               <label
                 className={`block mb-1.5 font-medium ${
-                  errors.topic ? "text-red-500" : "text-gray-700 dark:text-gray-300"
+                  errors.title ? "text-red-500" : "text-gray-700 dark:text-gray-300"
                 }`}
               >
                 Topic
               </label>
-              <div className={`relative ${focusedField === "topic" ? "ring-2 ring-purple-500 ring-opacity-50" : ""}`}>
+              <div className={`relative ${focusedField === "title" ? "ring-2 ring-purple-500 ring-opacity-50" : ""}`}>
                 <input
                   type="text"
-                  name="topic"
-                  value={formData.topic}
+                  name="title"
+                  value={formData.title}
                   onChange={handleChange}
-                  onFocus={() => setFocusedField("topic")}
+                  onFocus={() => setFocusedField("title")}
                   onBlur={() => setFocusedField(null)}
                   className={`w-full px-4 py-3 rounded-lg bg-white dark:bg-gray-800 border ${
-                    errors.topic
+                    errors.title
                       ? "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/10"
                       : "border-gray-300 dark:border-gray-700"
                   } focus:outline-none transition-colors duration-200`}
                   placeholder="e.g., Programming, Design, Marketing"
                 />
               </div>
-              {errors.topic && (
+              {errors.title && (
                 <p className="mt-1.5 text-sm text-red-500 flex items-center">
                   <AlertCircle size={14} className="mr-1" />
-                  {errors.topic}
+                  {errors.title}
                 </p>
               )}
             </motion.div>
@@ -295,40 +296,6 @@ export default function UploadForm() {
                 <p className="mt-1.5 text-sm text-red-500 flex items-center">
                   <AlertCircle size={14} className="mr-1" />
                   {errors.description}
-                </p>
-              )}
-            </motion.div>
-
-            <motion.div variants={itemVariants}>
-              <label
-                className={`block mb-1.5 font-medium ${
-                  errors.uploader ? "text-red-500" : "text-gray-700 dark:text-gray-300"
-                }`}
-              >
-                Your Name
-              </label>
-              <div
-                className={`relative ${focusedField === "uploader" ? "ring-2 ring-purple-500 ring-opacity-50" : ""}`}
-              >
-                <input
-                  type="text"
-                  name="uploader"
-                  value={formData.uploader}
-                  onChange={handleChange}
-                  onFocus={() => setFocusedField("uploader")}
-                  onBlur={() => setFocusedField(null)}
-                  className={`w-full px-4 py-3 rounded-lg bg-white dark:bg-gray-800 border ${
-                    errors.uploader
-                      ? "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/10"
-                      : "border-gray-300 dark:border-gray-700"
-                  } focus:outline-none transition-colors duration-200`}
-                  placeholder="Your name"
-                />
-              </div>
-              {errors.uploader && (
-                <p className="mt-1.5 text-sm text-red-500 flex items-center">
-                  <AlertCircle size={14} className="mr-1" />
-                  {errors.uploader}
                 </p>
               )}
             </motion.div>
