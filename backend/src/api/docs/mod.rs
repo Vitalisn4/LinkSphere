@@ -14,7 +14,8 @@ use crate::{
         crate::api::docs::auth::register_docs,
         crate::api::docs::auth::login_docs,
         crate::api::docs::links::get_links_docs,
-        crate::api::docs::links::create_link_docs
+        crate::api::docs::links::create_link_docs,
+        crate::api::docs::links::delete_link_docs
     ),
     components(
         schemas(
