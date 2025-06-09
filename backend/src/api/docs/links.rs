@@ -34,13 +34,14 @@ pub fn create_link_docs() {}
     delete,
     path = "/api/links/{id}",
     params(
-        ("id" = i32, Path, description = "Link ID to delete")
+        ("id" = i32, Path, description = "Numeric ID of the link to delete")
     ),
     responses(
-        (status = 200, description = "Link deleted successfully", body = ApiResponse<()>),
-        (status = 401, description = "Unauthorized - Valid JWT token required", body = ErrorResponse),
-        (status = 404, description = "Link not found", body = ErrorResponse),
-        (status = 500, description = "Internal server error", body = ErrorResponse)
+        (status = 200, description = "Link was successfully deleted. This operation is permanent and cannot be undone.", body = ApiResponse<()>),
+        (status = 401, description = "Missing or invalid JWT token in Authorization header", body = ErrorResponse),
+        (status = 403, description = "User doesn't have permission to delete this link", body = ErrorResponse),
+        (status = 404, description = "Link with the specified ID was not found", body = ErrorResponse),
+        (status = 500, description = "Database or server error occurred", body = ErrorResponse)
     ),
     security(
         ("bearer_auth" = [])
