@@ -87,4 +87,33 @@ pub async fn delete_link(pool: &PgPool, link_id: i32) -> Result<(), sqlx::Error>
     .await?;
 
     Ok(())
+}
+
+/// Retrieves a single link by its ID
+/// 
+/// # Arguments
+/// * `pool` - Database connection pool
+/// * `link_id` - The ID of the link to fetch
+/// 
+/// # Returns
+/// * `Result<Option<Link>, sqlx::Error>` - The link if found, None if not found, or an error
+pub async fn get_link_by_id(pool: &PgPool, link_id: i32) -> Result<Option<Link>, sqlx::Error> {
+    sqlx::query_as!(
+        Link,
+        r#"
+        SELECT 
+            id,
+            url as "url!",
+            title as "title!",
+            description as "description!",
+            username as "username!",
+            created_at as "created_at!",
+            updated_at as "updated_at!"
+        FROM links
+        WHERE id = $1
+        "#,
+        link_id
+    )
+    .fetch_optional(pool)
+    .await
 } 
