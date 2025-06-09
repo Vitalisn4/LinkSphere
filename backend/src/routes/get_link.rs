@@ -1,1 +1,0 @@
-// Fetching stored links
