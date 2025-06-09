@@ -7,22 +7,23 @@ use utoipa::ToSchema;
 /// Request payload for creating a new link
 #[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct CreateLinkRequest {
-    /// The URL to be added
+    /// The complete URL to be added. Must be a valid URL starting with http:// or https://
     #[validate(url(message = "Invalid URL format"))]
     #[schema(example = "https://www.rust-lang.org")]
     pub url: String,
 
-    /// The title of the link
+    /// A descriptive title for the link
     #[validate(length(min = 1, max = 255, message = "Title must be between 1 and 255 characters"))]
     #[schema(example = "Official Rust Website")]
     pub title: String,
 
-    /// A description of the link
+    /// A detailed description of what the link contains or represents
     #[validate(length(min = 1, max = 1000, message = "Description must be between 1 and 1000 characters"))]
     #[schema(example = "The home page of the Rust programming language")]
     pub description: String,
 
-    /// Username of the person creating the link
+    /// Username of the link creator. Must match the authenticated user's username.
+    /// The link will be associated with this user and only they can modify or delete it.
     #[validate(
         length(min = 3, max = 50, message = "Username must be between 3 and 50 characters"),
         regex(path = "USERNAME_REGEX", message = "Username must be alphanumeric with underscores only")
