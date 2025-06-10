@@ -3,7 +3,7 @@ use chrono::{Duration, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use sqlx::PgPool;
 
-use super::models::{AuthResponse, Claims, RegisterRequest, User};
+use super::models::{AuthResponse, Claims, RegisterRequest, User, UserStatus};
 
 #[derive(Clone)]
 pub struct AuthService {
@@ -23,14 +23,26 @@ impl AuthService {
         sqlx::query_as!(
             User,
             r#"
-            INSERT INTO users (email, username, password_hash, gender)
-            VALUES ($1, $2, $3, $4)
-            RETURNING id, email, username, password_hash, gender as "gender: _", created_at, updated_at
+            INSERT INTO users (
+                email, username, password_hash, gender, 
+                status, is_verified, verification_attempts
+            )
+            VALUES ($1, $2, $3, $4, $5, false, 0)
+            RETURNING 
+                id, email, username, password_hash, 
+                gender as "gender: _", 
+                status as "status: _",
+                is_verified,
+                verification_attempts,
+                verified_at,
+                created_at, 
+                updated_at
             "#,
             req.email,
             req.username,
             password_hash,
-            req.gender as _
+            req.gender as _,
+            UserStatus::Inactive as _
         )
         .fetch_one(&self.pool)
         .await
@@ -40,7 +52,15 @@ impl AuthService {
         let user = sqlx::query_as!(
             User,
             r#"
-            SELECT id, email, username, password_hash, gender as "gender: _", created_at, updated_at
+            SELECT 
+                id, email, username, password_hash, 
+                gender as "gender: _",
+                status as "status: _",
+                is_verified,
+                verification_attempts,
+                verified_at,
+                created_at, 
+                updated_at
             FROM users
             WHERE email = $1
             "#,
@@ -53,6 +73,16 @@ impl AuthService {
             .map_err(|e| sqlx::Error::Protocol(format!("Failed to verify password: {}", e)))?
         {
             return Err(sqlx::Error::Protocol("Invalid password".to_string()));
+        }
+
+        // Check if user is verified
+        if !user.is_verified {
+            return Err(sqlx::Error::Protocol("Email not verified".to_string()));
+        }
+
+        // Check if user is active
+        if user.status != UserStatus::Active {
+            return Err(sqlx::Error::Protocol("Account is not active".to_string()));
         }
 
         let token = self.create_token(&user)?;
