@@ -1,16 +1,187 @@
 "use client"
 
-import { ReactNode } from "react"
-import { Outlet } from "react-router-dom"
-import Navbar from "./Navbar"
+import type { ReactNode } from "react"
+import { Link, useLocation, Navigate } from "react-router-dom"
+import { useTheme } from "../hooks/useTheme"
+import { motion } from "framer-motion"
+import { Sun, Moon, LinkIcon, Upload, LogOut, LogIn, LayoutDashboard } from "lucide-react"
+import { useAuth } from "../contexts/AuthContext"
 
-export default function Layout() {
+interface LayoutProps {
+  children: ReactNode
+}
+
+export default function Layout({ children }: LayoutProps) {
+  const { theme, toggleTheme } = useTheme()
+  const location = useLocation()
+  const { user, logout } = useAuth()
+
+  // Redirect authenticated users to dashboard if they try to access landing page
+  if (user && location.pathname === "/") {
+    return <Navigate to="/dashboard" replace />
+  }
+
+  // Redirect non-authenticated users to landing page if they try to access protected routes
+  if (!user && ["/dashboard", "/upload"].includes(location.pathname)) {
+    return <Navigate to="/" replace />
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navbar />
+    <div
+      className={`min-h-screen transition-colors duration-300 ${
+        theme === "dark"
+          ? "bg-gray-900 text-white"
+          : "bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 text-gray-900"
+      }`}
+    >
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-opacity-70 border-b border-purple-500/20 dark:border-purple-500/10">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <Link to={user ? "/dashboard" : "/"} className="flex items-center space-x-2 group">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20 group-hover:shadow-purple-500/40 transition-all duration-300 group-hover:scale-105">
+              <LinkIcon size={20} className="text-white" />
+            </div>
+            <div>
+              <h1 className="font-bold text-xl tracking-tight bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+                LinkSphere
+              </h1>
+              <p className="text-xs opacity-70">Link Management System</p>
+            </div>
+          </Link>
+
+          <nav className="hidden md:flex items-center space-x-1">
+            {user ? (
+              <>
+                <NavLink to="/dashboard" current={location.pathname === "/dashboard"}>
+                  <LayoutDashboard size={16} className="mr-1" />
+                  Dashboard
+                </NavLink>
+                <NavLink to="/upload" current={location.pathname === "/upload"}>
+                  <Upload size={16} className="mr-1" />
+                  Upload
+                </NavLink>
+              </>
+            ) : (
+              location.pathname !== "/" && (
+                <NavLink to="/" current={location.pathname === "/"}>
+                  Home
+                </NavLink>
+              )
+            )}
+          </nav>
+
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg hover:bg-purple-500/10 transition-colors"
+              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {theme === "dark" ? (
+                <Sun size={20} className="text-yellow-300" />
+              ) : (
+                <Moon size={20} className="text-purple-600" />
+              )}
+            </button>
+
+            {user ? (
+              <button
+                onClick={logout}
+                className="flex items-center space-x-1 px-3 py-1.5 rounded-lg transition-all duration-300 bg-red-500/10 text-red-500 hover:bg-red-500/20"
+              >
+                <LogOut size={16} />
+                <span className="text-sm">Logout</span>
+              </button>
+            ) : (
+              location.pathname !== "/login" && (
+                <Link
+                  to="/login"
+                  className="flex items-center space-x-1 px-3 py-1.5 rounded-lg transition-all duration-300 bg-purple-500/10 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20"
+                >
+                  <LogIn size={16} />
+                  <span className="text-sm">Login</span>
+                </Link>
+              )
+            )}
+          </div>
+        </div>
+      </header>
+
       <main className="container mx-auto px-4 py-8">
-        <Outlet />
+        <motion.div
+          key={location.pathname}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+        >
+          {children}
+        </motion.div>
       </main>
+
+      <footer className="container mx-auto px-4 py-6 mt-auto border-t border-purple-500/10 text-center text-sm opacity-70">
+        <p>© {new Date().getFullYear()} LinkSphere. All rights reserved.</p>
+      </footer>
+
+      {/* Mobile Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-purple-500/20 z-50">
+        <div className="flex justify-around py-3">
+          {user ? (
+            <>
+              <MobileNavLink to="/dashboard" icon={<LayoutDashboard size={20} />} label="Dashboard" />
+              <MobileNavLink to="/upload" icon={<Upload size={20} />} label="Upload" />
+            </>
+          ) : (
+            location.pathname !== "/" && (
+              <MobileNavLink to="/" icon={<LinkIcon size={20} />} label="Home" />
+            )
+          )}
+        </div>
+      </div>
     </div>
+  )
+}
+
+function NavLink({ to, current, children }: { to: string; current: boolean; children: ReactNode }) {
+  return (
+    <Link
+      to={to}
+      className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center ${
+        current
+          ? "text-purple-600 dark:text-purple-400"
+          : "text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-500/10"
+      }`}
+    >
+      {children}
+      {current && (
+        <motion.div
+          layoutId="activeNavIndicator"
+          className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-600 to-pink-500"
+          transition={{ type: "spring", stiffness: 380, damping: 30 }}
+        />
+      )}
+    </Link>
+  )
+}
+
+function MobileNavLink({ to, icon, label }: { to: string; icon: ReactNode; label: string }) {
+  const location = useLocation()
+  const isActive = location.pathname === to
+
+  return (
+    <Link
+      to={to}
+      className={`flex flex-col items-center space-y-1 px-2 ${
+        isActive ? "text-purple-600 dark:text-purple-400" : "text-gray-600 dark:text-gray-400"
+      }`}
+    >
+      {icon}
+      <span className="text-xs">{label}</span>
+      {isActive && (
+        <motion.div
+          layoutId="activeMobileNavIndicator"
+          className="absolute -top-1 h-0.5 w-12 bg-gradient-to-r from-purple-600 to-pink-500"
+          transition={{ type: "spring", stiffness: 380, damping: 30 }}
+        />
+      )}
+    </Link>
   )
 }
