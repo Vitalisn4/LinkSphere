@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import ApiService, { Gender } from "../services/api";
 
 interface User {
@@ -21,9 +22,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check if user is logged in on mount
@@ -53,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await ApiService.register(email, username, password, gender);
       // Store email temporarily for verification
-      sessionStorage.setItem("pendingVerificationEmail", email);
+      localStorage.setItem("pendingVerificationEmail", email);
     } catch (error) {
       console.error("Registration failed:", error);
       throw error;
@@ -64,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await ApiService.verifyEmail(email, otp);
       // Clear stored email after verification
-      sessionStorage.removeItem("pendingVerificationEmail");
+      localStorage.removeItem("pendingVerificationEmail");
     } catch (error) {
       console.error("Email verification failed:", error);
       throw error;
@@ -84,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
+    navigate("/login");
   };
 
   return (
