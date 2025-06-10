@@ -2,6 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
+/* General reset for margin and padding */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body styling */
+body {
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  background-image: url("https://us.123rf.com/450wm/silentstock639/silentstock6392409/silentstock639240900080/235384659-edge-background-austria-graphic-and-label-element-of-impact-for-the-use-you-want-to-make-of-it.jpg?ver=6");
+  background-size: cover;
+  background-attachment: fixed;
+  margin: 0;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #1a1a1a;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: theme('colors.purple.500');
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.purple.600');
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
 @layer base {
   html {
     @apply antialiased;
