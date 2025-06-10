@@ -9,10 +9,11 @@ use axum::{
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use super::models::Claims;
 use crate::api::ErrorResponse;
+use uuid::Uuid;
 
 #[derive(Clone, Debug)]
 pub struct AuthUser {
-    pub id: i32,
+    pub id: Uuid,
     pub email: String,
     pub username: String,
 }
