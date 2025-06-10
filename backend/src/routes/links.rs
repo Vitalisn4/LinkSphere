@@ -4,7 +4,8 @@ use axum::{
     http::StatusCode,
     Json,
 };
-use crate::database::queries::create_link;
+use uuid::Uuid;
+use crate::database::queries::{create_link, increment_click_count};
 use crate::{
     database::{self, PgPool},
     api::{ApiResponse, ErrorResponse, models::CreateLinkRequest},
@@ -38,6 +39,7 @@ pub async fn get_links(
 /// 
 pub async fn handle_create_link(
     State(pool): State<PgPool>,
+    Extension(user): Extension<AuthUser>,
     Json(payload): Json<CreateLinkRequest>,
 ) -> impl IntoResponse {
     // Validate the request payload
@@ -60,7 +62,7 @@ pub async fn handle_create_link(
         payload.url,
         payload.title,
         payload.description,
-        payload.username
+        user.id,
     ).await {
         Ok(link) => {
             let response = ApiResponse::success_with_message(
@@ -72,6 +74,26 @@ pub async fn handle_create_link(
         Err(e) => {
             let error = ErrorResponse::new(format!("Failed to create link: {}", e))
                 .with_code("LINK_CREATE_ERROR");
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response()
+        }
+    }
+}
+
+/// Track a link click
+/// 
+/// Increments the click count for a link
+pub async fn track_click(
+    State(pool): State<PgPool>,
+    Path(link_id): Path<Uuid>,
+) -> impl IntoResponse {
+    match increment_click_count(&pool, link_id).await {
+        Ok(_) => {
+            let response = ApiResponse::success(());
+            (StatusCode::OK, Json(response)).into_response()
+        }
+        Err(e) => {
+            let error = ErrorResponse::new(format!("Failed to track click: {}", e))
+                .with_code("CLICK_TRACK_ERROR");
             (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response()
         }
     }
@@ -169,12 +191,12 @@ pub async fn handle_create_link(
 pub async fn delete_link(
     State(pool): State<PgPool>,
     Extension(user): Extension<AuthUser>,
-    Path(link_id): Path<i32>,
+    Path(link_id): Path<Uuid>,
 ) -> impl IntoResponse {
     // First check if the link exists and belongs to the user
     match database::queries::get_link_by_id(&pool, link_id).await {
         Ok(Some(link)) => {
-            if link.username != user.username {
+            if link.user_id != user.id {
                 let error = ErrorResponse::new("You don't have permission to delete this link")
                     .with_code("FORBIDDEN");
                 return (StatusCode::FORBIDDEN, Json(error)).into_response();
