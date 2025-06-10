@@ -3,7 +3,7 @@ mod links;
 
 use utoipa::OpenApi;
 use crate::{
-    api::{ApiResponse, ErrorResponse, models::CreateLinkRequest},
+    api::{ApiResponse, ErrorResponse, models::{CreateLinkRequest, VerifyEmailRequest, ResendOtpRequest}},
     auth::{LoginRequest, RegisterRequest, User, AuthResponse, Gender},
     database::models::Link,
 };
@@ -15,7 +15,9 @@ use crate::{
         crate::api::docs::auth::login_docs,
         crate::api::docs::links::get_links_docs,
         crate::api::docs::links::create_link_docs,
-        crate::api::docs::links::delete_link_docs
+        crate::api::docs::links::delete_link_docs,
+        crate::api::docs::auth::verify_email_docs,
+        crate::api::docs::auth::resend_otp_docs
     ),
     components(
         schemas(
@@ -30,7 +32,9 @@ use crate::{
             RegisterRequest,
             User,
             AuthResponse,
-            Gender
+            Gender,
+            VerifyEmailRequest,
+            ResendOtpRequest
         )
     ),
     tags(
