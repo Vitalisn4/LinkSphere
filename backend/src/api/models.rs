@@ -1,6 +1,7 @@
 use serde::{Deserialize};
 use validator::Validate;
 use url::Url;
+use uuid::Uuid;
 use regex;
 use utoipa::ToSchema;
 
@@ -22,14 +23,8 @@ pub struct CreateLinkRequest {
     #[schema(example = "The home page of the Rust programming language")]
     pub description: String,
 
-    /// Username of the link creator. Must match the authenticated user's username.
-    /// The link will be associated with this user and only they can modify or delete it.
-    #[validate(
-        length(min = 3, max = 50, message = "Username must be between 3 and 50 characters"),
-        regex(path = "USERNAME_REGEX", message = "Username must be alphanumeric with underscores only")
-    )]
-    #[schema(example = "rustdev123")]
-    pub username: String,
+    /// ID of the user creating the link
+    pub user_id: Uuid
 }
 
 impl CreateLinkRequest {
@@ -40,4 +35,40 @@ impl CreateLinkRequest {
 
 lazy_static::lazy_static! {
     static ref USERNAME_REGEX: regex::Regex = regex::Regex::new(r"^[a-zA-Z0-9_]{3,50}$").unwrap();
+}
+
+#[derive(Debug, Deserialize, Validate)]
+pub struct RegisterRequest {
+    #[validate(email)]
+    pub email: String,
+    #[validate(length(min = 8))]
+    pub password: String,
+    #[validate(length(min = 3))]
+    pub username: String,
+}
+
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct VerifyEmailRequest {
+    /// The email address to verify
+    #[validate(email(message = "Invalid email format"))]
+    #[schema(example = "user@example.com")]
+    pub email: String,
+
+    /// The 6-digit OTP code sent to the email
+    #[validate(length(equal = 6, message = "OTP must be exactly 6 digits"))]
+    #[validate(regex(path = "OTP_REGEX", message = "OTP must contain only digits"))]
+    #[schema(example = "123456")]
+    pub otp: String,
+}
+
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct ResendOtpRequest {
+    /// The email address to resend the OTP to
+    #[validate(email(message = "Invalid email format"))]
+    #[schema(example = "user@example.com")]
+    pub email: String,
+}
+
+lazy_static::lazy_static! {
+    static ref OTP_REGEX: regex::Regex = regex::Regex::new(r"^[0-9]{6}$").unwrap();
 } 
