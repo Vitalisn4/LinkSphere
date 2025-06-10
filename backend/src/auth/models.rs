@@ -2,28 +2,42 @@ use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
 use utoipa::ToSchema;
 use validator::Validate;
+use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize, sqlx::Type, ToSchema)]
-#[sqlx(type_name = "user_gender", rename_all = "lowercase")]
+#[derive(Debug, Serialize, Deserialize, sqlx::Type, ToSchema, PartialEq)]
+#[sqlx(type_name = "user_gender", rename_all = "lowercase")] 
+#[derive(Clone)]
 pub enum Gender {
     Male,
     Female,
     Other,
 }
 
+#[derive(Debug, Serialize, Deserialize, sqlx::Type, ToSchema, PartialEq)]
+#[sqlx(type_name = "user_status", rename_all = "lowercase")]
+pub enum UserStatus {
+    Active,
+    Inactive,
+    Suspended,
+}
+
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct User {
-    pub id: i32,
+    pub id: Uuid,
     pub email: String,
     pub username: String,
     #[serde(skip_serializing)]
     pub password_hash: String,
     pub gender: Gender,
+    pub status: UserStatus,
+    pub is_verified: bool,
+    pub verification_attempts: i32,
+    pub verified_at: Option<DateTime<Utc>>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Deserialize, Validate, ToSchema)]
+#[derive(Debug, Deserialize, Validate, ToSchema, Clone)]
 pub struct RegisterRequest {
     #[validate(email(message = "Invalid email format"))]
     pub email: String,
@@ -52,7 +66,7 @@ pub struct AuthResponse {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Claims {
-    pub sub: i32, // user id
+    pub sub: Uuid, // user id
     pub exp: i64, // expiration time
     pub email: String,
     pub username: String,
