@@ -1,50 +1,93 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { ThemeProvider } from "./contexts/ThemeContext"
+import { AuthProvider, useAuth } from "./contexts/AuthContext"
 import Layout from "./components/Layout"
 import HomePage from "./components/HomePage"
 import UploadForm from "./components/UploadForm"
 import AdminDashboard from "./components/AdminDashboard"
+import LoginPage from "./pages/auth/LoginPage"
+import RegisterPage from "./pages/auth/RegisterPage"
+import VerifyEmailPage from "./pages/auth/VerifyEmailPage"
 import { AnimatePresence } from "framer-motion"
 
-export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
 
-  // Simulate authentication check
-  useEffect(() => {
-    const checkAuth = () => {
-      const auth = localStorage.getItem("isAuthenticated")
-      setIsAuthenticated(auth === "true")
-    }
-
-    checkAuth()
-
-    // For demo purposes only - in a real app, use proper authentication
-    window.addEventListener("storage", checkAuth)
-    return () => window.removeEventListener("storage", checkAuth)
-  }, [])
-
-  // For demo purposes - toggle authentication
-  const toggleAuth = () => {
-    const newState = !isAuthenticated
-    localStorage.setItem("isAuthenticated", String(newState))
-    setIsAuthenticated(newState)
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
 
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+
+  return <>{children}</>;
+}
+
+function AuthRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/" />;
+  }
+
+  return <>{children}</>;
+}
+
+export default function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
-        <AnimatePresence mode="wait">
-          <Layout toggleAuth={toggleAuth} isAuthenticated={isAuthenticated}>
+        <AuthProvider>
+          <AnimatePresence mode="wait">
             <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/upload" element={<UploadForm />} />
-              <Route path="/admin" element={isAuthenticated ? <AdminDashboard /> : <Navigate to="/" />} />
+              {/* Auth routes - no layout */}
+              <Route
+                path="/login"
+                element={
+                  <AuthRoute>
+                    <LoginPage />
+                  </AuthRoute>
+                }
+              />
+              <Route
+                path="/register"
+                element={
+                  <AuthRoute>
+                    <RegisterPage />
+                  </AuthRoute>
+                }
+              />
+              <Route
+                path="/verify-email"
+                element={
+                  <AuthRoute>
+                    <VerifyEmailPage />
+                  </AuthRoute>
+                }
+              />
+
+              {/* Protected routes - with layout */}
+              <Route
+                element={
+                  <ProtectedRoute>
+                    <Layout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="/" element={<HomePage />} />
+                <Route path="/upload" element={<UploadForm />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+              </Route>
             </Routes>
-          </Layout>
-        </AnimatePresence>
+          </AnimatePresence>
+        </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
   )
