@@ -13,7 +13,7 @@ use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::api::docs::ApiDoc;
-use crate::auth::{service::AuthService, middleware::AuthMiddlewareState};
+use crate::auth::middleware::AuthMiddlewareState;
 
 #[tokio::main]
 async fn main() {
@@ -42,13 +42,10 @@ async fn main() {
     let jwt_secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
     let auth_middleware_state = AuthMiddlewareState::new(jwt_secret.clone());
 
-    // Create auth service
-    let auth_service = AuthService::new(pool.clone(), jwt_secret);
-
     // Build our application with routes
     let app = Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
-        .nest("/api/auth", auth::create_router(auth_service))
+        .nest("/api/auth", auth::create_router(pool.clone()))
         .merge(
             routes::create_router(pool)
                 .layer(middleware::from_fn_with_state(
