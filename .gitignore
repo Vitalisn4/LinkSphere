@@ -31,3 +31,7 @@ dist-ssr
 *.zip
 *-lock.json
 *.lock
+
+Cargo.lock
+backend/Cargo.lock
+

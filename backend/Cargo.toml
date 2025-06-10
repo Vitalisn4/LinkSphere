@@ -4,10 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-actix-web = "4"
+axum = "0.7"
 sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "postgres", "macros", "time", "chrono"] }
 dotenv = "0.15"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-actix-cors = "0.7"
+tokio = { version = "1.38", features = ["full"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace", "compression-br", "timeout"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 chrono = { version = "0.4", features = ["serde"] }
