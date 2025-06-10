@@ -20,6 +20,20 @@ interface AuthResponse {
 
 export type Gender = "male" | "female" | "other";
 
+export interface Link {
+  id: string;
+  url: string;
+  title: string;
+  description: string;
+  user_id: string;
+  click_count: number;
+  created_at: string;
+  updated_at: string;
+  user: {
+    username: string;
+  };
+}
+
 class ApiService {
   private static getHeaders(): HeadersInit {
     const headers: HeadersInit = {
@@ -84,6 +98,46 @@ class ApiService {
       method: "POST",
       headers: this.getHeaders(),
       body: JSON.stringify({ email }),
+    });
+
+    return this.handleResponse(response);
+  }
+
+  static async getAllLinks(): Promise<Link[]> {
+    const response = await fetch(`${API_URL}/links`, {
+      headers: this.getHeaders(),
+    });
+
+    return this.handleResponse<Link[]>(response);
+  }
+
+  static async createLink(data: {
+    url: string;
+    title: string;
+    description: string;
+  }): Promise<Link> {
+    const response = await fetch(`${API_URL}/links`, {
+      method: "POST",
+      headers: this.getHeaders(),
+      body: JSON.stringify(data),
+    });
+
+    return this.handleResponse<Link>(response);
+  }
+
+  static async deleteLink(id: string): Promise<void> {
+    const response = await fetch(`${API_URL}/links/${id}`, {
+      method: "DELETE",
+      headers: this.getHeaders(),
+    });
+
+    return this.handleResponse(response);
+  }
+
+  static async incrementLinkClick(id: string): Promise<void> {
+    const response = await fetch(`${API_URL}/links/${id}/click`, {
+      method: "POST",
+      headers: this.getHeaders(),
     });
 
     return this.handleResponse(response);
