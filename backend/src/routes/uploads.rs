@@ -1,6 +1,6 @@
 // Endpoint for uploading links
 
-use actix_web::{post, web, HttpResponse, Responder};
+use axum::{extract::State, Json, http::StatusCode};
 use sqlx::PgPool;
 use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
@@ -24,11 +24,10 @@ pub struct LinkResponse {
     pub created_at: DateTime<Utc>,
 }
 
-#[post("/upload")]
 pub async fn upload_link(
-    pool: web::Data<PgPool>,
-    link_data: web::Json<LinkUpload>,
-) -> impl Responder {
+    State(pool): State<PgPool>,
+    Json(link_data): Json<LinkUpload>,
+) -> (StatusCode, Json<LinkResponse>) {
     println!("Received upload request: {:?}", link_data);
 
     // Hardcode user_id for now, as frontend doesn't provide it
@@ -45,12 +44,12 @@ pub async fn upload_link(
         link_data.description,
         default_user_id
     )
-    .fetch_one(&**pool)
+    .fetch_one(&pool)
     .await
     {
         Ok(record) => {
             println!("Successfully inserted link with ID: {}", record.id);
-            HttpResponse::Ok().json(LinkResponse {
+            (StatusCode::OK, Json(LinkResponse {
                 id: record.id,
                 url: record.url,
                 title: record.title,
@@ -59,11 +58,21 @@ pub async fn upload_link(
                 click_count: record.click_count,
                 favicon_url: record.favicon_url,
                 created_at: record.created_at,
-            })
+            }))
         }
         Err(e) => {
             println!("Error inserting link: {:?}", e);
-            HttpResponse::InternalServerError().body(format!("Database error: {}", e))
+            // In case of an error, return a 500 Internal Server Error with a plain text body
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(LinkResponse {
+                id: 0, // Placeholder or sensible default
+                url: "".to_string(),
+                title: "Error".to_string(),
+                description: format!("Database error: {}", e),
+                user_id: 0,
+                click_count: None,
+                favicon_url: None,
+                created_at: Utc::now(),
+            }))
         }
     }
 }
