@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import ApiService, { Gender } from "../services/api";
+import ApiService from "../services/api";
 
 interface User {
   id: string;
@@ -11,53 +11,53 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, username: string, password: string, gender: Gender) => Promise<void>;
+  logout: () => void;
+  register: (email: string, username: string, password: string, gender: string) => Promise<void>;
   verifyEmail: (email: string, otp: string) => Promise<void>;
   resendOtp: (email: string) => Promise<void>;
-  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(() => {
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is logged in on mount
-    const token = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
-    
-    if (token && storedUser) {
-      setUser(JSON.parse(storedUser));
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
     }
-    
     setIsLoading(false);
-  }, []);
+  }, [user]);
 
   const login = async (email: string, password: string) => {
     try {
       const response = await ApiService.login(email, password);
-      localStorage.setItem("token", response.token);
-      localStorage.setItem("user", JSON.stringify(response.user));
       setUser(response.user);
+      localStorage.setItem("token", response.token);
     } catch (error) {
-      console.error("Login failed:", error);
       throw error;
     }
   };
 
-  const register = async (email: string, username: string, password: string, gender: Gender) => {
+  const logout = () => {
+    setUser(null);
+    navigate("/login");
+  };
+
+  const register = async (email: string, username: string, password: string, gender: string) => {
     try {
       await ApiService.register(email, username, password, gender);
-      // Store email temporarily for verification
-      localStorage.setItem("pendingVerificationEmail", email);
     } catch (error) {
-      console.error("Registration failed:", error);
       throw error;
     }
   };
@@ -65,10 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const verifyEmail = async (email: string, otp: string) => {
     try {
       await ApiService.verifyEmail(email, otp);
-      // Clear stored email after verification
-      localStorage.removeItem("pendingVerificationEmail");
     } catch (error) {
-      console.error("Email verification failed:", error);
       throw error;
     }
   };
@@ -77,31 +74,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await ApiService.resendOtp(email);
     } catch (error) {
-      console.error("OTP resend failed:", error);
       throw error;
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
-    navigate("/login");
+  const value = {
+    user,
+    isLoading,
+    login,
+    logout,
+    register,
+    verifyEmail,
+    resendOtp,
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated: !!user,
-        isLoading,
-        login,
-        register,
-        verifyEmail,
-        resendOtp,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
