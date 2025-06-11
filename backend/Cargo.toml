@@ -4,36 +4,40 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = { version = "0.7", features = ["json"] }
-tower-http = { version = "0.5", features = ["trace", "cors"] }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-tokio = { version = "1.0", features = ["full"] }
-sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "chrono", "migrate", "uuid"] }
-uuid = { version = "1.6", features = ["v4", "serde"] }
-dotenv = "0.15"
-chrono = { version = "0.4", features = ["serde"] }
+axum = { version = "0.8.4", features = ["multipart"] }
+tower = { version = "0.5.2", features = ["util"] }
+tower-http = { version = "0.6.6", features = ["cors", "trace"] }
+tokio = { version = "1.40.0", features = ["full", "macros", "rt-multi-thread"] }
+serde = { version = "1.0.215", features = ["derive"] }
+serde_json = "1.0.135"
+sqlx = { version = "0.8.3", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono"] }
+dotenv = "0.15.0"
+env_logger = "0.11.6"
+log = "0.4.24"
+chrono = { version = "0.4.30", features = ["serde"] }
+uuid = { version = "1.0", features = ["serde", "v4"] }
+jsonwebtoken = "9.1"
+bcrypt = "0.17.0"
+derive_more = { version = "2.0.1", features = ["display", "error"] }
+thiserror = "2.0.12"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-validator = { version = "0.16", features = ["derive"] }
-url = "2.5"
-regex = "1.10"
-lazy_static = "1.4"
-utoipa = { version = "4.2", features = ["axum_extras"] }
-utoipa-swagger-ui = { version = "6.0", features = ["axum"] }
-jsonwebtoken = "9.2"
-bcrypt = "0.15"
-async-trait = "0.1"
+utoipa = { version = "5.3.1", features = ["axum_extras", "uuid", "chrono"] }
+utoipa-swagger-ui = { version = "9.0.2", features = ["axum"] }
+validator = { version = "0.20.0", features = ["derive"] }
+url = "2.4.4"
+regex = "1.11.1"
+lazy_static = "1.4.0"
 
 # Email sending
-lettre = { version = "0.11", features = ["tokio1", "tokio1-native-tls"] }
+lettre = { version = "0.11.17", features = ["tokio1", "tokio1-native-tls"] }
 
 # HTTP client for Upstash Redis REST API
-reqwest = { version = "0.11", features = ["json"] }
-rand = "0.8"
+reqwest = { version = "0.12.11", features = ["json"] }
+rand = { version = "0.9.1", features = ["std"] }
 
 # Password strength checking
-zxcvbn = "2.2.2"
+zxcvbn = "3.1.0"
 
 [workspace]
 members = ["."]
