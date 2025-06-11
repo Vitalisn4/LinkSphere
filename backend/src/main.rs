@@ -1,20 +1,22 @@
 mod routes;
 mod database;
-use actix_web::{App, HttpServer, web};
+use axum::{routing::{get, post}, Router};
 use database::get_db_pool;
-use routes::uploads::upload_link;
-use actix_cors::Cors;
+use tower_http::cors::CorsLayer;
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
+#[tokio::main]
+async fn main() {
     let db_pool = get_db_pool().await;
-    HttpServer::new(move || {
-        App::new()
-            .wrap(Cors::permissive())
-            .app_data(web::Data::new(db_pool.clone()))
-            .service(upload_link)
-    })
-    .bind(("0.0.0.0", 8000))?
-    .run()
-    .await
+
+    // build our application with a route
+    let app = Router::new()
+        .route("/upload", post(routes::uploads::upload_link))
+        .layer(CorsLayer::permissive())
+        .with_state(db_pool);
+
+    // run it
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:8000")
+        .await
+        .unwrap();
+    axum::serve(listener, app).await.unwrap();
 }
