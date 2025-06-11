@@ -4,12 +4,14 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import { UserPlus, Mail, Lock, User, ArrowRight } from "lucide-react"
-import ApiService from "../../services/api"
+import ApiService, { Gender } from "../../services/api"
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("")
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [gender, setGender] = useState<Gender>("other")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const navigate = useNavigate()
@@ -19,9 +21,18 @@ export default function RegisterPage() {
     setIsLoading(true)
     setError("")
 
+    if (password !== confirmPassword) {
+      setError("Passwords do not match")
+      setIsLoading(false)
+      return
+    }
+
     try {
-      await ApiService.register(email, username, password)
-      navigate("/verify-email")
+      await ApiService.register(email, username, password, gender)
+      navigate("/verify-email", { 
+        replace: true,
+        state: { email }
+      })
     } catch (error) {
       setError(error instanceof Error ? error.message : "Failed to register")
     } finally {
@@ -98,12 +109,42 @@ export default function RegisterPage() {
 
           <div>
             <div className="relative">
+              <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <select
+                value={gender}
+                onChange={(e) => setGender(e.target.value as Gender)}
+                required
+                className="w-full pl-12 pr-4 py-4 bg-white/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50"
+              >
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <div className="relative">
               <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
+                required
+                className="w-full pl-12 pr-4 py-4 bg-white/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50"
+              />
+            </div>
+          </div>
+
+          <div>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm Password"
                 required
                 className="w-full pl-12 pr-4 py-4 bg-white/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50"
               />
