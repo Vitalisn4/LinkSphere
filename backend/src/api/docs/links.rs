@@ -28,7 +28,7 @@ pub fn get_links_docs() {}
     request_body = CreateLinkRequest,
     responses(
         (status = 201, description = "Link created successfully", body = LinkResponse),
-        (status = 400, description = "Invalid request data", body = ErrorResponse),
+        (status = 422, description = "Invalid request data (URL format, title/description length)", body = ErrorResponse),
         (status = 401, description = "Missing or invalid JWT token", body = ErrorResponse),
         (status = 500, description = "Server error", body = ErrorResponse)
     ),
