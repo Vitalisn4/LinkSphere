@@ -5,9 +5,9 @@ mod auth;
 
 use std::env;
 use std::net::SocketAddr;
-use axum::{Router, middleware};
+use axum::{Router, middleware, http::{Method, HeaderName}};
 use dotenv::dotenv;
-use tower_http::trace::TraceLayer;
+use tower_http::{trace::TraceLayer, cors::CorsLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -42,6 +42,13 @@ async fn main() {
     let jwt_secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
     let auth_middleware_state = AuthMiddlewareState::new(jwt_secret.clone());
 
+    // CORS configuration
+    let cors = CorsLayer::new()
+            .allow_origin(["http://localhost:5173".parse().unwrap()])
+        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
+        .allow_headers([HeaderName::from_static("authorization"), HeaderName::from_static("content-type")])
+        .allow_credentials(true);
+
     // Build our application with routes
     let app = Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
@@ -53,6 +60,7 @@ async fn main() {
                     auth::middleware::auth_middleware,
                 ))
         )
+        .layer(cors)
         .layer(TraceLayer::new_for_http());
 
     // Run it
