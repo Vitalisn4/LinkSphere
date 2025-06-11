@@ -2,49 +2,56 @@ mod auth;
 mod links;
 
 use utoipa::OpenApi;
-use crate::{
-    api::{ApiResponse, ErrorResponse, models::{CreateLinkRequest, VerifyEmailRequest, ResendOtpRequest}},
-    auth::{LoginRequest, RegisterRequest, User, AuthResponse, Gender},
-    database::models::Link,
-};
+use crate::auth::models::{RegisterRequest, LoginRequest, AuthResponse, User, Gender, UserStatus};
+use crate::api::models::VerifyEmailRequest;
+use crate::api::{ApiResponse, ErrorResponse};
+use crate::database::models::Link;
+
+type EmptyResponse = ApiResponse<()>;
+type AuthResponseWrapper = ApiResponse<AuthResponse>;
+type LinkResponse = ApiResponse<Link>;
+type LinksResponse = ApiResponse<Vec<Link>>;
 
 #[derive(OpenApi)]
 #[openapi(
     paths(
         crate::api::docs::auth::register_docs,
-        crate::api::docs::auth::login_docs,
-        crate::api::docs::links::get_links_docs,
-        crate::api::docs::links::create_link_docs,
-        crate::api::docs::links::delete_link_docs,
         crate::api::docs::auth::verify_email_docs,
-        crate::api::docs::auth::resend_otp_docs
+        crate::api::docs::auth::login_docs
     ),
     components(
         schemas(
-            ApiResponse<Link>,
-            ApiResponse<Vec<Link>>,
-            ApiResponse<User>,
-            ApiResponse<AuthResponse>,
-            ErrorResponse,
-            Link,
-            CreateLinkRequest,
-            LoginRequest,
             RegisterRequest,
-            User,
+            LoginRequest,
             AuthResponse,
+            User,
             Gender,
+            UserStatus,
             VerifyEmailRequest,
-            ResendOtpRequest
+            EmptyResponse,
+            AuthResponseWrapper,
+            LinkResponse,
+            LinksResponse,
+            ErrorResponse,
+            Link
         )
-    ),
-    tags(
-        (name = "auth", description = "Authentication endpoints"),
-        (name = "links", description = "Link management endpoints")
-    ),
-    info(
-        title = "LinkSphere API",
-        version = "0.1.0",
-        description = "API for managing and sharing links with authentication"
     )
 )]
-pub struct ApiDoc; 
+pub struct ApiDoc;
+
+struct SecurityAddon;
+
+impl utoipa::Modify for SecurityAddon {
+    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+        if let Some(components) = openapi.components.as_mut() {
+            components.add_security_scheme(
+                "bearer_auth",
+                utoipa::openapi::security::SecurityScheme::Http(
+                    utoipa::openapi::security::Http::new(
+                        utoipa::openapi::security::HttpAuthScheme::Bearer,
+                    ),
+                ),
+            );
+        }
+    }
+} 
