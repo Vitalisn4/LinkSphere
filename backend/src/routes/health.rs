@@ -4,8 +4,9 @@ use axum::{
 };
 use crate::api::ApiResponse;
 use serde::Serialize;
+use utoipa::ToSchema;
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 struct HealthStatus {
     name: String,
     version: String,
