@@ -1,7 +1,6 @@
 use serde::{Deserialize};
 use validator::Validate;
 use url::Url;
-use uuid::Uuid;
 use regex;
 use utoipa::ToSchema;
 
@@ -21,10 +20,7 @@ pub struct CreateLinkRequest {
     /// A detailed description of what the link contains or represents
     #[validate(length(min = 1, max = 1000, message = "Description must be between 1 and 1000 characters"))]
     #[schema(example = "The home page of the Rust programming language")]
-    pub description: String,
-
-    /// ID of the user creating the link
-    pub user_id: Uuid
+    pub description: String
 }
 
 impl CreateLinkRequest {
