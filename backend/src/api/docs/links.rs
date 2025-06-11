@@ -1,12 +1,19 @@
+use crate::api::models::CreateLinkRequest;
+use crate::api::{ApiResponse, ErrorResponse};
+use crate::database::models::Link;
+
+type EmptyResponse = ApiResponse<()>;
+type LinkResponse = ApiResponse<Link>;
+type LinksResponse = ApiResponse<Vec<Link>>;
 
 /// Link Management Endpoints
 #[utoipa::path(
     get,
     path = "/api/links",
     responses(
-        (status = 200, description = "Links retrieved successfully", body = ApiResponse<Vec<Link>>),
-        (status = 401, description = "Missing or invalid JWT token in Authorization header", body = ErrorResponse),
-        (status = 500, description = "Database or server error occurred", body = ErrorResponse)
+        (status = 200, description = "Links retrieved successfully", body = LinksResponse),
+        (status = 401, description = "Missing or invalid JWT token", body = ErrorResponse),
+        (status = 500, description = "Server error", body = ErrorResponse)
     ),
     security(
         ("bearer_auth" = [])
@@ -18,17 +25,12 @@ pub fn get_links_docs() {}
 #[utoipa::path(
     post,
     path = "/api/links",
-    request_body(
-        content = CreateLinkRequest,
-        description = "Link details to create. The username must match the authenticated user's username.",
-        content_type = "application/json"
-    ),
+    request_body = CreateLinkRequest,
     responses(
-        (status = 201, description = "Link was successfully created", body = ApiResponse<Link>),
-        (status = 400, description = "Invalid request data - Check the error message for validation details", body = ErrorResponse),
-        (status = 401, description = "Missing or invalid JWT token in Authorization header", body = ErrorResponse),
-        (status = 403, description = "Username in request doesn't match authenticated user", body = ErrorResponse),
-        (status = 500, description = "Database or server error occurred", body = ErrorResponse)
+        (status = 201, description = "Link created successfully", body = LinkResponse),
+        (status = 400, description = "Invalid request data", body = ErrorResponse),
+        (status = 401, description = "Missing or invalid JWT token", body = ErrorResponse),
+        (status = 500, description = "Server error", body = ErrorResponse)
     ),
     security(
         ("bearer_auth" = [])
@@ -41,14 +43,14 @@ pub fn create_link_docs() {}
     delete,
     path = "/api/links/{id}",
     params(
-        ("id" = i32, Path, description = "Numeric ID of the link to delete. Must be owned by the authenticated user.")
+        ("id" = Uuid, Path, description = "ID of the link to delete")
     ),
     responses(
-        (status = 200, description = "Link was successfully deleted. This operation is permanent and cannot be undone.", body = ApiResponse<()>),
-        (status = 401, description = "Missing or invalid JWT token in Authorization header", body = ErrorResponse),
-        (status = 403, description = "Authenticated user is not the owner of this link", body = ErrorResponse),
-        (status = 404, description = "Link with the specified ID was not found", body = ErrorResponse),
-        (status = 500, description = "Database or server error occurred", body = ErrorResponse)
+        (status = 200, description = "Link deleted successfully", body = EmptyResponse),
+        (status = 401, description = "Missing or invalid JWT token", body = ErrorResponse),
+        (status = 403, description = "Not authorized to delete this link", body = ErrorResponse),
+        (status = 404, description = "Link not found", body = ErrorResponse),
+        (status = 500, description = "Server error", body = ErrorResponse)
     ),
     security(
         ("bearer_auth" = [])
