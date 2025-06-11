@@ -4,18 +4,36 @@ use axum::{
     http::StatusCode,
     Json,
 };
+
 use uuid::Uuid;
 use crate::database::queries::{create_link, increment_click_count};
 use crate::{
-    database::{self, PgPool},
+    database::{self, PgPool, models::Link},
     api::{ApiResponse, ErrorResponse, models::CreateLinkRequest},
     auth::middleware::AuthUser,
 };
 use validator::Validate;
+
+type LinkResponse = ApiResponse<Link>;
+type LinksResponse = ApiResponse<Vec<Link>>;
+
 /// Get all links
 /// 
 /// Returns a list of all links in the system
 /// Requires Authentication: Bearer token from /api/auth/login
+#[utoipa::path(
+    get,
+    path = "/api/links",
+    responses(
+        (status = 200, description = "Links retrieved successfully", body = LinksResponse),
+        (status = 401, description = "Missing or invalid JWT token", body = ErrorResponse),
+        (status = 500, description = "Server error", body = ErrorResponse)
+    ),
+    security(
+        ("bearer_auth" = [])
+    ),
+    tag = "links"
+)]
 pub async fn get_links(
     State(pool): State<PgPool>,
 ) -> impl IntoResponse {
@@ -34,9 +52,24 @@ pub async fn get_links(
 
 /// Create a new link
 /// 
-/// Creates a new link with the provided details
+/// Creates a new link with the provided details. The user ID is automatically extracted from the JWT token.
 /// Requires Authentication: Bearer token from /api/auth/login
 /// 
+#[utoipa::path(
+    post,
+    path = "/api/links",
+    request_body = CreateLinkRequest,
+    responses(
+        (status = 201, description = "Link created successfully", body = LinkResponse),
+        (status = 422, description = "Invalid request data (URL format, title/description length)", body = ErrorResponse),
+        (status = 401, description = "Missing or invalid JWT token", body = ErrorResponse),
+        (status = 500, description = "Server error", body = ErrorResponse)
+    ),
+    security(
+        ("bearer_auth" = [])
+    ),
+    tag = "links"
+)]
 pub async fn handle_create_link(
     State(pool): State<PgPool>,
     Extension(user): Extension<AuthUser>,
@@ -46,17 +79,17 @@ pub async fn handle_create_link(
     if let Err(validation_errors) = payload.validate() {
         let error = ErrorResponse::new(format!("Validation error: {}", validation_errors))
             .with_code("VALIDATION_ERROR");
-        return (StatusCode::BAD_REQUEST, Json(error)).into_response();
+        return (StatusCode::UNPROCESSABLE_ENTITY, Json(error)).into_response();
     }
 
     // Validate URL format
     if let Err(url_error) = payload.validate_url() {
         let error = ErrorResponse::new(format!("Invalid URL format: {}", url_error))
             .with_code("INVALID_URL");
-        return (StatusCode::BAD_REQUEST, Json(error)).into_response();
+        return (StatusCode::UNPROCESSABLE_ENTITY, Json(error)).into_response();
     }
 
-    // Create the link
+    // Create the link using the user ID from the JWT token
     match create_link(
         &pool,
         payload.url,
