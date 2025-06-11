@@ -28,7 +28,7 @@ pub fn validate_password(password: &str) -> Result<(), PasswordError> {
     }
 
     // Use zxcvbn to check password strength
-    let estimate = zxcvbn(password, &[]).unwrap();
+    let estimate = zxcvbn(password, &[]);
     
     // Score ranges from 0-4, where:
     // 0 - too guessable
@@ -37,7 +37,7 @@ pub fn validate_password(password: &str) -> Result<(), PasswordError> {
     // 3 - safely unguessable
     // 4 - very unguessable
     
-    if estimate.score() < 3 {
+    if (estimate.score() as u8) < 3 {
         let feedback = estimate
             .feedback()
             .as_ref()
@@ -45,7 +45,7 @@ pub fn validate_password(password: &str) -> Result<(), PasswordError> {
             .unwrap_or_else(|| "Password is too weak".to_string());
             
         return Err(PasswordError {
-            score: estimate.score(),
+            score: estimate.score() as u8,
             feedback,
         });
     }
