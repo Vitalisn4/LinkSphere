@@ -11,10 +11,9 @@ use axum::{
 use chrono::{DateTime, Utc};
 use utoipa::ToSchema;
 
-
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "snake_case")]
-pub struct ApiResponse<T> {
+pub struct ApiResponse<T: Serialize + ToSchema> {
     pub success: bool,
     pub message: String,
     pub data: T,
@@ -23,7 +22,7 @@ pub struct ApiResponse<T> {
     pub timestamp: DateTime<Utc>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct PaginationMeta {
     pub current_page: u32,
     pub page_size: u32,
@@ -40,7 +39,7 @@ pub struct ErrorResponse {
     pub timestamp: DateTime<Utc>,
 }
 
-impl<T: Serialize> ApiResponse<T> {
+impl<T: Serialize + ToSchema> ApiResponse<T> {
     pub fn success(data: T) -> Self {
         Self {
             success: true,
@@ -83,7 +82,6 @@ impl ErrorResponse {
     }
 }
 
-// Convert our error response into an Axum response
 impl IntoResponse for ErrorResponse {
     fn into_response(self) -> axum::response::Response {
         (StatusCode::INTERNAL_SERVER_ERROR, Json(self)).into_response()
