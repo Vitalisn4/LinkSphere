@@ -1,15 +1,25 @@
 "use client"
 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import { AuthProvider } from "./contexts/AuthContext"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
+import { AuthProvider, useAuth } from "./contexts/AuthContext"
 import Layout from "./components/Layout"
-import ProtectedRoute from "./components/ProtectedRoute"
-import HomePage from "./pages/HomePage"
 import LandingPage from "./pages/LandingPage"
 import LoginPage from "./pages/auth/LoginPage"
 import RegisterPage from "./pages/auth/RegisterPage"
 import VerifyEmailPage from "./pages/auth/VerifyEmailPage"
-import UploadPage from "./pages/UploadPage"
+import UploadPage from "./pages/dashboard/UploadPage"
+import DashboardPage from "./pages/dashboard/DashboardPage"
+import MyAccountPage from "./pages/dashboard/MyAccountPage"
+
+function PrivateRoute({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth()
+  return user ? <>{children}</> : <Navigate to="/login" />
+}
+
+function PublicRoute({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth()
+  return !user ? <>{children}</> : <Navigate to="/dashboard" />
+}
 
 export default function App() {
   return (
@@ -17,24 +27,53 @@ export default function App() {
       <AuthProvider>
         <Layout>
           <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            <Route
+              path="/"
+              element={
+                <PublicRoute>
+                  <LandingPage />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <PublicRoute>
+                  <LoginPage />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <PublicRoute>
+                  <RegisterPage />
+                </PublicRoute>
+              }
+            />
             <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route
               path="/dashboard"
               element={
-                <ProtectedRoute>
-                  <HomePage />
-                </ProtectedRoute>
+                <PrivateRoute>
+                  <DashboardPage />
+                </PrivateRoute>
               }
             />
             <Route
-              path="/upload"
+              path="/dashboard/upload"
               element={
-                <ProtectedRoute>
+                <PrivateRoute>
                   <UploadPage />
-                </ProtectedRoute>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/dashboard/my-account"
+              element={
+                <PrivateRoute>
+                  <MyAccountPage />
+                </PrivateRoute>
               }
             />
           </Routes>
