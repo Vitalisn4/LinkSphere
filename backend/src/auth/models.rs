@@ -4,16 +4,15 @@ use utoipa::ToSchema;
 use validator::Validate;
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize, sqlx::Type, ToSchema, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, sqlx::Type, ToSchema, PartialEq, Clone)]
 #[sqlx(type_name = "user_gender", rename_all = "lowercase")] 
-#[derive(Clone)]
 pub enum Gender {
     Male,
     Female,
     Other,
 }
 
-#[derive(Debug, Serialize, Deserialize, sqlx::Type, ToSchema, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, sqlx::Type, ToSchema, PartialEq, Clone)]
 #[sqlx(type_name = "user_status", rename_all = "lowercase")]
 pub enum UserStatus {
     Active,
@@ -21,12 +20,28 @@ pub enum UserStatus {
     Suspended,
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+fn validate_username(username: &str) -> Result<(), validator::ValidationError> {
+    if USERNAME_REGEX.is_match(username) {
+        Ok(())
+    } else {
+        Err(validator::ValidationError::new("invalid_username"))
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Validate, ToSchema, Clone)]
 pub struct User {
+    #[schema(example = "123e4567-e89b-12d3-a456-426614174000")]
     pub id: Uuid,
+    
+    #[validate(email)]
+    #[schema(example = "user@example.com")]
     pub email: String,
+    
+    #[validate(length(min = 3, max = 50))]
+    #[validate(custom(function = "validate_username", message = "Username must be alphanumeric with underscores only"))]
+    #[schema(example = "john_doe")]
     pub username: String,
-    #[serde(skip_serializing)]
+    
     pub password_hash: String,
     pub gender: Gender,
     pub status: UserStatus,
@@ -40,34 +55,42 @@ pub struct User {
 #[derive(Debug, Deserialize, Validate, ToSchema, Clone)]
 pub struct RegisterRequest {
     #[validate(email(message = "Invalid email format"))]
+    #[schema(example = "user@example.com")]
     pub email: String,
-    #[validate(
-        length(min = 3, max = 50, message = "Username must be between 3 and 50 characters"),
-        regex(path = "USERNAME_REGEX", message = "Username must be alphanumeric with underscores only")
-    )]
+    
+    #[validate(length(min = 3, max = 50))]
+    #[validate(custom(function = "validate_username", message = "Username must be alphanumeric with underscores only"))]
+    #[schema(example = "john_doe")]
     pub username: String,
-    #[validate(length(min = 6, message = "Password must be at least 6 characters long"))]
+    
+    #[validate(length(min = 6))]
+    #[schema(example = "StrongP@ssw0rd")]
     pub password: String,
+    
     pub gender: Gender,
 }
 
 #[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct LoginRequest {
     #[validate(email(message = "Invalid email format"))]
+    #[schema(example = "user@example.com")]
     pub email: String,
+    
+    #[schema(example = "StrongP@ssw0rd")]
     pub password: String,
 }
 
 #[derive(Debug, Serialize, ToSchema)]
 pub struct AuthResponse {
+    #[schema(example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")]
     pub token: String,
     pub user: User,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Claims {
-    pub sub: Uuid, // user id
-    pub exp: i64, // expiration time
+    pub sub: Uuid,
+    pub exp: i64,
     pub email: String,
     pub username: String,
 }
