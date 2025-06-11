@@ -52,16 +52,99 @@ impl EmailService {
             .send()
             .await?;
 
-        let email_body = format!(
-            "Your verification code is: {}\n\nThis code will expire in 5 minutes.",
-            otp
-        );
+        let html_body = format!(r#"
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body {{
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        line-height: 1.6;
+                        color: #333;
+                        max-width: 600px;
+                        margin: 0 auto;
+                        padding: 20px;
+                    }}
+                    .container {{
+                        background-color: #ffffff;
+                        border-radius: 10px;
+                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                        padding: 30px;
+                    }}
+                    .header {{
+                        text-align: center;
+                        margin-bottom: 30px;
+                    }}
+                    .logo {{
+                        color: #6366f1;
+                        font-size: 28px;
+                        font-weight: bold;
+                        text-decoration: none;
+                    }}
+                    .otp-container {{
+                        background-color: #f3f4f6;
+                        border-radius: 8px;
+                        padding: 20px;
+                        text-align: center;
+                        margin: 25px 0;
+                    }}
+                    .otp {{
+                        font-size: 32px;
+                        font-weight: bold;
+                        color: #4f46e5;
+                        letter-spacing: 4px;
+                    }}
+                    .footer {{
+                        text-align: center;
+                        margin-top: 30px;
+                        padding-top: 20px;
+                        border-top: 1px solid #e5e7eb;
+                        color: #6b7280;
+                        font-size: 14px;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <div class="logo">LinkSphere</div>
+                    </div>
+                    
+                    <h2>Welcome to LinkSphere! 🎉</h2>
+                    
+                    <p>We're excited to have you join our community. To get started, please verify your email address using the verification code below:</p>
+                    
+                    <div class="otp-container">
+                        <div class="otp">{}</div>
+                        <p style="margin-top: 10px; color: #6b7280;">This code will expire in 5 minutes</p>
+                    </div>
+                    
+                    <p>Once verified, you'll have full access to:</p>
+                    <ul>
+                        <li>Share and organize your favorite links</li>
+                        <li>Connect with other members</li>
+                        <li>Discover amazing content</li>
+                    </ul>
+                    
+                    <p>If you didn't create an account with LinkSphere, please ignore this email.</p>
+                    
+                    <div class="footer">
+                        <p>© 2025 LinkSphere. All rights reserved.</p>
+                        <p>This is an automated message, please do not reply.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        "#, otp);
 
         let email = Message::builder()
             .from("LinkSphere <noreply@linksphere.com>".parse()?)
             .to(email.parse()?)
-            .subject("Email Verification Code")
-            .body(email_body)?;
+            .subject("Welcome to LinkSphere - Verify Your Email")
+            .header(lettre::message::header::ContentType::TEXT_HTML)
+            .body(html_body)?;
 
         self.smtp_transport.send(email).await?;
         Ok(())
@@ -94,10 +177,9 @@ impl EmailService {
     }
 
     fn generate_otp(&self) -> String {
-        rand::thread_rng()
-            .sample_iter(&rand::distributions::Uniform::new(0, 10))
-            .take(6)
-            .map(|d| d.to_string())
+        let mut rng = rand::rng();
+        (0..6)
+            .map(|_| rng.random_range(0..10).to_string())
             .collect()
     }
 } 
