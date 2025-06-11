@@ -10,6 +10,26 @@ import { useAuth } from "../contexts/AuthContext";
 // Categories for quick filtering
 const categories = ["Programming", "Web Development", "Design", "AI", "Data Science"];
 
+// Sample data for demonstration
+const sampleData = [
+  { id: 1, name: "Traits in Rust", url: "https://example.com/rust-traits", category: "Programming" },
+  { id: 2, name: "Threads in Java", url: "https://example.com/java-threads", category: "Programming" },
+  { id: 3, name: "Pattern matching in Python", url: "https://example.com/python-patterns", category: "Programming" },
+  { id: 4, name: "Enums in TypeScript", url: "https://example.com/typescript-enums", category: "Programming" },
+  { id: 5, name: "Options in Swift", url: "https://example.com/swift-options", category: "Programming" },
+  { id: 6, name: "React Hooks Guide", url: "https://example.com/react-hooks", category: "Web Development" },
+  { id: 7, name: "CSS Grid Layout", url: "https://example.com/css-grid", category: "Web Development" },
+  { id: 8, name: "JavaScript Promises", url: "https://example.com/js-promises", category: "Web Development" },
+];
+
+// Type for search result item
+interface ResultItem {
+  id: number;
+  name: string;
+  url: string;
+  category: string;
+}
+
 export default function HomePage() {
   const [links, setLinks] = useState<LinkType[]>([]);
   const [filteredLinks, setFilteredLinks] = useState<LinkType[]>([]);
@@ -19,6 +39,7 @@ export default function HomePage() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
+  const [filteredResults, setFilteredResults] = useState<ResultItem[]>([]);
 
   useEffect(() => {
     fetchLinks();
@@ -102,6 +123,29 @@ export default function HomePage() {
     },
   };
 
+  // Function to handle real-time search filtering
+  const handleSearchResults = (searchQuery: string) => {
+    setQuery(searchQuery);
+
+    if (searchQuery) {
+      const results = sampleData.filter(
+        (item) =>
+          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.category.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
+      setFilteredResults(results);
+    } else {
+      setFilteredResults([]);
+    }
+  };
+
+  // Focus search input on page load
+  useEffect(() => {
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, []);
+
   return (
     <div className="max-w-7xl mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -168,8 +212,8 @@ export default function HomePage() {
             type="text"
             className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/90 dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             value={query}
-            onChange={(e) => handleSearch(e.target.value)}
-            placeholder="Search your links..."
+            onChange={(e) => handleSearchResults(e.target.value)}
+            placeholder="Search for links, topics, or categories..."
             onFocus={() => setIsSearchFocused(true)}
             onBlur={() => setIsSearchFocused(false)}
           />
@@ -179,7 +223,7 @@ export default function HomePage() {
           {categories.map((category, index) => (
             <button
               key={category}
-              onClick={() => handleSearch(category)}
+              onClick={() => handleSearchResults(category)}
               className="px-3 py-1.5 text-sm rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-800/40 transition-colors duration-300"
             >
               {category}
@@ -304,46 +348,32 @@ export default function HomePage() {
           <h2 className="text-xl font-semibold mb-6 text-gray-900 dark:text-white">
             Search Results
           </h2>
-          {filteredLinks.length === 0 ? (
+          {filteredResults.length === 0 ? (
             <p className="text-center text-gray-500 dark:text-gray-400 py-8">
               No results found for "{query}"
             </p>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
-              {filteredLinks.map((link) => (
-                <motion.div
-                  key={link.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+              {filteredResults.map((result) => (
+                <motion.a
+                  key={result.id}
+                  href={result.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="group block p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-purple-200 dark:hover:border-purple-700/50 shadow-sm hover:shadow-md transition-all duration-300"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-medium text-gray-900 dark:text-white truncate group-hover:text-purple-600 dark:group-hover:text-purple-400">
-                        {link.title}
-                      </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
-                        {link.description}
-                      </p>
+                  <div className="flex items-start">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-md shadow-purple-500/20 group-hover:shadow-purple-500/40 transition-all duration-300 mr-3 flex-shrink-0">
+                      <LinkIcon size={18} className="text-white" />
                     </div>
-                    <div className="ml-4 flex items-center space-x-2">
-                      <button
-                        onClick={() => handleClick(link.id, link.url)}
-                        className="p-1 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg transition-colors"
-                      >
-                        <ExternalLink size={18} className="text-purple-500" />
-                      </button>
-                      {user?.id === link.user_id && (
-                        <button
-                          onClick={() => handleDelete(link.id)}
-                          className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                        >
-                          <Trash2 size={18} className="text-red-500" />
-                        </button>
-                      )}
+                    <div>
+                      <h3 className="font-medium text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
+                        {result.name}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{result.category}</p>
                     </div>
                   </div>
-                </motion.div>
+                </motion.a>
               ))}
             </div>
           )}
