@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import { LogIn, Mail, Lock, ArrowRight } from "lucide-react"
-import ApiService from "../../services/api"
+import { useAuth } from "../../contexts/AuthContext"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,7 +20,7 @@ export default function LoginPage() {
     setError("")
 
     try {
-      await ApiService.login(email, password)
+      await login(email, password)
       navigate("/dashboard")
     } catch (error) {
       setError(error instanceof Error ? error.message : "Failed to login")
