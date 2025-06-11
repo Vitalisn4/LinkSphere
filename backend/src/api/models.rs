@@ -56,7 +56,7 @@ pub struct VerifyEmailRequest {
 
     /// The 6-digit OTP code sent to the email
     #[validate(length(equal = 6, message = "OTP must be exactly 6 digits"))]
-    #[validate(regex(path = "OTP_REGEX", message = "OTP must contain only digits"))]
+    #[validate(custom(function = "validate_otp", message = "OTP must contain only digits"))]
     #[schema(example = "123456")]
     pub otp: String,
 }
@@ -71,4 +71,12 @@ pub struct ResendOtpRequest {
 
 lazy_static::lazy_static! {
     static ref OTP_REGEX: regex::Regex = regex::Regex::new(r"^[0-9]{6}$").unwrap();
+}
+
+fn validate_otp(otp: &str) -> Result<(), validator::ValidationError> {
+    if otp.chars().all(|c| c.is_ascii_digit()) {
+        Ok(())
+    } else {
+        Err(validator::ValidationError::new("invalid_otp"))
+    }
 } 
