@@ -1,4 +1,7 @@
-const API_URL = "http://localhost:8080/api";
+/// <reference types="vite/client" />
+import axios, { AxiosError } from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 interface ApiResponse<T = any> {
   success: boolean;
@@ -6,16 +9,6 @@ interface ApiResponse<T = any> {
   data?: T;
   code?: string;
   timestamp?: string;
-}
-
-interface AuthResponse {
-  token: string;
-  user: {
-    id: string;
-    email: string;
-    username: string;
-    gender: string;
-  };
 }
 
 export type Gender = "male" | "female" | "other";
@@ -34,114 +27,146 @@ export interface Link {
   };
 }
 
-class ApiService {
-  private static getHeaders(): HeadersInit {
-    const headers: HeadersInit = {
-      "Content-Type": "application/json",
-    };
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("token");
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
 
-    const token = localStorage.getItem("token");
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
+export interface AuthResponse {
+  token: string;
+  user: {
+    id: string;
+    email: string;
+    username: string;
+    gender: Gender;
+  };
+}
+
+const ApiService = {
+  async register(email: string, username: string, password: string, gender: Gender): Promise<void> {
+    try {
+      await axios.post<ApiResponse>(`${API_URL}/auth/register`, {
+        email,
+        username,
+        password,
+        gender
+      }, {
+        headers: getAuthHeaders()
+      });
+    } catch (err) {
+      if (err instanceof AxiosError && err.response) {
+        throw new Error(err.response.data.message || "Registration failed");
+      }
+      throw err;
     }
+  },
 
-    return headers;
-  }
-
-  private static async handleResponse<T>(response: Response): Promise<T> {
-    const data: ApiResponse<T> = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.message || "Something went wrong");
+  async verifyEmail(email: string, otp: string): Promise<void> {
+    try {
+      await axios.post<ApiResponse>(`${API_URL}/auth/verify`, {
+        email,
+        otp
+      }, {
+        headers: getAuthHeaders()
+      });
+    } catch (err) {
+      if (err instanceof AxiosError && err.response) {
+        throw new Error(err.response.data.message || "Email verification failed");
+      }
+      throw err;
     }
+  },
 
-    return data.data as T;
-  }
+  async login(email: string, password: string): Promise<AuthResponse> {
+    try {
+      const response = await axios.post<ApiResponse<AuthResponse>>(`${API_URL}/auth/login`, {
+        email,
+        password
+      }, {
+        headers: getAuthHeaders()
+      });
+      return response.data.data!;
+    } catch (err) {
+      if (err instanceof AxiosError && err.response) {
+        throw new Error(err.response.data.message || "Login failed");
+      }
+      throw err;
+    }
+  },
 
-  static async login(email: string, password: string): Promise<AuthResponse> {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: "POST",
-      headers: this.getHeaders(),
-      body: JSON.stringify({ email, password }),
-    });
+  async resendOtp(email: string): Promise<void> {
+    try {
+      await axios.post<ApiResponse>(`${API_URL}/auth/resend-otp`, { email }, {
+        headers: getAuthHeaders()
+      });
+    } catch (err) {
+      if (err instanceof AxiosError && err.response) {
+        throw new Error(err.response.data.message || "Failed to resend verification code");
+      }
+      throw err;
+    }
+  },
 
-    return this.handleResponse<AuthResponse>(response);
-  }
+  async getAllLinks(): Promise<Link[]> {
+    try {
+      const response = await axios.get<ApiResponse<Link[]>>(`${API_URL}/links`, {
+        headers: getAuthHeaders()
+      });
+      return response.data.data!;
+    } catch (err) {
+      if (err instanceof AxiosError && err.response) {
+        throw new Error(err.response.data.message || "Failed to fetch links");
+      }
+      throw err;
+    }
+  },
 
-  static async register(
-    email: string, 
-    username: string, 
-    password: string,
-    gender: Gender
-  ): Promise<void> {
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: "POST",
-      headers: this.getHeaders(),
-      body: JSON.stringify({ email, username, password, gender }),
-    });
-
-    return this.handleResponse(response);
-  }
-
-  static async verifyEmail(email: string, otp: string): Promise<void> {
-    const response = await fetch(`${API_URL}/auth/verify`, {
-      method: "POST",
-      headers: this.getHeaders(),
-      body: JSON.stringify({ email, otp }),
-    });
-
-    return this.handleResponse(response);
-  }
-
-  static async resendOtp(email: string): Promise<void> {
-    const response = await fetch(`${API_URL}/auth/resend-otp`, {
-      method: "POST",
-      headers: this.getHeaders(),
-      body: JSON.stringify({ email }),
-    });
-
-    return this.handleResponse(response);
-  }
-
-  static async getAllLinks(): Promise<Link[]> {
-    const response = await fetch(`${API_URL}/links`, {
-      headers: this.getHeaders(),
-    });
-
-    return this.handleResponse<Link[]>(response);
-  }
-
-  static async createLink(data: {
+  async createLink(data: {
     url: string;
     title: string;
     description: string;
   }): Promise<Link> {
-    const response = await fetch(`${API_URL}/links`, {
-      method: "POST",
-      headers: this.getHeaders(),
-      body: JSON.stringify(data),
-    });
+    try {
+      const response = await axios.post<ApiResponse<Link>>(`${API_URL}/links`, data, {
+        headers: getAuthHeaders()
+      });
+      return response.data.data!;
+    } catch (err) {
+      if (err instanceof AxiosError && err.response) {
+        throw new Error(err.response.data.message || "Failed to create link");
+      }
+      throw err;
+    }
+  },
 
-    return this.handleResponse<Link>(response);
-  }
+  async deleteLink(id: string): Promise<void> {
+    try {
+      await axios.delete<ApiResponse>(`${API_URL}/links/${id}`, {
+        headers: getAuthHeaders()
+      });
+    } catch (err) {
+      if (err instanceof AxiosError && err.response) {
+        throw new Error(err.response.data.message || "Failed to delete link");
+      }
+      throw err;
+    }
+  },
 
-  static async deleteLink(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/links/${id}`, {
-      method: "DELETE",
-      headers: this.getHeaders(),
-    });
-
-    return this.handleResponse(response);
-  }
-
-  static async incrementLinkClick(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/links/${id}/click`, {
-      method: "POST",
-      headers: this.getHeaders(),
-    });
-
-    return this.handleResponse(response);
-  }
-}
+  async incrementLinkClick(id: string): Promise<void> {
+    try {
+      await axios.post<ApiResponse>(`${API_URL}/links/${id}/click`, null, {
+        headers: getAuthHeaders()
+      });
+    } catch (err) {
+      if (err instanceof AxiosError && err.response) {
+        throw new Error(err.response.data.message || "Failed to track click");
+      }
+      throw err;
+    }
+  },
+};
 
 export default ApiService; 
