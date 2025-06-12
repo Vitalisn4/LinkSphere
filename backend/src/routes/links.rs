@@ -11,6 +11,7 @@ use crate::{
     database::{self, PgPool, models::Link},
     api::{ApiResponse, ErrorResponse, models::CreateLinkRequest},
     auth::middleware::AuthUser,
+    services::link_preview::fetch_link_preview,
 };
 use validator::Validate;
 
@@ -89,6 +90,15 @@ pub async fn handle_create_link(
         return (StatusCode::UNPROCESSABLE_ENTITY, Json(error)).into_response();
     }
 
+    // Fetch link preview
+    let preview = match fetch_link_preview(&payload.url).await {
+        Ok(preview) => Some(preview),
+        Err(e) => {
+            eprintln!("Failed to fetch link preview: {}", e);
+            None
+        }
+    };
+
     // Create the link using the user ID from the JWT token
     match create_link(
         &pool,
@@ -96,6 +106,7 @@ pub async fn handle_create_link(
         payload.title,
         payload.description,
         user.id,
+        preview.as_ref(),
     ).await {
         Ok(link) => {
             let response = ApiResponse::success_with_message(
