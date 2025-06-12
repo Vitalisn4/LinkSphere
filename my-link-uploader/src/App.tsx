@@ -1,7 +1,9 @@
+import * as React from 'react'
 "use client"
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { AuthProvider, useAuth } from "./contexts/AuthContext"
+import { ThemeProvider } from "./contexts/ThemeContext"
 import Layout from "./components/Layout"
 import LandingPage from "./pages/LandingPage"
 import LoginPage from "./pages/auth/LoginPage"
@@ -24,61 +26,63 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <Router>
-      <AuthProvider>
-        <Layout>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <PublicRoute>
-                  <LandingPage />
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/login"
-              element={
-                <PublicRoute>
-                  <LoginPage />
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/register"
-              element={
-                <PublicRoute>
-                  <RegisterPage />
-                </PublicRoute>
-              }
-            />
-            <Route path="/verify-email" element={<VerifyEmailPage />} />
-            <Route
-              path="/dashboard"
-              element={
-                <PrivateRoute>
-                  <DashboardPage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/dashboard/upload"
-              element={
-                <PrivateRoute>
-                  <UploadPage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/dashboard/my-account"
-              element={
-                <PrivateRoute>
-                  <MyAccountPage />
-                </PrivateRoute>
-              }
-            />
-          </Routes>
-        </Layout>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <Layout>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <PublicRoute>
+                    <LandingPage />
+                  </PublicRoute>
+                }
+              />
+              <Route
+                path="/login"
+                element={
+                  <PublicRoute>
+                    <LoginPage />
+                  </PublicRoute>
+                }
+              />
+              <Route
+                path="/register"
+                element={
+                  <PublicRoute>
+                    <RegisterPage />
+                  </PublicRoute>
+                }
+              />
+              <Route path="/verify-email" element={<VerifyEmailPage />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <PrivateRoute>
+                    <DashboardPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/dashboard/upload"
+                element={
+                  <PrivateRoute>
+                    <UploadPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/dashboard/my-account"
+                element={
+                  <PrivateRoute>
+                    <MyAccountPage />
+                  </PrivateRoute>
+                }
+              />
+            </Routes>
+          </Layout>
+        </AuthProvider>
+      </ThemeProvider>
     </Router>
   )
 }
