@@ -1,66 +1,132 @@
 "use client"
-import { createContext } from "react"
+import { createContext, useContext } from "react"
 import { useState, useEffect } from "react"
 import type { ReactNode } from "react"
 
 type Theme = "light" | "dark"
+type ThemeMode = "system" | "light" | "dark"
 
 interface ThemeContextType {
   theme: Theme
+  themeMode: ThemeMode
   toggleTheme: () => void
+  setThemeMode: (mode: ThemeMode) => void
+  isDark: boolean
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
-// Export ThemeContext so the hook can import it
-export { ThemeContext };
+// Apply theme with transition
+const applyTheme = (theme: Theme) => {
+  if (typeof window === "undefined") return
+
+  const root = window.document.documentElement
+  
+  // Add transition class
+  root.classList.add("transition-colors", "duration-200")
+  
+  // Remove existing themes
+  root.classList.remove("light", "dark")
+  
+  // Add new theme
+  root.classList.add(theme)
+  
+  // Remove transition after it completes
+  setTimeout(() => {
+    root.classList.remove("transition-colors", "duration-200")
+  }, 200)
+}
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  // Check for user preference or stored preference
-  const getInitialTheme = (): Theme => {
-    if (typeof window !== "undefined") {
-      const storedTheme = localStorage.getItem("theme") as Theme | null
+  // Get initial theme mode (system/light/dark)
+  const [mounted, setMounted] = useState(false)
+  const [themeMode, setThemeModeState] = useState<ThemeMode>("system")
+  const [theme, setTheme] = useState<Theme>("light")
 
-      if (storedTheme) {
-        return storedTheme
-      }
-
-      const userPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-      return userPrefersDark ? "dark" : "light"
+  // Initialize theme on mount
+  useEffect(() => {
+    setMounted(true)
+    const storedMode = localStorage.getItem("themeMode") as ThemeMode | null
+    const initialMode = storedMode || "system"
+    setThemeModeState(initialMode)
+    
+    if (initialMode === "system") {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+      setTheme(systemTheme)
+      applyTheme(systemTheme)
+    } else {
+      setTheme(initialMode as Theme)
+      applyTheme(initialMode as Theme)
     }
+  }, [])
 
-    return "light"
+  // Update theme when mode changes
+  const updateThemeFromMode = (mode: ThemeMode) => {
+    if (mode === "system") {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+      setTheme(systemTheme)
+      applyTheme(systemTheme)
+    } else {
+      setTheme(mode as Theme)
+      applyTheme(mode as Theme)
+    }
   }
 
-  const [theme, setTheme] = useState<Theme>(getInitialTheme)
-
-  // Apply theme to document
-  useEffect(() => {
-    const root = window.document.documentElement
-
-    root.classList.remove("light", "dark")
-    root.classList.add(theme)
-
-    localStorage.setItem("theme", theme)
-  }, [theme])
+  // Handle theme mode changes
+  const setThemeMode = (mode: ThemeMode) => {
+    setThemeModeState(mode)
+    localStorage.setItem("themeMode", mode)
+    updateThemeFromMode(mode)
+  }
 
   // Listen for system preference changes
   useEffect(() => {
+    if (!mounted) return
+
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
 
     const handleChange = () => {
-      if (!localStorage.getItem("theme")) {
-        setTheme(mediaQuery.matches ? "dark" : "light")
+      if (themeMode === "system") {
+        updateThemeFromMode("system")
       }
     }
 
     mediaQuery.addEventListener("change", handleChange)
     return () => mediaQuery.removeEventListener("change", handleChange)
-  }, [])
+  }, [themeMode, mounted])
 
   const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"))
+    const newMode = themeMode === "system" 
+      ? theme === "light" ? "dark" : "light"
+      : themeMode === "light" ? "dark" : "light"
+    setThemeMode(newMode)
   }
 
-  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>
+  // Prevent flash of wrong theme
+  if (!mounted) {
+    return null
+  }
+
+  return (
+    <ThemeContext.Provider 
+      value={{ 
+        theme, 
+        themeMode,
+        toggleTheme, 
+        setThemeMode,
+        isDark: theme === "dark"
+      }}
+    >
+      {children}
+    </ThemeContext.Provider>
+  )
+}
+
+// Custom hook for using theme
+export function useTheme() {
+  const context = useContext(ThemeContext)
+  if (context === undefined) {
+    throw new Error("useTheme must be used within a ThemeProvider")
+  }
+  return context
 }
