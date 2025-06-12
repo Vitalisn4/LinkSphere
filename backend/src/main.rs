@@ -2,6 +2,7 @@ mod api;
 mod database;
 mod routes;
 mod auth;
+mod services;
 
 use std::env;
 use std::net::SocketAddr;
