@@ -1,5 +1,5 @@
 use sqlx::PgPool;
-use super::models::Link;
+use super::models::{Link, LinkPreview, JsonLinkPreview};
 use chrono::Utc;
 use uuid::Uuid;
 
@@ -19,7 +19,8 @@ pub async fn get_all_links(pool: &PgPool) -> Result<Vec<Link>, sqlx::Error> {
             user_id as "user_id!",
             click_count as "click_count!",
             created_at as "created_at!",
-            updated_at as "updated_at!"
+            updated_at as "updated_at!",
+            preview as "preview: JsonLinkPreview"
         FROM links
         ORDER BY created_at DESC
         "#
@@ -36,6 +37,7 @@ pub async fn get_all_links(pool: &PgPool) -> Result<Vec<Link>, sqlx::Error> {
 /// * `title` - The title of the link
 /// * `description` - A description of the link
 /// * `user_id` - The ID of the user creating the link
+/// * `preview` - The preview of the link
 /// 
 /// # Returns
 /// * `Result<Link, sqlx::Error>` - The created link or an error
@@ -45,14 +47,16 @@ pub async fn create_link(
     title: String,
     description: String,
     user_id: Uuid,
+    preview: Option<&LinkPreview>,
 ) -> Result<Link, sqlx::Error> {
     let now = Utc::now();
+    let preview_json = JsonLinkPreview::from(preview);
     
     sqlx::query_as!(
         Link,
         r#"
-        INSERT INTO links (url, title, description, user_id, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $5)
+        INSERT INTO links (url, title, description, user_id, created_at, updated_at, preview)
+        VALUES ($1, $2, $3, $4, $5, $5, $6)
         RETURNING 
             id,
             url as "url!",
@@ -61,13 +65,15 @@ pub async fn create_link(
             user_id as "user_id!",
             click_count as "click_count!",
             created_at as "created_at!",
-            updated_at as "updated_at!"
+            updated_at as "updated_at!",
+            preview as "preview: JsonLinkPreview"
         "#,
         url,
         title,
         description,
         user_id,
         now,
+        preview_json as _
     )
     .fetch_one(pool)
     .await
@@ -135,7 +141,8 @@ pub async fn get_link_by_id(pool: &PgPool, link_id: Uuid) -> Result<Option<Link>
             user_id as "user_id!",
             click_count as "click_count!",
             created_at as "created_at!",
-            updated_at as "updated_at!"
+            updated_at as "updated_at!",
+            preview as "preview: JsonLinkPreview"
         FROM links
         WHERE id = $1
         "#,
