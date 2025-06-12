@@ -143,7 +143,7 @@ export default function UploadPage() {
   }
 
   if (successMessage) {
-    return (
+  return (
       <div className="w-full min-h-screen p-6 flex items-center justify-center">
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
@@ -162,8 +162,8 @@ export default function UploadPage() {
             Your link has been successfully added to LinkSphere!
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              onClick={() => setSuccessMessage(null)}
+              <button
+                onClick={() => setSuccessMessage(null)}
               className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
                 isDark
                   ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
@@ -177,10 +177,10 @@ export default function UploadPage() {
               className="px-6 py-3 rounded-lg font-medium text-white transition-all duration-300 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 shadow-md hover:shadow-lg shadow-purple-500/20"
             >
               View All Links
-            </button>
+              </button>
           </div>
         </motion.div>
-      </div>
+        </div>
     )
   }
 
@@ -216,7 +216,7 @@ export default function UploadPage() {
         >
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Link Input with Drop Zone */}
-            <div>
+          <div>
               <label className={`block text-lg font-medium mb-3 ${
                 isDark ? "text-gray-300" : "text-gray-700"
               }`}>
@@ -238,8 +238,8 @@ export default function UploadPage() {
                   ${errors.url ? 'border-red-400' : ''}
                 `}
               >
-                <input
-                  type="url"
+              <input
+                type="url"
                   value={formData.url}
                   onChange={e => setFormData(prev => ({ ...prev, url: e.target.value }))}
                   placeholder="Paste or drop a link here..."
@@ -248,7 +248,7 @@ export default function UploadPage() {
                       ? "bg-transparent text-white placeholder-gray-500"
                       : "bg-transparent text-gray-900 placeholder-gray-400"
                   }`}
-                />
+              />
               </div>
               {errors.url && (
                 <p className="mt-2 text-base text-red-400 flex items-center">
@@ -256,10 +256,10 @@ export default function UploadPage() {
                   {errors.url}
                 </p>
               )}
-            </div>
+          </div>
 
             {/* Title */}
-            <div>
+          <div>
               <label className={`block text-lg font-medium mb-3 ${
                 isDark ? "text-gray-300" : "text-gray-700"
               }`}>
@@ -285,14 +285,14 @@ export default function UploadPage() {
                   {errors.title}
                 </p>
               )}
-            </div>
+          </div>
 
             {/* Description */}
-            <div>
+          <div>
               <label className={`block text-lg font-medium mb-3 ${
                 isDark ? "text-gray-300" : "text-gray-700"
               }`}>
-                Description
+              Description
               </label>
               <textarea
                 value={formData.description}
@@ -313,7 +313,7 @@ export default function UploadPage() {
                   {errors.description}
                 </p>
               )}
-            </div>
+          </div>
 
             <button
               type="submit"
@@ -328,7 +328,7 @@ export default function UploadPage() {
               `}
             >
               {isSubmitting ? 'Uploading...' : 'Upload'}
-            </button>
+          </button>
           </form>
         </motion.div>
       </div>
