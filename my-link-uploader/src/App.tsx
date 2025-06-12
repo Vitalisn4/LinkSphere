@@ -27,61 +27,61 @@ export default function App() {
   return (
     <Router>
       <ThemeProvider>
-        <AuthProvider>
-          <Layout>
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <PublicRoute>
-                    <LandingPage />
-                  </PublicRoute>
-                }
-              />
-              <Route
-                path="/login"
-                element={
-                  <PublicRoute>
-                    <LoginPage />
-                  </PublicRoute>
-                }
-              />
-              <Route
-                path="/register"
-                element={
-                  <PublicRoute>
-                    <RegisterPage />
-                  </PublicRoute>
-                }
-              />
-              <Route path="/verify-email" element={<VerifyEmailPage />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <PrivateRoute>
-                    <DashboardPage />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/dashboard/upload"
-                element={
-                  <PrivateRoute>
-                    <UploadPage />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/dashboard/my-account"
-                element={
-                  <PrivateRoute>
-                    <MyAccountPage />
-                  </PrivateRoute>
-                }
-              />
-            </Routes>
-          </Layout>
-        </AuthProvider>
+      <AuthProvider>
+        <Layout>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <PublicRoute>
+                  <LandingPage />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <PublicRoute>
+                  <LoginPage />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <PublicRoute>
+                  <RegisterPage />
+                </PublicRoute>
+              }
+            />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute>
+                  <DashboardPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/dashboard/upload"
+              element={
+                <PrivateRoute>
+                  <UploadPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/dashboard/my-account"
+              element={
+                <PrivateRoute>
+                  <MyAccountPage />
+                </PrivateRoute>
+              }
+            />
+          </Routes>
+        </Layout>
+      </AuthProvider>
       </ThemeProvider>
     </Router>
   )
