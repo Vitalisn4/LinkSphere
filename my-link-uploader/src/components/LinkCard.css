@@ -1,0 +1,112 @@
+.link-card {
+  transition: all 0.3s ease-in-out;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.link-card:hover {
+  transform: translateY(-4px);
+}
+
+.link-card-image {
+  position: relative;
+  overflow: hidden;
+  min-height: 200px;
+  background-color: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.link-card-image img {
+  transition: transform 0.5s ease;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.link-card:hover .link-card-image img {
+  transform: scale(1.05);
+}
+
+.link-card-image svg {
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.link-card-favicon {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 2px solid white;
+  backdrop-filter: blur(4px);
+}
+
+.link-card-content {
+  transition: background-color 0.3s ease;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.link-card:hover .link-card-content {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.link-card-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 3.5rem;
+}
+
+.link-card-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.5rem;
+  margin-top: 0.5rem;
+}
+
+.link-card-stats {
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.link-card:hover .link-card-stats {
+  opacity: 1;
+}
+
+.link-card-delete {
+  opacity: 0;
+  transform: translateX(10px);
+  transition: all 0.3s ease;
+}
+
+.link-card:hover .link-card-delete {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link-card,
+  .link-card-image img,
+  .link-card-content,
+  .link-card-stats,
+  .link-card-delete {
+    transition: none;
+  }
+  
+  .link-card:hover {
+    transform: none;
+  }
+  
+  .link-card:hover .link-card-image img {
+    transform: none;
+  }
+} 
