@@ -127,8 +127,8 @@ export default function VerifyEmailPage() {
                 pattern="[0-9]{6}"
                 className="w-full px-4 py-6 bg-white/50 dark:bg-gray-900/50 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-4xl text-center tracking-[1em] font-mono text-gray-900 dark:text-white placeholder:text-base placeholder:tracking-normal placeholder:font-sans placeholder:text-gray-500 dark:placeholder:text-gray-400 transition-all duration-300 hover:border-purple-500/50 letter-spacing-1"
                 style={{ 
-                  WebkitTextSecurity: otp.length < 6 ? 'disc' : 'none'
-                }}
+                  '-webkit-text-security': otp.length < 6 ? 'disc' : 'none'
+                } as React.CSSProperties}
               />
             </div>
           </div>
