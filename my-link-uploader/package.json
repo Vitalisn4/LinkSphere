@@ -14,6 +14,7 @@
     "@types/node": "^24.0.0",
     "@types/react-router-dom": "^5.3.3",
     "axios": "^1.9.0",
+    "date-fns": "^4.1.0",
     "framer-motion": "^10.18.0",
     "lucide-react": "^0.292.0",
     "react": "^18.2.0",
@@ -21,6 +22,10 @@
     "react-router-dom": "^6.18.0"
   },
   "devDependencies": {
+    "@types/estree": "^1.0.8",
+    "@types/history": "^4.7.11",
+    "@types/node": "^24.0.0",
+    "@types/prop-types": "^15.7.15",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
