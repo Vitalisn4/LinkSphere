@@ -12,11 +12,11 @@
   }
 
   body.dark {
-    @apply bg-gray-900 text-white;
+    @apply bg-gray-900 text-gray-50;
   }
 
   body.light {
-    @apply bg-white text-gray-900;
+    @apply bg-gray-100/40 text-gray-600;
   }
 
   /* Custom scrollbar */
@@ -29,16 +29,16 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 dark:bg-gray-700 rounded-full;
+    @apply bg-gray-300/50 dark:bg-gray-700 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400 dark:bg-gray-600;
+    @apply bg-gray-400/50 dark:bg-gray-600;
   }
 
   /* Focus styles */
   :focus-visible {
-    @apply outline-none ring-2 ring-purple-500 ring-opacity-50;
+    @apply outline-none ring-2 ring-purple-400/30 ring-opacity-50;
   }
 }
 
@@ -47,8 +47,8 @@
   text-align: center;
   max-width: 800px;
   padding: 40px;
-  background-color: rgba(255, 255, 255, 0);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
   border-radius: 50px;
   width: 90%;
 }
@@ -76,14 +76,14 @@
   max-width: 400px;
   padding: 12px;
   font-size: 20px;
-  border: 2px solid #e0dde0;
+  border: 2px solid rgba(224, 221, 224, 0.6);
   border-radius: 25px;
   outline: none;
-  background-color: #10011300;
+  background-color: rgba(255, 255, 255, 0.4);
 }
 
 .search-bar:focus {
-  border-color: #ede6f0;
+  border-color: rgba(237, 230, 240, 0.6);
 }
 
 .search-results {
@@ -91,24 +91,24 @@
   padding: 20px;
   max-height: 300px;
   overflow-y: auto;
-  border: 2px solid #eee4ed;
+  border: 2px solid rgba(238, 228, 237, 0.6);
   border-radius: 8px;
-  background-color: #180f1a00;
+  background-color: rgba(255, 255, 255, 0.4);
 }
 
 .search-results .result-item {
   padding: 10px;
-  border-bottom: 1px solid hsl(0, 0%, 87%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   cursor: pointer;
 }
 
 .search-results .result-item:hover {
-  background-color: #4c15b9;
+  background-color: rgba(76, 21, 185, 0.1);
 }
 
 .search-results .no-results {
   padding: 20px;
-  color: #555454;
+  color: rgba(85, 84, 84, 0.8);
   text-align: center;
 }
 
