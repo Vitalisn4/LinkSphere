@@ -2,26 +2,30 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LinkSphere</title>
     <!-- Prevent theme flash -->
     <script>
       (function() {
-        // Check if theme exists in localStorage
-        const theme = localStorage.getItem('theme') || 'light';
-        // Check if user prefers dark mode
+        // Check if theme mode exists in localStorage
+        const themeMode = localStorage.getItem('themeMode') || 'system';
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         
-        // Set the theme class on the html element before the app loads
-        if (theme === 'dark' || (!theme && prefersDark)) {
+        // Determine theme based on mode
+        const isDark = themeMode === 'system' 
+          ? prefersDark 
+          : themeMode === 'dark';
+
+        // Set the theme class on the html element
+        if (isDark) {
           document.documentElement.classList.add('dark');
         } else {
           document.documentElement.classList.remove('dark');
         }
         
-        // Set initial background color to prevent flash
-        document.documentElement.style.backgroundColor = theme === 'dark' ? '#111827' : '#ffffff';
+        // Set initial background color
+        document.documentElement.style.backgroundColor = isDark ? '#111827' : '#ffffff';
       })();
     </script>
   </head>
