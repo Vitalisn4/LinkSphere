@@ -45,7 +45,7 @@ async fn main() {
 
     // CORS configuration
     let cors = CorsLayer::new()
-        .allow_origin(["http://localhost:5173".parse().unwrap()])
+            .allow_origin(["http://localhost:5173".parse().unwrap()])
         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
         .allow_headers([HeaderName::from_static("authorization"), HeaderName::from_static("content-type")])
         .allow_credentials(true);
