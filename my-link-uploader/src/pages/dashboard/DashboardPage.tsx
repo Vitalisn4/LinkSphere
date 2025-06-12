@@ -100,7 +100,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="w-full min-h-screen p-6 bg-gray-50/50 dark:bg-gray-900/50">
+    <div className="w-full min-h-screen p-6 bg-gray-100/40 dark:bg-gray-900/50">
       <div className="max-w-6xl mx-auto">
         {/* Welcome Message */}
         <motion.div
@@ -109,12 +109,12 @@ export default function DashboardPage() {
           className="text-center mb-8"
         >
           <h1 className={`text-3xl font-bold mb-2 ${
-            isDark ? "text-gray-100" : "text-gray-800"
+            isDark ? "text-gray-100" : "text-gray-600"
           }`}>
             Welcome to Your Dashboard
           </h1>
           <p className={`text-lg ${
-            isDark ? "text-gray-400" : "text-gray-600"
+            isDark ? "text-gray-400" : "text-gray-500"
           }`}>
             Search and manage your links below
           </p>
@@ -130,15 +130,15 @@ export default function DashboardPage() {
           <div
             className={`relative transition-all duration-300 ${
               isSearchFocused 
-                ? "ring-2 ring-purple-500/50 ring-opacity-50 shadow-lg" 
-                : "shadow hover:shadow-md hover:ring-1 hover:ring-purple-500/20"
+                ? "ring-2 ring-purple-400/20 ring-opacity-50 shadow-lg" 
+                : "shadow hover:shadow-md hover:ring-1 hover:ring-purple-400/10"
             }`}
           >
             <Search
               size={20}
               className={`absolute left-4 top-1/2 transform -translate-y-1/2 transition-colors duration-300 ${
                 isSearchFocused 
-                  ? isDark ? "text-purple-400" : "text-purple-500"
+                  ? isDark ? "text-purple-400" : "text-purple-400/70"
                   : "text-gray-400"
               }`}
             />
@@ -148,7 +148,7 @@ export default function DashboardPage() {
               className={`w-full pl-12 pr-4 py-4 rounded-full border focus:outline-none transition-all duration-300 ${
                 isDark
                   ? "bg-gray-800/80 border-gray-700 text-gray-100 placeholder-gray-500"
-                  : "bg-gray-50/80 border-gray-200 text-gray-800 placeholder-gray-400"
+                  : "bg-gray-100/60 border-gray-200/60 text-gray-600 placeholder-gray-400"
               }`}
               value={query}
               onChange={(e) => handleSearch(e.target.value)}
@@ -167,14 +167,14 @@ export default function DashboardPage() {
             className={`mb-6 p-4 rounded-lg text-center ${
               isDark
                 ? "bg-red-900/20 text-red-400 border border-red-800"
-                : "bg-red-50/80 text-red-600 border border-red-200"
+                : "bg-red-50/30 text-red-500/80 border border-red-200/30"
             }`}
           >
             {error}
             <button
               onClick={() => fetchLinks()}
               className={`ml-4 underline hover:no-underline ${
-                isDark ? "text-purple-400" : "text-purple-500"
+                isDark ? "text-purple-400" : "text-purple-400/70"
               }`}
             >
               Retry
@@ -202,7 +202,7 @@ export default function DashboardPage() {
                 className={`rounded-2xl overflow-hidden border transition-all duration-300 hover:shadow-xl ${
                   isDark
                     ? "bg-gray-800/50 border-gray-700 hover:border-purple-500/30"
-                    : "bg-gray-50/80 border-gray-200 hover:border-purple-500/20"
+                    : "bg-gray-100/60 border-gray-200/60 hover:border-purple-400/20"
                 }`}
               >
                 {/* Link Preview Image */}
@@ -220,21 +220,21 @@ export default function DashboardPage() {
                 <div className="p-6">
                   {/* Link Title */}
                   <h3 className={`text-xl font-semibold mb-3 ${
-                    isDark ? "text-gray-100" : "text-gray-800"
+                    isDark ? "text-gray-100" : "text-gray-600"
                   }`}>
                     {link.title}
                   </h3>
 
                   {/* Link Description */}
                   <p className={`mb-4 line-clamp-2 ${
-                    isDark ? "text-gray-400" : "text-gray-600"
+                    isDark ? "text-gray-400" : "text-gray-500/90"
                   }`}>
                     {link.description}
                   </p>
 
                   {/* Link Metadata */}
                   <div className={`flex flex-wrap gap-4 mb-4 text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-500"
+                    isDark ? "text-gray-400" : "text-gray-500/80"
                   }`}>
                     <div className="flex items-center gap-1">
                       <User size={16} />
@@ -256,7 +256,7 @@ export default function DashboardPage() {
                     className={`w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg transition-all duration-300 ${
                       isDark
                         ? "bg-purple-500/10 text-purple-400 hover:bg-purple-500/20"
-                        : "bg-purple-50 text-purple-600 hover:bg-purple-100"
+                        : "bg-purple-50/40 text-purple-500/80 hover:bg-purple-100/40"
                     }`}
                   >
                     <ExternalLink size={20} />
