@@ -103,45 +103,45 @@ export default function DashboardPage() {
     <div className="w-full min-h-screen p-6">
       <div className="max-w-6xl mx-auto">
         {/* Search Bar */}
-        <motion.div
-          className="relative w-full max-w-4xl mx-auto mb-12"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+      <motion.div
+        className="relative w-full max-w-4xl mx-auto mb-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
+      >
+        <div
+          className={`relative transition-all duration-300 ${
+            isSearchFocused ? "ring-2 ring-purple-500 ring-opacity-50 shadow-lg" : "shadow"
+          }`}
         >
-          <div
-            className={`relative transition-all duration-300 ${
-              isSearchFocused ? "ring-1 ring-purple-400 shadow-md" : "shadow-sm"
+          <Search
+            size={20}
+            className={`absolute left-4 top-1/2 transform -translate-y-1/2 transition-colors duration-300 ${
+              isSearchFocused 
+                  ? isDark ? "text-purple-400" : "text-purple-600"
+                : "text-gray-400"
             }`}
-          >
-            <Search
-              size={20}
-              className={`absolute left-4 top-1/2 transform -translate-y-1/2 transition-colors duration-300 ${
-                isSearchFocused 
-                  ? isDark ? "text-purple-300" : "text-purple-500"
-                  : "text-gray-400"
-              }`}
-            />
-            <input
-              ref={searchInputRef}
-              type="text"
-              className={`w-full pl-12 pr-4 py-3 rounded-xl border focus:outline-none transition-all duration-300 ${
+          />
+          <input
+            ref={searchInputRef}
+            type="text"
+            className={`w-full pl-12 pr-4 py-4 rounded-full border focus:outline-none transition-all duration-300 ${
                 isDark
-                  ? "bg-gray-800/30 border-gray-700/50 text-gray-100 placeholder-gray-500"
-                  : "bg-gray-50/50 border-gray-200/70 text-gray-800 placeholder-gray-400"
-              }`}
-              value={query}
-              onChange={(e) => handleSearch(e.target.value)}
+                ? "bg-gray-800 border-gray-700 text-white placeholder-gray-500"
+                : "bg-white border-gray-200 text-gray-900 placeholder-gray-400"
+            }`}
+            value={query}
+            onChange={(e) => handleSearch(e.target.value)}
               placeholder="Search for links..."
-              onFocus={() => setIsSearchFocused(true)}
-              onBlur={() => setIsSearchFocused(false)}
-            />
-          </div>
-        </motion.div>
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={() => setIsSearchFocused(false)}
+          />
+        </div>
+      </motion.div>
 
         {/* Error Message */}
         {error && (
-          <motion.div
+      <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className={`mb-6 p-4 rounded-lg text-center ${
@@ -163,7 +163,7 @@ export default function DashboardPage() {
         )}
 
         {/* Links Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading ? (
             <div className="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
               Loading links...
@@ -179,63 +179,73 @@ export default function DashboardPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className={`rounded-xl overflow-hidden border transition-all duration-300 hover:shadow-lg ${
+                className={`rounded-2xl overflow-hidden border transition-all duration-300 hover:shadow-xl ${
                   isDark
-                    ? "bg-gray-800/30 border-gray-700/50 hover:border-purple-500/30"
-                    : "bg-gray-50/50 border-gray-200/70 hover:border-purple-500/20"
+                    ? "bg-gray-800/50 border-gray-700 hover:border-purple-500/50"
+                    : "bg-white/50 border-gray-200 hover:border-purple-500/30"
                 }`}
               >
-                <div className="p-5">
-                  {/* Link Title and Description in a row */}
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                    <div className="flex-1">
-                      <h3 className={`text-lg font-semibold mb-2 ${
-                        isDark ? "text-gray-100" : "text-gray-800"
-                      }`}>
-                        {link.title}
-                      </h3>
-                      <p className={`mb-3 line-clamp-2 ${
-                        isDark ? "text-gray-300" : "text-gray-600"
-                      }`}>
-                        {link.description}
-                      </p>
-                    </div>
-
-                    {/* Visit Link Button */}
-                    <button
-                      onClick={() => handleLinkClick(link.id, link.url)}
-                      className={`flex items-center justify-center space-x-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all duration-300 ${
-                        isDark
-                          ? "bg-purple-500/5 text-purple-300 hover:bg-purple-500/10"
-                          : "bg-purple-50 text-purple-600 hover:bg-purple-100"
-                      }`}
-                    >
-                      <ExternalLink size={18} />
-                      <span>Visit Link</span>
-                    </button>
+                {/* Link Preview Image */}
+                {link.preview?.image && (
+                  <div className="relative aspect-video w-full overflow-hidden">
+                    <img
+                      src={link.preview.image}
+                      alt={link.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   </div>
+                )}
+
+                <div className="p-6">
+                  {/* Link Title */}
+                  <h3 className={`text-xl font-semibold mb-2 ${
+                    isDark ? "text-white" : "text-gray-900"
+                    }`}>
+                    {link.title}
+                    </h3>
+
+                  {/* Link Description */}
+                  <p className={`mb-4 line-clamp-2 ${
+                    isDark ? "text-gray-400" : "text-gray-600"
+                  }`}>
+                    {link.description}
+                  </p>
 
                   {/* Link Metadata */}
-                  <div className={`flex flex-wrap gap-4 mt-3 text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-500"
-                  }`}>
+                  <div className={`flex flex-wrap gap-4 mb-4 text-sm ${
+                    isDark ? "text-gray-400" : "text-gray-600"
+                    }`}>
                     <div className="flex items-center gap-1">
-                      <User size={14} />
+                      <User size={16} />
                       <span>{link.user?.username || user?.username || 'Unknown user'}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Calendar size={14} />
+                      <Calendar size={16} />
                       <span>{format(new Date(link.created_at), 'MMM d, yyyy')}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Clock size={14} />
+                      <Clock size={16} />
                       <span>{format(new Date(link.created_at), 'h:mm a')}</span>
                     </div>
                   </div>
+
+                  {/* Visit Link Button */}
+                  <button
+                    onClick={() => handleLinkClick(link.id, link.url)}
+                    className={`w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                      isDark
+                        ? "bg-purple-500/10 text-purple-400 hover:bg-purple-500/20"
+                        : "bg-purple-100 text-purple-600 hover:bg-purple-200"
+                    }`}
+                  >
+                    <ExternalLink size={20} />
+                    <span>Visit Link</span>
+                  </button>
                 </div>
-              </motion.div>
+          </motion.div>
             ))
-          )}
+        )}
         </div>
       </div>
     </div>
