@@ -1,129 +1,113 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { motion } from "framer-motion"
-import { Search, ArrowRight, LinkIcon } from "lucide-react"
-import { Link } from "react-router-dom"
-import DashboardLayout from "../../components/DashboardLayout"
-import ApiService, { Link as LinkType } from "../../services/api"
+import { Search, ExternalLink, Calendar, User, Clock } from "lucide-react"
+import { format } from "date-fns"
 import { useAuth } from "../../contexts/AuthContext"
-import { useTheme } from "../../hooks/useTheme"
-
-// Sample data for demonstration
-const sampleData = [
-  { id: 1, name: "Traits in Rust", url: "https://example.com/rust-traits", category: "Programming" },
-  { id: 2, name: "Threads in Java", url: "https://example.com/java-threads", category: "Programming" },
-  { id: 3, name: "Pattern matching in Python", url: "https://example.com/python-patterns", category: "Programming" },
-  { id: 4, name: "Enums in TypeScript", url: "https://example.com/typescript-enums", category: "Programming" },
-  { id: 5, name: "Options in Swift", url: "https://example.com/swift-options", category: "Programming" },
-  { id: 6, name: "React Hooks Guide", url: "https://example.com/react-hooks", category: "Web Development" },
-  { id: 7, name: "CSS Grid Layout", url: "https://example.com/css-grid", category: "Web Development" },
-  { id: 8, name: "JavaScript Promises", url: "https://example.com/js-promises", category: "Web Development" },
-]
-
-// Type for search result item
-interface ResultItem {
-  id: number
-  name: string
-  url: string
-  category: string
-}
+import { useTheme } from "../../contexts/ThemeContext"
+import ApiService, { Link } from "../../services/api"
 
 export default function DashboardPage() {
   const [query, setQuery] = useState<string>("")
-  const [filteredResults, setFilteredResults] = useState<ResultItem[]>([])
+  const [links, setLinks] = useState<Link[]>([])
+  const [filteredLinks, setFilteredLinks] = useState<Link[]>([])
   const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const retryTimeoutRef = useRef<NodeJS.Timeout>()
   const { user } = useAuth()
-  const { theme } = useTheme()
+  const { isDark } = useTheme()
 
-  // Function to handle real-time search filtering
-  const handleSearch = (searchQuery: string) => {
-    setQuery(searchQuery)
-
-    if (searchQuery) {
-      const results = sampleData.filter(
-        (item) =>
-          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.category.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-      setFilteredResults(results)
-    } else {
-      setFilteredResults([])
-    }
-  }
-
-  // Focus search input on page load
-  useEffect(() => {
-    if (searchInputRef.current) {
-      searchInputRef.current.focus()
+  const fetchLinks = useCallback(async (retryCount = 0) => {
+    try {
+      setError(null)
+      const data = await ApiService.getAllLinks()
+      setLinks(data)
+      setFilteredLinks(data)
+      setIsLoading(false)
+    } catch (error) {
+      console.error('Error fetching links:', error)
+      
+      // Handle specific error cases
+      if (error instanceof Error) {
+        if (error.message.includes('pool timed out')) {
+          setError('Database connection issue. Retrying...')
+          // Retry with exponential backoff
+          if (retryCount < 3) {
+            const delay = Math.min(1000 * Math.pow(2, retryCount), 5000)
+            retryTimeoutRef.current = setTimeout(() => {
+              fetchLinks(retryCount + 1)
+            }, delay)
+          } else {
+            setError('Unable to connect to the database. Please try again later.')
+          }
+        } else if (error.message.includes('Failed to fetch')) {
+          setError('Unable to reach the server. Please check your connection.')
+        } else {
+          setError(error.message)
+        }
+      } else {
+        setError('An unexpected error occurred')
+      }
+      setIsLoading(false)
     }
   }, [])
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
+  useEffect(() => {
+    fetchLinks()
+    
+    // Cleanup function
+    return () => {
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current)
+      }
+    }
+  }, [fetchLinks])
+
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (query) {
+        const results = links.filter(
+          (link) =>
+            link.title.toLowerCase().includes(query.toLowerCase()) ||
+            link.description.toLowerCase().includes(query.toLowerCase())
+        )
+        setFilteredLinks(results)
+      } else {
+        setFilteredLinks(links)
+      }
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [query, links])
+
+  const handleSearch = (searchQuery: string) => {
+    setQuery(searchQuery)
   }
 
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { type: "spring", stiffness: 300, damping: 24 },
-    },
+  const handleLinkClick = async (id: string, url: string) => {
+    try {
+      await ApiService.incrementLinkClick(id)
+      window.open(url, '_blank', 'noopener,noreferrer')
+    } catch (error) {
+      console.error('Error incrementing click count:', error)
+      // Still open the link even if tracking fails
+      window.open(url, '_blank', 'noopener,noreferrer')
+    }
   }
 
   return (
-    <DashboardLayout>
-      <div className="w-full">
-        <motion.div
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <motion.h1
-            className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 bg-clip-text text-transparent"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-          >
-            Welcome to LinkSphere
-          </motion.h1>
-          <motion.p
-            className={`text-xl md:text-2xl mb-2 ${
-              theme === "dark" ? "text-gray-300" : "text-gray-700"
-            }`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-          >
-            Discover and share valuable resources
-          </motion.p>
-          <motion.p
-            className={`text-lg ${
-              theme === "dark" ? "text-gray-400" : "text-gray-600"
-            }`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-          >
-            Let's make your search easier than ever!
-          </motion.p>
-        </motion.div>
-
+    <div className="w-full min-h-screen p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Search Bar */}
         <motion.div
           className="relative w-full max-w-4xl mx-auto mb-12"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.5 }}
+          transition={{ delay: 0.2 }}
         >
           <div
             className={`relative transition-all duration-300 ${
@@ -134,7 +118,7 @@ export default function DashboardPage() {
               size={20}
               className={`absolute left-4 top-1/2 transform -translate-y-1/2 transition-colors duration-300 ${
                 isSearchFocused 
-                  ? theme === "dark" ? "text-purple-400" : "text-purple-600"
+                  ? isDark ? "text-purple-400" : "text-purple-600"
                   : "text-gray-400"
               }`}
             />
@@ -142,125 +126,128 @@ export default function DashboardPage() {
               ref={searchInputRef}
               type="text"
               className={`w-full pl-12 pr-4 py-4 rounded-full border focus:outline-none transition-all duration-300 ${
-                theme === "dark"
+                isDark
                   ? "bg-gray-800 border-gray-700 text-white placeholder-gray-500"
                   : "bg-white border-gray-200 text-gray-900 placeholder-gray-400"
               }`}
               value={query}
               onChange={(e) => handleSearch(e.target.value)}
-              placeholder="Search for links, topics, or categories..."
+              placeholder="Search for links..."
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setIsSearchFocused(false)}
             />
           </div>
-
-          {/* Quick categories */}
-          <div className="flex flex-wrap justify-center gap-2 mt-4">
-            {["Programming", "Web Development", "Design", "AI", "Data Science"].map((category, index) => (
-              <motion.button
-                key={category}
-                className={`px-4 py-2 text-sm rounded-full transition-colors duration-300 ${
-                  theme === "dark"
-                    ? "bg-gray-800 text-purple-400 hover:bg-gray-700"
-                    : "bg-gray-100 text-purple-600 hover:bg-gray-200"
-                }`}
-                onClick={() => handleSearch(category)}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.9 + index * 0.1, duration: 0.3 }}
-              >
-                {category}
-              </motion.button>
-            ))}
-          </div>
         </motion.div>
 
-        {/* Search Results */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className={`w-full max-w-6xl mx-auto backdrop-blur-sm rounded-2xl p-6 shadow-xl border ${
-            theme === "dark"
-              ? "bg-gray-800/50 border-gray-700"
-              : "bg-white/50 border-gray-200"
-          }`}
-        >
-          <h2 className={`text-xl font-semibold mb-4 flex items-center ${
-            theme === "dark" ? "text-white" : "text-gray-900"
-          }`}>
-            <LinkIcon size={20} className={`mr-2 ${
-              theme === "dark" ? "text-purple-400" : "text-purple-600"
-            }`} />
-            {query ? "Search Results" : "Popular Links"}
-          </h2>
+        {/* Error Message */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`mb-6 p-4 rounded-lg text-center ${
+              isDark
+                ? "bg-red-900/20 text-red-400 border border-red-800"
+                : "bg-red-50 text-red-600 border border-red-200"
+            }`}
+          >
+            {error}
+            <button
+              onClick={() => fetchLinks()}
+              className={`ml-4 underline hover:no-underline ${
+                isDark ? "text-purple-400" : "text-purple-600"
+              }`}
+            >
+              Retry
+            </button>
+          </motion.div>
+        )}
 
-          {filteredResults.length === 0 && query ? (
-            <motion.div className="text-center py-12" variants={itemVariants}>
-              <p className={theme === "dark" ? "text-gray-400" : "text-gray-600"}>
-                No results found for "{query}"
-              </p>
-              <Link
-                to="/dashboard/upload"
-                className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-300 mt-4"
-              >
-                <span>Add this resource</span>
-                <ArrowRight size={16} className="ml-2" />
-              </Link>
-            </motion.div>
+        {/* Links Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {isLoading ? (
+            <div className="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
+              Loading links...
+            </div>
+          ) : filteredLinks.length === 0 ? (
+            <div className="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
+              {query ? "No matching links found" : "No links found"}
+            </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {(query ? filteredResults : sampleData.slice(0, 6)).map((result) => (
-                <motion.a
-                  key={result.id}
-                  href={result.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`group block p-4 rounded-xl border shadow-sm hover:shadow-md transition-all duration-300 ${
-                    theme === "dark"
-                      ? "bg-gray-800 border-gray-700 hover:border-purple-500/50"
-                      : "bg-white border-gray-200 hover:border-purple-300"
-                  }`}
-                  variants={itemVariants}
-                  whileHover={{ y: -4 }}
-                >
-                  <div className="flex items-start">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-md shadow-purple-500/20 group-hover:shadow-purple-500/40 transition-all duration-300 mr-3 flex-shrink-0">
-                      <LinkIcon size={18} className="text-white" />
+            filteredLinks.map((link, index) => (
+              <motion.div
+                key={link.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className={`rounded-2xl overflow-hidden border transition-all duration-300 hover:shadow-xl ${
+                  isDark
+                    ? "bg-gray-800/50 border-gray-700 hover:border-purple-500/50"
+                    : "bg-white/50 border-gray-200 hover:border-purple-500/30"
+                }`}
+              >
+                {/* Link Preview Image */}
+                {link.preview?.image && (
+                  <div className="relative aspect-video w-full overflow-hidden">
+                    <img
+                      src={link.preview.image}
+                      alt={link.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                  </div>
+                )}
+
+                <div className="p-6">
+                  {/* Link Title */}
+                  <h3 className={`text-xl font-semibold mb-2 ${
+                    isDark ? "text-white" : "text-gray-900"
+                  }`}>
+                    {link.title}
+                  </h3>
+
+                  {/* Link Description */}
+                  <p className={`mb-4 line-clamp-2 ${
+                    isDark ? "text-gray-400" : "text-gray-600"
+                  }`}>
+                    {link.description}
+                  </p>
+
+                  {/* Link Metadata */}
+                  <div className={`flex flex-wrap gap-4 mb-4 text-sm ${
+                    isDark ? "text-gray-400" : "text-gray-600"
+                  }`}>
+                    <div className="flex items-center gap-1">
+                      <User size={16} />
+                      <span>{link.user?.username || user?.username || 'Unknown user'}</span>
                     </div>
-                    <div>
-                      <h3 className={`font-medium transition-colors duration-300 ${
-                        theme === "dark"
-                          ? "text-white group-hover:text-purple-400"
-                          : "text-gray-900 group-hover:text-purple-600"
-                      }`}>
-                        {result.name}
-                      </h3>
-                      <p className={`text-sm mt-1 ${
-                        theme === "dark" ? "text-gray-400" : "text-gray-500"
-                      }`}>
-                        {result.category}
-                      </p>
+                    <div className="flex items-center gap-1">
+                      <Calendar size={16} />
+                      <span>{format(new Date(link.created_at), 'MMM d, yyyy')}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock size={16} />
+                      <span>{format(new Date(link.created_at), 'h:mm a')}</span>
                     </div>
                   </div>
-                </motion.a>
-              ))}
-            </div>
-          )}
 
-          {!query && (
-            <motion.div className="mt-6 text-center" variants={itemVariants}>
-              <Link
-                to="/dashboard/upload"
-                className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-lg hover:from-purple-700 hover:to-pink-600 transition-all duration-300 shadow-md hover:shadow-lg"
-              >
-                <span>Share a new link</span>
-                <ArrowRight size={16} className="ml-2" />
-              </Link>
-            </motion.div>
+                  {/* Visit Link Button */}
+                  <button
+                    onClick={() => handleLinkClick(link.id, link.url)}
+                    className={`w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                      isDark
+                        ? "bg-purple-500/10 text-purple-400 hover:bg-purple-500/20"
+                        : "bg-purple-100 text-purple-600 hover:bg-purple-200"
+                    }`}
+                  >
+                    <ExternalLink size={20} />
+                    <span>Visit Link</span>
+                  </button>
+                </div>
+              </motion.div>
+            ))
           )}
-        </motion.div>
+        </div>
       </div>
-    </DashboardLayout>
+    </div>
   )
 } 
