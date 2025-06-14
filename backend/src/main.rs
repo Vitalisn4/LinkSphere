@@ -50,9 +50,10 @@ async fn main() {
     // Build our application with routes
     let app = Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
+        .merge(routes::create_public_router(pool.clone()))
         .nest("/api/auth", auth::create_router(pool.clone()))
         .merge(
-            routes::create_router(pool)
+            routes::create_protected_router(pool)
                 .layer(from_fn_with_state(
                     auth_middleware_state.clone(),
                     auth::middleware::auth_middleware,
