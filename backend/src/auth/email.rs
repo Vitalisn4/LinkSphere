@@ -1,11 +1,11 @@
 use lettre::{
-    transport::smtp::authentication::Credentials,
-    AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor,
+    transport::smtp::authentication::Credentials, AsyncSmtpTransport, AsyncTransport, Message,
+    Tokio1Executor,
 };
 use rand::Rng;
-use std::env;
 use reqwest;
 use serde_json::json;
+use std::env;
 
 const OTP_EXPIRY_SECONDS: u64 = 300; // 5 minutes
 
@@ -38,12 +38,13 @@ impl EmailService {
 
     pub async fn send_otp(&self, email: &str) -> Result<(), Box<dyn std::error::Error>> {
         let otp = self.generate_otp();
-        
+
         // Store OTP with expiry in Upstash
         let client = reqwest::Client::new();
         let set_url = format!("{}/set/otp:{}", self.upstash_url, email);
-        
-        client.post(&set_url)
+
+        client
+            .post(&set_url)
             .header("Authorization", format!("Bearer {}", self.upstash_token))
             .json(&json!({
                 "value": otp,
@@ -52,7 +53,8 @@ impl EmailService {
             .send()
             .await?;
 
-        let html_body = format!(r#"
+        let html_body = format!(
+            r#"
             <!DOCTYPE html>
             <html>
             <head>
@@ -137,7 +139,9 @@ impl EmailService {
                 </div>
             </body>
             </html>
-        "#, otp);
+        "#,
+            otp
+        );
 
         let email = Message::builder()
             .from("LinkSphere <noreply@linksphere.com>".parse()?)
@@ -153,8 +157,9 @@ impl EmailService {
     pub async fn verify_otp(&self, email: &str, otp: &str) -> bool {
         let client = reqwest::Client::new();
         let get_url = format!("{}/get/otp:{}", self.upstash_url, email);
-        
-        match client.get(&get_url)
+
+        match client
+            .get(&get_url)
             .header("Authorization", format!("Bearer {}", self.upstash_token))
             .send()
             .await
@@ -172,7 +177,7 @@ impl EmailService {
                 }
                 false
             }
-            Err(_) => false
+            Err(_) => false,
         }
     }
 
@@ -182,4 +187,4 @@ impl EmailService {
             .map(|_| rng.random_range(0..10).to_string())
             .collect()
     }
-} 
+}
