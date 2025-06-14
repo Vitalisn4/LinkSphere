@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react"
 import { Link, useLocation } from "react-router-dom"
-import { useTheme } from "../contexts/ThemeContext"
+import { useTheme } from "../hooks/useTheme"
 import { motion } from "framer-motion"
 import { 
   Sun, 
@@ -15,7 +15,7 @@ import {
   UserPlus,
   User
 } from "lucide-react"
-import { useAuth } from "../contexts/AuthContext"
+import { useAuth } from "../hooks/useAuth"
 
 interface LayoutProps {
   children: ReactNode
