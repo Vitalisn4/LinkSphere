@@ -1,20 +1,13 @@
-use axum::{
-    routing::post,
-    Router,
-    Json,
-    extract::State,
-    response::IntoResponse,
-    http::StatusCode
-};
+use axum::{extract::State, http::StatusCode, response::IntoResponse, routing::post, Json, Router};
 use validator::Validate;
 
+use crate::api::models::{ResendOtpRequest, VerifyEmailRequest};
 use crate::api::{ApiResponse, ErrorResponse};
+use crate::auth::email::EmailService;
 use crate::auth::models::{LoginRequest, RegisterRequest};
-use crate::api::models::{VerifyEmailRequest, ResendOtpRequest};
 use crate::auth::service::AuthService;
 use crate::auth::validation::{validate_email, validate_password};
-use crate::auth::email::EmailService;
-use crate::database::{PgPool, queries};
+use crate::database::{queries, PgPool};
 
 #[derive(Clone)]
 pub struct AuthState {
@@ -42,7 +35,7 @@ pub fn create_router(pool: PgPool) -> Router {
 }
 
 /// Register a new user
-/// 
+///
 /// # OpenAPI Specification
 /// ```yaml
 /// /api/auth/register:
@@ -110,23 +103,23 @@ pub async fn register(
 
     // Validate email format
     if !validate_email(&payload.email) {
-        let error = ErrorResponse::new("Invalid email format")
-            .with_code("INVALID_EMAIL");
+        let error = ErrorResponse::new("Invalid email format").with_code("INVALID_EMAIL");
         return (StatusCode::BAD_REQUEST, Json(error)).into_response();
     }
 
     // Validate password strength
     if let Err(password_error) = validate_password(&payload.password) {
-        let error = ErrorResponse::new(password_error.feedback)
-            .with_code("WEAK_PASSWORD");
+        let error = ErrorResponse::new(password_error.feedback).with_code("WEAK_PASSWORD");
         return (StatusCode::BAD_REQUEST, Json(error)).into_response();
     }
 
     // Check if email or username already exists
-    if let Ok(exists) = queries::check_user_exists(&state.pool, &payload.email, &payload.username).await {
+    if let Ok(exists) =
+        queries::check_user_exists(&state.pool, &payload.email, &payload.username).await
+    {
         if exists {
-            let error = ErrorResponse::new("Email or username already exists")
-                .with_code("USER_EXISTS");
+            let error =
+                ErrorResponse::new("Email or username already exists").with_code("USER_EXISTS");
             return (StatusCode::CONFLICT, Json(error)).into_response();
         }
     }
@@ -143,7 +136,7 @@ pub async fn register(
         Ok(_) => {
             let response = ApiResponse::success_with_message(
                 (),
-                "Registration initiated. Please check your email for verification code."
+                "Registration initiated. Please check your email for verification code.",
             );
             (StatusCode::OK, Json(response)).into_response()
         }
@@ -156,7 +149,7 @@ pub async fn register(
 }
 
 /// Verify email with OTP
-/// 
+///
 /// # OpenAPI Specification
 /// ```yaml
 /// /api/auth/verify:
@@ -220,9 +213,13 @@ pub async fn verify_email(
     }
 
     // Verify OTP
-    if !state.email_service.verify_otp(&payload.email, &payload.otp).await {
-        let error = ErrorResponse::new("Invalid or expired verification code")
-            .with_code("INVALID_OTP");
+    if !state
+        .email_service
+        .verify_otp(&payload.email, &payload.otp)
+        .await
+    {
+        let error =
+            ErrorResponse::new("Invalid or expired verification code").with_code("INVALID_OTP");
         return (StatusCode::UNAUTHORIZED, Json(error)).into_response();
     }
 
@@ -231,13 +228,12 @@ pub async fn verify_email(
         Ok(_) => {
             let response = ApiResponse::success_with_message(
                 (),
-                "Email verified successfully. You can now log in."
+                "Email verified successfully. You can now log in.",
             );
             (StatusCode::OK, Json(response)).into_response()
         }
         Err(sqlx::Error::RowNotFound) => {
-            let error = ErrorResponse::new("Registration not found")
-                .with_code("NOT_FOUND");
+            let error = ErrorResponse::new("Registration not found").with_code("NOT_FOUND");
             (StatusCode::NOT_FOUND, Json(error)).into_response()
         }
         Err(e) => {
@@ -249,7 +245,7 @@ pub async fn verify_email(
 }
 
 /// Resend OTP
-/// 
+///
 /// # OpenAPI Specification
 /// ```yaml
 /// /api/auth/resend-otp:
@@ -310,15 +306,14 @@ pub async fn resend_otp(
     let exists = match queries::check_user_exists(&state.pool, &payload.email, "").await {
         Ok(exists) => exists,
         Err(e) => {
-            let error = ErrorResponse::new(format!("Database error: {}", e))
-                .with_code("DATABASE_ERROR");
+            let error =
+                ErrorResponse::new(format!("Database error: {}", e)).with_code("DATABASE_ERROR");
             return (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response();
         }
     };
 
     if !exists {
-        let error = ErrorResponse::new("Email not found")
-            .with_code("NOT_FOUND");
+        let error = ErrorResponse::new("Email not found").with_code("NOT_FOUND");
         return (StatusCode::NOT_FOUND, Json(error)).into_response();
     }
 
@@ -326,14 +321,15 @@ pub async fn resend_otp(
     match queries::is_user_verified(&state.pool, &payload.email).await {
         Ok(is_verified) => {
             if is_verified {
-                let error = ErrorResponse::new("Account is already verified. Please login instead.")
-                    .with_code("ALREADY_VERIFIED");
+                let error =
+                    ErrorResponse::new("Account is already verified. Please login instead.")
+                        .with_code("ALREADY_VERIFIED");
                 return (StatusCode::BAD_REQUEST, Json(error)).into_response();
             }
         }
         Err(e) => {
-            let error = ErrorResponse::new(format!("Database error: {}", e))
-                .with_code("DATABASE_ERROR");
+            let error =
+                ErrorResponse::new(format!("Database error: {}", e)).with_code("DATABASE_ERROR");
             return (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response();
         }
     }
@@ -343,7 +339,7 @@ pub async fn resend_otp(
         Ok(_) => {
             let response = ApiResponse::success_with_message(
                 (),
-                "Verification code resent. Please check your email."
+                "Verification code resent. Please check your email.",
             );
             (StatusCode::OK, Json(response)).into_response()
         }
@@ -356,7 +352,7 @@ pub async fn resend_otp(
 }
 
 /// Login user
-/// 
+///
 /// # OpenAPI Specification
 /// ```yaml
 /// /api/auth/login:
@@ -433,33 +429,36 @@ async fn login(
         return (StatusCode::BAD_REQUEST, Json(error)).into_response();
     }
 
-    match state.auth_service.login(payload.email, payload.password).await {
+    match state
+        .auth_service
+        .login(payload.email, payload.password)
+        .await
+    {
         Ok(auth_response) => {
-            let response = ApiResponse::success_with_message(
-                auth_response,
-                "Login successful"
-            );
+            let response = ApiResponse::success_with_message(auth_response, "Login successful");
             (StatusCode::OK, Json(response)).into_response()
         }
         Err(e) => {
             let error_msg = e.to_string();
             match error_msg.as_str() {
                 "Email not verified" => {
-                    let error = ErrorResponse::new("Email not verified. Please verify your email before logging in")
-                        .with_code("EMAIL_NOT_VERIFIED");
+                    let error = ErrorResponse::new(
+                        "Email not verified. Please verify your email before logging in",
+                    )
+                    .with_code("EMAIL_NOT_VERIFIED");
                     (StatusCode::UNAUTHORIZED, Json(error)).into_response()
                 }
                 "Account is not active" => {
-                    let error = ErrorResponse::new("Account is not active")
-                        .with_code("ACCOUNT_INACTIVE");
+                    let error =
+                        ErrorResponse::new("Account is not active").with_code("ACCOUNT_INACTIVE");
                     (StatusCode::FORBIDDEN, Json(error)).into_response()
                 }
                 _ => {
-                    let error = ErrorResponse::new("Invalid credentials")
-                        .with_code("AUTHENTICATION_ERROR");
+                    let error =
+                        ErrorResponse::new("Invalid credentials").with_code("AUTHENTICATION_ERROR");
                     (StatusCode::BAD_REQUEST, Json(error)).into_response()
                 }
             }
         }
     }
-} 
+}
