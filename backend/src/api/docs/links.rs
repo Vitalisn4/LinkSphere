@@ -57,4 +57,4 @@ pub fn create_link_docs() {}
     ),
     tag = "links"
 )]
-pub fn delete_link_docs() {} 
+pub fn delete_link_docs() {}
