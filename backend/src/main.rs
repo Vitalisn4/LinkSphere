@@ -5,7 +5,7 @@ mod auth;
 mod services;
 mod logging;
 mod middleware;
-
+use axum::routing::get;
 use std::env;
 use std::net::SocketAddr;
 use axum::{Router, http::{Method, HeaderName}, middleware::{from_fn, from_fn_with_state}};
@@ -50,6 +50,7 @@ async fn main() {
     // Build our application with routes
     let app = Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
+        .route("/health", get(routes::health::root))
         .merge(routes::create_public_router(pool.clone()))
         .nest("/api/auth", auth::create_router(pool.clone()))
         .merge(
