@@ -1,5 +1,5 @@
 pub mod links;
-mod health;
+pub mod health;
 
 use axum::{Router, routing::{get, post, delete}};
 use crate::{
@@ -9,7 +9,6 @@ use crate::{
 // Public routes that don't require authentication
 pub fn create_public_router(pool: PgPool) -> Router {
     Router::new()
-        .route("/health", get(health::root))
         .with_state(pool)
 }
 
