@@ -25,6 +25,9 @@ ARG SMTP_SERVER
 ARG UPSTASH_REDIS_REST_URL
 ARG UPSTASH_REDIS_REST_TOKEN
 
+# Copy the migrations directory first
+COPY backend/migrations ./migrations
+
 # Copy the entire backend directory
 COPY backend .
 
@@ -48,6 +51,9 @@ WORKDIR /app
 
 # Copy the binary from builder
 COPY --from=builder /usr/src/backend/target/release/backend /app/backend
+
+# Copy migrations directory for runtime
+COPY --from=builder /usr/src/backend/migrations /app/migrations
 
 # Define runtime arguments
 ARG DATABASE_URL
