@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "../hooks/useTheme";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import { motion } from "framer-motion";
 import { Sun, Moon, LinkIcon, Upload, LayoutDashboard, LogOut, LogIn } from "lucide-react";
 
