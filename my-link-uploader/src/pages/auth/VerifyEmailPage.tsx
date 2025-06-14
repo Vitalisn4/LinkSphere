@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import { Mail, ArrowRight, RefreshCw } from "lucide-react"
-import { useAuth } from "../../contexts/AuthContext"
+import { useAuth } from "../../hooks/useAuth"
 
 export default function VerifyEmailPage() {
   const [otp, setOtp] = useState("")
