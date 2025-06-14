@@ -1,14 +1,10 @@
 #![allow(dead_code)]
-pub mod models;
 pub mod docs;
+pub mod models;
 
-use serde::{Deserialize, Serialize};
-use axum::{
-    response::IntoResponse,
-    http::StatusCode,
-    Json,
-};
+use axum::{http::StatusCode, response::IntoResponse, Json};
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
@@ -86,4 +82,4 @@ impl IntoResponse for ErrorResponse {
     fn into_response(self) -> axum::response::Response {
         (StatusCode::INTERNAL_SERVER_ERROR, Json(self)).into_response()
     }
-} 
+}
