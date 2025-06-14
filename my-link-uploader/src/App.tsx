@@ -1,8 +1,10 @@
 import * as React from 'react'
 "use client"
 
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
-import { AuthProvider, useAuth } from "./contexts/AuthContext"
+import { AuthProvider } from "./contexts/AuthContext"
+import { useAuth } from "./hooks/useAuth"
 import { ThemeProvider } from "./contexts/ThemeContext"
 import Layout from "./components/Layout"
 import LandingPage from "./pages/LandingPage"
