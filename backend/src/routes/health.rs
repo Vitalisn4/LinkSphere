@@ -1,8 +1,5 @@
-use axum::{
-    response::IntoResponse,
-    http::StatusCode,
-};
 use crate::api::ApiResponse;
+use axum::{http::StatusCode, response::IntoResponse};
 use serde::Serialize;
 use utoipa::ToSchema;
 
@@ -22,10 +19,8 @@ pub async fn root() -> impl IntoResponse {
         timestamp: chrono::Utc::now(),
     };
 
-    let response = ApiResponse::success_with_message(
-        status,
-        "Welcome to LinkSphere API - Service is running"
-    );
+    let response =
+        ApiResponse::success_with_message(status, "Welcome to LinkSphere API - Service is running");
 
     (StatusCode::OK, axum::Json(response)).into_response()
-} 
+}
