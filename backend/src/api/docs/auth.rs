@@ -1,6 +1,6 @@
+use crate::api::models::{ResendOtpRequest, VerifyEmailRequest};
 use crate::api::{ApiResponse, ErrorResponse};
-use crate::auth::models::{RegisterRequest, LoginRequest, AuthResponse};
-use crate::api::models::{VerifyEmailRequest, ResendOtpRequest};
+use crate::auth::models::{AuthResponse, LoginRequest, RegisterRequest};
 
 type EmptyResponse = ApiResponse<()>;
 type AuthResponseWrapper = ApiResponse<AuthResponse>;
@@ -60,4 +60,4 @@ pub fn resend_otp_docs() {}
     ),
     tag = "auth"
 )]
-pub fn login_docs() {} 
+pub fn login_docs() {}
