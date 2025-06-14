@@ -8,10 +8,12 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
   },
+  preview: {
+    port: 4173,
+    strictPort: true,
+  },
   esbuild: {
-    loader: "tsx",
     include: [
-      // Add visibility to the files you want to use JSX syntax in
       "src/**/*.tsx",
       "src/**/*.ts",
       "src/**/*.jsx",
