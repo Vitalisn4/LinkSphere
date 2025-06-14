@@ -1,9 +1,9 @@
-use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
-use utoipa::ToSchema;
-use uuid::Uuid;
+use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 use sqlx::types::Json;
+use utoipa::ToSchema;
+use uuid::Uuid;
 
 /// Represents a link preview metadata
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone)]
@@ -34,7 +34,7 @@ impl From<JsonValue> for JsonLinkPreview {
 
 impl From<JsonLinkPreview> for Option<LinkPreview> {
     fn from(wrapper: JsonLinkPreview) -> Self {
-        wrapper.0.0
+        wrapper.0 .0
     }
 }
 
@@ -73,7 +73,7 @@ pub struct Link {
     pub updated_at: DateTime<Utc>,
     /// Preview metadata from the link
     #[serde(with = "preview_serde")]
-    pub preview: Option<LinkPreview>
+    pub preview: Option<LinkPreview>,
 }
 
 // Custom serialization for preview field to handle JSON conversion
@@ -98,4 +98,4 @@ mod preview_serde {
         let json_value = JsonValue::deserialize(deserializer)?;
         Ok(JsonLinkPreview::from(json_value).into())
     }
-} 
+}
