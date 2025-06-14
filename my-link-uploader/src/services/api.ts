@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, AxiosRequestConfig } from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
@@ -33,83 +33,77 @@ export interface Link {
   };
 }
 
-const getAuthHeaders = () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    throw new Error("No authentication token found. Please log in.");
-  }
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  };
-};
-
-const handleApiError = (error: unknown) => {
-  if (error instanceof AxiosError && error.response) {
-    const message = error.response.data.message || "An error occurred";
-    if (error.response.status === 401 || error.response.status === 403) {
-      // Clear invalid auth data
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-    }
-    throw new Error(message);
-  }
-  throw error;
-};
-
-export interface AuthResponse {
-  token: string;
-  user: {
-    id: string;
-    email: string;
-    username: string;
-    gender: Gender;
-  };
+interface User {
+  id: string;
+  username: string;
+  email: string;
 }
 
-const ApiService = {
+interface AuthResponse {
+  token: string;
+  user: User;
+}
+
+interface ApiError {
+  message: string;
+  status: number;
+}
+
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+api.interceptors.request.use((config: AxiosRequestConfig) => {
+  const token = localStorage.getItem('token');
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+const handleApiError = (error: AxiosError<ApiError>) => {
+  if (error.response) {
+    throw new Error(error.response.data.message || 'An error occurred');
+  }
+  throw new Error('Network error');
+};
+
+export const ApiService = {
   async register(email: string, username: string, password: string, gender: Gender): Promise<void> {
     try {
-      await axios.post<ApiResponse>(`${API_URL}/auth/register`, {
+      await api.post<ApiResponse>('/auth/register', {
         email,
         username,
         password,
         gender
       });
     } catch (error) {
-      handleApiError(error);
+      handleApiError(error as AxiosError<ApiError>);
+      throw error;
     }
   },
 
   async verifyEmail(email: string, otp: string): Promise<void> {
     try {
-      await axios.post<ApiResponse>(`${API_URL}/auth/verify`, {
+      await api.post<ApiResponse>('/auth/verify', {
         email,
         otp
       });
     } catch (error) {
-      handleApiError(error);
+      handleApiError(error as AxiosError<ApiError>);
+      throw error;
     }
   },
 
   async login(email: string, password: string): Promise<AuthResponse> {
     try {
-      const response = await axios.post<ApiResponse<AuthResponse>>(`${API_URL}/auth/login`, {
-        email,
-        password
-      });
-      
-      if (!response.data.success || !response.data.data) {
-        throw new Error(response.data.message || "Login failed");
-      }
-
-      // Store auth data
-      localStorage.setItem("token", response.data.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.data.user));
-      
-      return response.data.data;
+      const response = await api.post<AuthResponse>('/auth/login', { email, password });
+      return response.data;
     } catch (error) {
-      handleApiError(error);
+      handleApiError(error as AxiosError<ApiError>);
       throw error;
     }
   },
@@ -121,85 +115,50 @@ const ApiService = {
 
   async resendOtp(email: string): Promise<void> {
     try {
-      await axios.post<ApiResponse>(`${API_URL}/auth/resend-otp`, { email });
+      await api.post<ApiResponse>('/auth/resend-otp', { email });
     } catch (error) {
-      handleApiError(error);
+      handleApiError(error as AxiosError<ApiError>);
     }
   },
 
-  async getAllLinks(): Promise<Link[]> {
+  async getLinks(): Promise<Link[]> {
     try {
-      const response = await axios.get<ApiResponse<Link[]>>(`${API_URL}/links`, {
-        headers: getAuthHeaders()
-      });
-      
-      if (!response.data.success || !response.data.data) {
-        throw new Error(response.data.message || "Failed to fetch links");
-      }
-      
-      return response.data.data;
+      const response = await api.get<Link[]>('/links');
+      return response.data;
     } catch (error) {
-      handleApiError(error);
+      handleApiError(error as AxiosError<ApiError>);
       throw error;
     }
   },
 
-  async createLink(data: {
-    url: string;
-    title: string;
-    description: string;
-  }): Promise<Link> {
+  async createLink(data: Omit<Link, 'id' | 'created_at' | 'user_id'>): Promise<Link> {
     try {
-      // Validate user authentication
-      const user = localStorage.getItem("user");
-      if (!user) {
-        throw new Error("User not authenticated. Please log in.");
-      }
-
-      const response = await axios.post<ApiResponse<Link>>(
-        `${API_URL}/links`,
-        data,
-        { headers: getAuthHeaders() }
-      );
-      
-      if (!response.data.success || !response.data.data) {
-        throw new Error(response.data.message || "Failed to create link");
-      }
-      
-      return response.data.data;
+      const response = await api.post<Link>('/links', data);
+      return response.data;
     } catch (error) {
-      handleApiError(error);
+      handleApiError(error as AxiosError<ApiError>);
       throw error;
     }
   },
 
   async deleteLink(id: string): Promise<void> {
     try {
-      const response = await axios.delete<ApiResponse>(`${API_URL}/links/${id}`, {
-        headers: getAuthHeaders()
-      });
-      
-      if (!response.data.success) {
-        throw new Error(response.data.message || "Failed to delete link");
-      }
+      await api.delete(`/links/${id}`);
     } catch (error) {
-      handleApiError(error);
+      handleApiError(error as AxiosError<ApiError>);
+      throw error;
     }
   },
 
   async incrementLinkClick(id: string): Promise<void> {
     try {
-      const response = await axios.post<ApiResponse>(
-        `${API_URL}/links/${id}/click`,
-        null,
-        { headers: getAuthHeaders() }
-      );
+      const response = await api.post<ApiResponse>(`/links/${id}/click`, null);
       
       if (!response.data.success) {
         throw new Error(response.data.message || "Failed to track click");
       }
     } catch (error) {
-      handleApiError(error);
+      handleApiError(error as AxiosError<ApiError>);
     }
   },
 };
