@@ -1,11 +1,11 @@
 mod auth;
 mod links;
 
-use utoipa::OpenApi;
-use crate::auth::models::{RegisterRequest, LoginRequest, AuthResponse, User, Gender, UserStatus};
 use crate::api::models::VerifyEmailRequest;
 use crate::api::{ApiResponse, ErrorResponse};
+use crate::auth::models::{AuthResponse, Gender, LoginRequest, RegisterRequest, User, UserStatus};
 use crate::database::models::Link;
+use utoipa::OpenApi;
 
 type EmptyResponse = ApiResponse<()>;
 type AuthResponseWrapper = ApiResponse<AuthResponse>;
@@ -22,23 +22,21 @@ type LinksResponse = ApiResponse<Vec<Link>>;
         crate::api::docs::links::create_link_docs,
         crate::api::docs::links::delete_link_docs
     ),
-    components(
-        schemas(
-            RegisterRequest,
-            LoginRequest,
-            AuthResponse,
-            User,
-            Gender,
-            UserStatus,
-            VerifyEmailRequest,
-            EmptyResponse,
-            AuthResponseWrapper,
-            LinkResponse,
-            LinksResponse,
-            ErrorResponse,
-            Link
-        )
-    )
+    components(schemas(
+        RegisterRequest,
+        LoginRequest,
+        AuthResponse,
+        User,
+        Gender,
+        UserStatus,
+        VerifyEmailRequest,
+        EmptyResponse,
+        AuthResponseWrapper,
+        LinkResponse,
+        LinksResponse,
+        ErrorResponse,
+        Link
+    ))
 )]
 pub struct ApiDoc;
 
@@ -57,4 +55,4 @@ impl utoipa::Modify for SecurityAddon {
             );
         }
     }
-} 
+}
