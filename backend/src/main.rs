@@ -3,31 +3,28 @@ mod database;
 mod routes;
 mod auth;
 mod services;
+mod logging;
+mod middleware;
 
 use std::env;
 use std::net::SocketAddr;
-use axum::{Router, middleware, http::{Method, HeaderName}};
+use axum::{Router, http::{Method, HeaderName}, middleware::{from_fn, from_fn_with_state}};
 use dotenv::dotenv;
-use tower_http::{trace::TraceLayer, cors::CorsLayer};
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use tower_http::cors::CorsLayer;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
-
 use crate::api::docs::ApiDoc;
 use crate::auth::middleware::AuthMiddlewareState;
+use crate::logging::init_logging;
+use crate::middleware::request_logger::request_logger;
 
 #[tokio::main]
 async fn main() {
     // Load environment variables
     dotenv().ok();
 
-    // Initialize tracing
-    tracing_subscriber::registry()
-        .with(tracing_subscriber::EnvFilter::new(
-            env::var("RUST_LOG").unwrap_or_else(|_| "info".into()),
-        ))
-        .with(tracing_subscriber::fmt::layer())
-        .init();
+    // Initialize logging
+    init_logging();
 
     // Database connection
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -56,13 +53,13 @@ async fn main() {
         .nest("/api/auth", auth::create_router(pool.clone()))
         .merge(
             routes::create_router(pool)
-                .layer(middleware::from_fn_with_state(
+                .layer(from_fn_with_state(
                     auth_middleware_state.clone(),
                     auth::middleware::auth_middleware,
                 ))
         )
         .layer(cors)
-        .layer(TraceLayer::new_for_http());
+        .layer(from_fn(request_logger));
 
     // Run it
     let port = env::var("PORT")
@@ -77,7 +74,7 @@ async fn main() {
     let listener = tokio::net::TcpListener::bind(addr)
         .await
         .expect("Failed to bind to address");
-    tracing::info!("listening on {}", addr);
+    tracing::info!("Server listening on {}", addr);
 
     axum::serve(listener, app)
         .await
