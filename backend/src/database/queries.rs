@@ -1,10 +1,10 @@
-use sqlx::PgPool;
-use super::models::{Link, LinkPreview, JsonLinkPreview};
+use super::models::{JsonLinkPreview, Link, LinkPreview};
 use chrono::Utc;
+use sqlx::PgPool;
 use uuid::Uuid;
 
 /// Retrieves all links from the database
-/// 
+///
 /// # Returns
 /// * `Result<Vec<Link>, sqlx::Error>` - A list of all links or an error
 pub async fn get_all_links(pool: &PgPool) -> Result<Vec<Link>, sqlx::Error> {
@@ -30,7 +30,7 @@ pub async fn get_all_links(pool: &PgPool) -> Result<Vec<Link>, sqlx::Error> {
 }
 
 /// Creates a new link in the database
-/// 
+///
 /// # Arguments
 /// * `pool` - Database connection pool
 /// * `url` - The URL to be added
@@ -38,7 +38,7 @@ pub async fn get_all_links(pool: &PgPool) -> Result<Vec<Link>, sqlx::Error> {
 /// * `description` - A description of the link
 /// * `user_id` - The ID of the user creating the link
 /// * `preview` - The preview of the link
-/// 
+///
 /// # Returns
 /// * `Result<Link, sqlx::Error>` - The created link or an error
 pub async fn create_link(
@@ -51,7 +51,7 @@ pub async fn create_link(
 ) -> Result<Link, sqlx::Error> {
     let now = Utc::now();
     let preview_json = JsonLinkPreview::from(preview);
-    
+
     sqlx::query_as!(
         Link,
         r#"
@@ -80,11 +80,11 @@ pub async fn create_link(
 }
 
 /// Increment the click count for a link
-/// 
+///
 /// # Arguments
 /// * `pool` - Database connection pool
 /// * `link_id` - The ID of the link
-/// 
+///
 /// # Returns
 /// * `Result<(), sqlx::Error>` - Success or error
 pub async fn increment_click_count(pool: &PgPool, link_id: Uuid) -> Result<(), sqlx::Error> {
@@ -103,30 +103,27 @@ pub async fn increment_click_count(pool: &PgPool, link_id: Uuid) -> Result<(), s
 }
 
 /// Deletes a link from the database
-/// 
+///
 /// # Arguments
 /// * `pool` - Database connection pool
 /// * `link_id` - The ID of the link to delete
-/// 
+///
 /// # Returns
 /// * `Result<(), sqlx::Error>` - Success or error
 pub async fn delete_link(pool: &PgPool, link_id: Uuid) -> Result<(), sqlx::Error> {
-    sqlx::query!(
-        "DELETE FROM links WHERE id = $1",
-        link_id
-    )
-    .execute(pool)
-    .await?;
+    sqlx::query!("DELETE FROM links WHERE id = $1", link_id)
+        .execute(pool)
+        .await?;
 
     Ok(())
 }
 
 /// Retrieves a single link by its ID
-/// 
+///
 /// # Arguments
 /// * `pool` - Database connection pool
 /// * `link_id` - The ID of the link to fetch
-/// 
+///
 /// # Returns
 /// * `Result<Option<Link>, sqlx::Error>` - The link if found, None if not found, or an error
 pub async fn get_link_by_id(pool: &PgPool, link_id: Uuid) -> Result<Option<Link>, sqlx::Error> {
@@ -213,10 +210,7 @@ pub async fn create_unverified_user(
     Ok(())
 }
 
-pub async fn complete_registration(
-    pool: &PgPool,
-    email: &str,
-) -> Result<(), sqlx::Error> {
+pub async fn complete_registration(pool: &PgPool, email: &str) -> Result<(), sqlx::Error> {
     let result = sqlx::query!(
         r#"
         UPDATE users
@@ -238,10 +232,7 @@ pub async fn complete_registration(
     Ok(())
 }
 
-pub async fn is_user_verified(
-    pool: &PgPool,
-    email: &str,
-) -> Result<bool, sqlx::Error> {
+pub async fn is_user_verified(pool: &PgPool, email: &str) -> Result<bool, sqlx::Error> {
     let result = sqlx::query!(
         r#"
         SELECT is_verified
@@ -254,4 +245,4 @@ pub async fn is_user_verified(
     .await?;
 
     Ok(result.map(|r| r.is_verified).unwrap_or(false))
-} 
+}
