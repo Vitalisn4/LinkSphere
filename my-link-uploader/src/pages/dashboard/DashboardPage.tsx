@@ -246,7 +246,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock size={16} />
-                      <span>{format(new Date(link.created_at), 'h:mm a')}</span>
+                      <span>{format(new Date(link.created_at), 'h:mm a', { timeZone: 'Africa/Douala' })}</span>
                     </div>
                   </div>
 
