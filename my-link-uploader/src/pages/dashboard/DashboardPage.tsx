@@ -4,8 +4,8 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { motion } from "framer-motion"
 import { Search, ExternalLink, Calendar, User, Clock } from "lucide-react"
 import { format } from "date-fns"
-import { useAuth } from "../../contexts/AuthContext"
-import { useTheme } from "../../contexts/ThemeContext"
+import { useAuth } from "../../hooks/useAuth"
+import { useTheme } from "../../hooks/useTheme"
 import ApiService, { Link } from "../../services/api"
 
 export default function DashboardPage() {
