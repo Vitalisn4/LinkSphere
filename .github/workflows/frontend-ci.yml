@@ -6,7 +6,7 @@ on:
     paths:
       - 'my-link-uploader/**'
   pull_request:
-    branches: [ master ]
+    branches: [ dev ]
     paths:
       - 'my-link-uploader/**'
 
