@@ -29,7 +29,6 @@ dist-ssr
 *.sln
 *.sw?
 *.zip
-*-lock.json
 *.lock
 Cargo.lock
 build.sh
