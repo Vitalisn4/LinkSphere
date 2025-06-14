@@ -1,15 +1,15 @@
-pub mod links;
 pub mod health;
+pub mod links;
 
-use axum::{Router, routing::{get, post, delete}};
-use crate::{
-    database::PgPool
+use crate::database::PgPool;
+use axum::{
+    routing::{delete, get, post},
+    Router,
 };
 
 // Public routes that don't require authentication
 pub fn create_public_router(pool: PgPool) -> Router {
-    Router::new()
-        .with_state(pool)
+    Router::new().with_state(pool)
 }
 
 // Protected routes that require authentication
