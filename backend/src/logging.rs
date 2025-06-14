@@ -1,21 +1,13 @@
-use std::time::Duration;
 use rand::Rng;
-use tracing::{Level};
-use tracing_subscriber::{
-    fmt::{format::FmtSpan},
-    prelude::*,
-    EnvFilter,
-};
+use std::time::Duration;
+use tracing::Level;
 use tracing_appender::rolling::{RollingFileAppender, Rotation};
+use tracing_subscriber::{fmt::format::FmtSpan, prelude::*, EnvFilter};
 
 /// Initialize the logging system with custom configuration
 pub fn init_logging() {
     // Create a rolling file appender for logs
-    let file_appender = RollingFileAppender::new(
-        Rotation::DAILY,
-        "logs",
-        "app.log",
-    );
+    let file_appender = RollingFileAppender::new(Rotation::DAILY, "logs", "app.log");
 
     // Create a console appender with custom formatting
     let console_layer = tracing_subscriber::fmt::layer()
@@ -67,13 +59,7 @@ pub fn generate_request_id() -> String {
 }
 
 /// Log a request with timing information
-pub fn log_request(
-    method: &str,
-    path: &str,
-    status: u16,
-    duration: Duration,
-    request_id: &str,
-) {
+pub fn log_request(method: &str, path: &str, status: u16, duration: Duration, request_id: &str) {
     let level = if status >= 500 {
         Level::ERROR
     } else if status >= 400 {
@@ -84,22 +70,34 @@ pub fn log_request(
 
     match level {
         Level::ERROR => tracing::error!(
-            request_id, method, path, status,
+            request_id,
+            method,
+            path,
+            status,
             duration_ms = duration.as_millis(),
             "Request completed"
         ),
         Level::WARN => tracing::warn!(
-            request_id, method, path, status,
+            request_id,
+            method,
+            path,
+            status,
             duration_ms = duration.as_millis(),
             "Request completed"
         ),
         Level::INFO => tracing::info!(
-            request_id, method, path, status,
+            request_id,
+            method,
+            path,
+            status,
             duration_ms = duration.as_millis(),
             "Request completed"
         ),
         _ => tracing::debug!(
-            request_id, method, path, status,
+            request_id,
+            method,
+            path,
+            status,
             duration_ms = duration.as_millis(),
             "Request completed"
         ),
@@ -132,4 +130,4 @@ pub fn log_query(query: &str, duration: Duration) {
             "Query executed"
         );
     }
-} 
+}
