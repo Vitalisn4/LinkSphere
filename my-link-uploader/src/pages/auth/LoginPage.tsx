@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import { LogIn, Mail, Lock, ArrowRight } from "lucide-react"
-import { useAuth } from "../../contexts/AuthContext"
+import { useAuth } from "../../hooks/useAuth"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
