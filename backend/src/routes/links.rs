@@ -1,24 +1,24 @@
 use axum::{
-    extract::{State, Path, Extension},
-    response::IntoResponse,
+    extract::{Extension, Path, State},
     http::StatusCode,
+    response::IntoResponse,
     Json,
 };
 
-use uuid::Uuid;
 use crate::database::queries::{create_link, increment_click_count};
 use crate::{
-    database::{self, PgPool, models::Link},
-    api::{ApiResponse, ErrorResponse, models::CreateLinkRequest},
+    api::{models::CreateLinkRequest, ApiResponse, ErrorResponse},
     auth::middleware::AuthUser,
+    database::{self, models::Link, PgPool},
     services::link_preview::fetch_link_preview,
 };
+use uuid::Uuid;
 use validator::Validate;
 
 type LinkResponse = ApiResponse<Link>;
 type LinksResponse = ApiResponse<Vec<Link>>;
 /// Get all links
-/// 
+///
 /// Returns a list of all links in the system
 /// Requires Authentication: Bearer token from /api/auth/login
 #[utoipa::path(
@@ -34,9 +34,7 @@ type LinksResponse = ApiResponse<Vec<Link>>;
     ),
     tag = "links"
 )]
-pub async fn get_links(
-    State(pool): State<PgPool>,
-) -> impl IntoResponse {
+pub async fn get_links(State(pool): State<PgPool>) -> impl IntoResponse {
     match database::get_all_links(&pool).await {
         Ok(links) => {
             let response = ApiResponse::success(links);
@@ -51,10 +49,10 @@ pub async fn get_links(
 }
 
 /// Create a new link
-/// 
+///
 /// Creates a new link with the provided details. The user ID is automatically extracted from the JWT token.
 /// Requires Authentication: Bearer token from /api/auth/login
-/// 
+///
 #[utoipa::path(
     post,
     path = "/api/links",
@@ -106,12 +104,11 @@ pub async fn handle_create_link(
         payload.description,
         user.id,
         preview.as_ref(),
-    ).await {
+    )
+    .await
+    {
         Ok(link) => {
-            let response = ApiResponse::success_with_message(
-                link,
-                "Link created successfully"
-            );
+            let response = ApiResponse::success_with_message(link, "Link created successfully");
             (StatusCode::CREATED, Json(response)).into_response()
         }
         Err(e) => {
@@ -123,7 +120,7 @@ pub async fn handle_create_link(
 }
 
 /// Track a link click
-/// 
+///
 /// Increments the click count for a link
 pub async fn track_click(
     State(pool): State<PgPool>,
@@ -143,9 +140,9 @@ pub async fn track_click(
 }
 
 /// Delete a link
-/// 
+///
 /// Delete a link by its ID. This operation requires authentication and can only be performed by the link's owner.
-/// 
+///
 /// # OpenAPI Specification
 /// ```yaml
 /// /api/links/{id}:
@@ -248,10 +245,8 @@ pub async fn delete_link(
             // If the user owns the link, proceed with deletion
             match database::queries::delete_link(&pool, link_id).await {
                 Ok(_) => {
-                    let response = ApiResponse::success_with_message(
-                        (),
-                        "Link deleted successfully"
-                    );
+                    let response =
+                        ApiResponse::success_with_message((), "Link deleted successfully");
                     (StatusCode::OK, Json(response)).into_response()
                 }
                 Err(e) => {
@@ -262,8 +257,7 @@ pub async fn delete_link(
             }
         }
         Ok(None) => {
-            let error = ErrorResponse::new("Link not found")
-                .with_code("NOT_FOUND");
+            let error = ErrorResponse::new("Link not found").with_code("NOT_FOUND");
             (StatusCode::NOT_FOUND, Json(error)).into_response()
         }
         Err(e) => {
@@ -272,4 +266,4 @@ pub async fn delete_link(
             (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response()
         }
     }
-} 
+}
