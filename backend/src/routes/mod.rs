@@ -1,12 +1,10 @@
 pub mod links;
 mod health;
 
-use axum::{Router, routing::{get, post, delete}, middleware};
+use axum::{Router, routing::{get, post, delete}};
 use crate::{
-    database::PgPool,
-    auth::middleware::{auth_middleware, AuthMiddlewareState}
+    database::PgPool
 };
-use std::env;
 
 // Public routes that don't require authentication
 pub fn create_public_router(pool: PgPool) -> Router {
