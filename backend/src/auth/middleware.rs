@@ -45,7 +45,11 @@ pub async fn auth_middleware(
         .headers()
         .get("Authorization")
         .and_then(|auth_header| auth_header.to_str().ok())
-        .and_then(|auth_str| auth_str.strip_prefix("Bearer ").map(|stripped| stripped.to_string()))
+        .and_then(|auth_str| {
+            auth_str
+                .strip_prefix("Bearer ")
+                .map(|stripped| stripped.to_string())
+        })
         .ok_or_else(|| {
             let error = ErrorResponse::new("Missing or invalid authorization header")
                 .with_code("UNAUTHORIZED");
