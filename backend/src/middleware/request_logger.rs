@@ -1,9 +1,9 @@
+use crate::logging::{generate_request_id, log_request};
 use axum::{
+    body::Body,
     http::{Request, Response},
     middleware::Next,
-    body::Body,
 };
-use crate::logging::{generate_request_id, log_request};
 
 pub async fn request_logger(req: Request<Body>, next: Next) -> Response<Body> {
     let request_id = generate_request_id();
@@ -28,4 +28,4 @@ pub async fn request_logger(req: Request<Body>, next: Next) -> Response<Body> {
     );
 
     response
-} 
+}
