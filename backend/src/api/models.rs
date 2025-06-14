@@ -1,8 +1,8 @@
-use serde::{Deserialize};
-use validator::Validate;
-use url::Url;
 use regex;
+use serde::Deserialize;
+use url::Url;
 use utoipa::ToSchema;
+use validator::Validate;
 
 /// Request payload for creating a new link
 #[derive(Debug, Deserialize, Validate, ToSchema)]
@@ -13,14 +13,22 @@ pub struct CreateLinkRequest {
     pub url: String,
 
     /// A descriptive title for the link
-    #[validate(length(min = 1, max = 255, message = "Title must be between 1 and 255 characters"))]
+    #[validate(length(
+        min = 1,
+        max = 255,
+        message = "Title must be between 1 and 255 characters"
+    ))]
     #[schema(example = "Official Rust Website")]
     pub title: String,
 
     /// A detailed description of what the link contains or represents
-    #[validate(length(min = 1, max = 1000, message = "Description must be between 1 and 1000 characters"))]
+    #[validate(length(
+        min = 1,
+        max = 1000,
+        message = "Description must be between 1 and 1000 characters"
+    ))]
     #[schema(example = "The home page of the Rust programming language")]
-    pub description: String
+    pub description: String,
 }
 
 impl CreateLinkRequest {
@@ -75,4 +83,4 @@ fn validate_otp(otp: &str) -> Result<(), validator::ValidationError> {
     } else {
         Err(validator::ValidationError::new("invalid_otp"))
     }
-} 
+}
