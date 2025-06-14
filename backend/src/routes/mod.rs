@@ -8,22 +8,19 @@ use crate::{
 };
 use std::env;
 
-pub fn create_router(pool: PgPool) -> Router {
-    let jwt_secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
-    let auth_state = AuthMiddlewareState::new(jwt_secret);
-    
+// Public routes that don't require authentication
+pub fn create_public_router(pool: PgPool) -> Router {
     Router::new()
         .route("/health", get(health::root))
-        .merge(
-            Router::new()
-                .route("/api/links", get(links::get_links))
-                .route("/api/links", post(links::handle_create_link))
-                .route("/api/links/{id}", delete(links::delete_link))
-                .route("/api/links/{id}/click", post(links::track_click))
-                .layer(middleware::from_fn_with_state(
-                    auth_state,
-                    auth_middleware,
-                ))
-        )
+        .with_state(pool)
+}
+
+// Protected routes that require authentication
+pub fn create_protected_router(pool: PgPool) -> Router {
+    Router::new()
+        .route("/api/links", get(links::get_links))
+        .route("/api/links", post(links::handle_create_link))
+        .route("/api/links/{id}", delete(links::delete_link))
+        .route("/api/links/{id}/click", post(links::track_click))
         .with_state(pool)
 }
