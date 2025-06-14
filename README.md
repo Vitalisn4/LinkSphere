@@ -1,18 +1,19 @@
-
 [![Frontend CI](https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/actions/workflows/frontend-ci.yml)
 [![Backend CI](https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/actions/workflows/backend-ci.yml)
 
 # LinkSphere - Your Personal Link Management Platform
 
-LinkSphere is a modern, user-friendly web application that helps you organize, manage, and share your links efficiently. Built with React, TypeScript, and Tailwind CSS, it offers a beautiful and intuitive interface with both light and dark mode support.
+LinkSphere is a modern, user-friendly web application that helps you organize, manage, and share your links efficiently. Built with React and TypeScript for the frontend, and Rust with SQLx for the backend, it offers a beautiful and intuitive interface with both light and dark mode support.
 
 ## 🌟 Features
 
 ### Authentication & Security
-- Secure user registration and login system
+- Secure user registration and login system with JWT
 - Email verification with OTP
 - Password reset functionality
 - Protected routes and secure session management
+- Password hashing with bcrypt
+- Rate limiting and CSRF protection
 
 ### Link Management
 - Create and organize your links with custom titles and descriptions
@@ -20,6 +21,7 @@ LinkSphere is a modern, user-friendly web application that helps you organize, m
 - Search functionality to quickly find your links
 - Responsive grid layout for easy browsing
 - Link categorization and tagging (coming soon)
+- Automatic link preview generation
 
 ### User Interface
 - Beautiful, modern UI with smooth animations
@@ -36,6 +38,7 @@ LinkSphere is a modern, user-friendly web application that helps you organize, m
 - Account deletion with confirmation
 
 ### Technical Features
+#### Frontend
 - Built with React and TypeScript
 - Styled with Tailwind CSS
 - Framer Motion for smooth animations
@@ -43,46 +46,87 @@ LinkSphere is a modern, user-friendly web application that helps you organize, m
 - Modern development practices
 - Type-safe codebase
 
+#### Backend
+- Built with Rust for high performance
+- SQLx for type-safe database operations
+- PostgreSQL database
+- JWT-based authentication
+- Email integration with SMTP
+- Docker containerization
+- Comprehensive error handling
+
 ## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js (v14 or higher)
-- npm or yarn
+- Rust (latest stable)
+- PostgreSQL
+- Docker (optional)
 - Git
 
-### Installation
+### Frontend Installation
 
 1. Clone the repository:
 ```bash
 git clone https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere.git
-cd link-sphere
+cd LinkSphere/my-link-uploader
 ```
 
 2. Install dependencies:
 ```bash
 npm install
-# or
-yarn install
 ```
 
-3. Create a `.env` file in the root directory and add your environment variables:
+3. Create a `.env` file in the frontend directory and add your environment variables:
 ```env
 VITE_API_URL=your_api_url
-VITE_APP_NAME=LinkSphere
 ```
 
 4. Start the development server:
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
-The application will be available at `http://localhost:5173`
+The frontend will be available at `http://localhost:5173`
+
+### Backend Installation
+
+1. Navigate to the backend directory:
+```bash
+cd backend
+```
+
+2. Set up your environment variables in a `.env` file:
+```env
+DATABASE_URL=postgres://user:password@localhost:5432/linksphere
+JWT_SECRET=your_jwt_secret
+SMTP_USERNAME=your_smtp_username
+SMTP_PASSWORD=your_smtp_password
+FRONTEND_REQUEST_URL=http://localhost:5173
+SMTP_SERVER=smtp.gmail.com
+UPSTASH_REDIS_REST_URL=""
+UPSTASH_REDIS_REST_TOKEN=""
+PORT=""
+HOST=""
+```
+
+3. Run database migrations:
+```bash
+cargo install sqlx-cli
+sqlx migrate run
+```
+
+4. Start the backend server:
+```bash
+cargo run
+```
+
+The backend API will be available at `http://localhost:8000`
 
 ## 🛠️ Tech Stack
 
-- **Frontend Framework:** React with TypeScript
+### Frontend
+- **Framework:** React with TypeScript
 - **Styling:** Tailwind CSS
 - **Animations:** Framer Motion
 - **State Management:** React Context
@@ -90,6 +134,16 @@ The application will be available at `http://localhost:5173`
 - **Form Handling:** React Hook Form
 - **API Client:** Axios
 - **Build Tool:** Vite
+
+### Backend
+- **Language:** Rust
+- **Web Framework:** Axum
+- **Database:** PostgreSQL
+- **ORM:** SQLx
+- **Authentication:** JWT
+- **Email:** Lettre
+- **Containerization:** Docker
+- **Testing:** Rust's built-in testing framework
 
 ## 🎨 Theme Support
 
@@ -109,12 +163,14 @@ LinkSphere features a beautiful dual theme system:
 
 ## 🔒 Security Features
 
-- Secure password hashing
+- Secure password hashing with bcrypt
 - JWT-based authentication
 - Protected API endpoints
 - CSRF protection
 - Rate limiting
 - Input sanitization
+- SQL injection prevention through SQLx
+- Secure headers
 
 ## 📱 Responsive Design
 
@@ -133,6 +189,7 @@ LinkSphere features a beautiful dual theme system:
 - API for third-party integration
 - Advanced search filters
 - Link collections and folders
+- Real-time collaboration features
 
 ## 🤝 Contributing
 
@@ -150,10 +207,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
+### Frontend
 - [React](https://reactjs.org/)
 - [TypeScript](https://www.typescriptlang.org/)
 - [Tailwind CSS](https://tailwindcss.com/)
 - [Framer Motion](https://www.framer.com/motion/)
 - [Vite](https://vitejs.dev/)
+
+### Backend
+- [Rust](https://www.rust-lang.org/)
+- [Axum](https://github.com/tokio-rs/axum)
+- [SQLx](https://github.com/launchbadge/sqlx)
+- [PostgreSQL](https://www.postgresql.org/)
+- [Docker](https://www.docker.com/)
 
 ---
