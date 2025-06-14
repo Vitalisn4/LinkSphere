@@ -32,3 +32,4 @@ dist-ssr
 *.lock
 Cargo.lock
 build.sh
+.dockerignore
