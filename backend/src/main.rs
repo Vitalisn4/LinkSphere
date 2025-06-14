@@ -39,10 +39,10 @@ async fn main() {
     // JWT secret
     let jwt_secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
     let auth_middleware_state = AuthMiddlewareState::new(jwt_secret.clone());
-    let vite_api_url = env::var("VITE_API_URL").expect("VITE_API_URL must be set");
+    let frontend_request_url = env::var("FRONTEND_REQUEST_URL").expect("FRONTEND_REQUEST_URL must be set");
     // CORS configuration
     let cors = CorsLayer::new()
-        .allow_origin([vite_api_url.parse().unwrap()])
+        .allow_origin([frontend_request_url.parse().unwrap()])
         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
         .allow_headers([HeaderName::from_static("authorization"), HeaderName::from_static("content-type")])
         .allow_credentials(true);
