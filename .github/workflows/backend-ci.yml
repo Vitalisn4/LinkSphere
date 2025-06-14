@@ -6,6 +6,7 @@ on:
     paths:
       - 'backend/**'
   pull_request:
+    branches: [ master ]
     paths:
       - 'backend/**'
 
@@ -26,4 +27,6 @@ jobs:
 
       - name: Run clippy
         working-directory: backend
-        run: cargo clippy -- -D warnings 
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: cargo clippy --no-deps -- -D warnings 
