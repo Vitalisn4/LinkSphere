@@ -17,7 +17,6 @@ use validator::Validate;
 
 type LinkResponse = ApiResponse<Link>;
 type LinksResponse = ApiResponse<Vec<Link>>;
-
 /// Get all links
 /// 
 /// Returns a list of all links in the system
