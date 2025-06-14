@@ -31,6 +31,5 @@ dist-ssr
 *.zip
 *-lock.json
 *.lock
-migrations
 Cargo.lock
 build.sh
