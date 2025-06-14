@@ -1,22 +1,26 @@
 mod api;
-mod database;
-mod routes;
 mod auth;
-mod services;
+mod database;
 mod logging;
 mod middleware;
-use axum::routing::get;
-use std::env;
-use std::net::SocketAddr;
-use axum::{Router, http::{Method, HeaderName}, middleware::{from_fn, from_fn_with_state}};
-use dotenv::dotenv;
-use tower_http::cors::CorsLayer;
-use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
+mod routes;
+mod services;
 use crate::api::docs::ApiDoc;
 use crate::auth::middleware::AuthMiddlewareState;
 use crate::logging::init_logging;
 use crate::middleware::request_logger::request_logger;
+use axum::routing::get;
+use axum::{
+    http::{HeaderName, Method},
+    middleware::{from_fn, from_fn_with_state},
+    Router,
+};
+use dotenv::dotenv;
+use std::env;
+use std::net::SocketAddr;
+use tower_http::cors::CorsLayer;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 #[tokio::main]
 async fn main() {
@@ -29,7 +33,7 @@ async fn main() {
     // Database connection
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let pool = database::create_pool(&database_url).await;
-    
+
     // Run database migrations
     if let Err(e) = database::run_migrations(&pool).await {
         tracing::error!("Failed to run database migrations: {:?}", e);
@@ -39,12 +43,16 @@ async fn main() {
     // JWT secret
     let jwt_secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
     let auth_middleware_state = AuthMiddlewareState::new(jwt_secret.clone());
-    let frontend_request_url = env::var("FRONTEND_REQUEST_URL").expect("FRONTEND_REQUEST_URL must be set");
+    let frontend_request_url =
+        env::var("FRONTEND_REQUEST_URL").expect("FRONTEND_REQUEST_URL must be set");
     // CORS configuration
     let cors = CorsLayer::new()
         .allow_origin([frontend_request_url.parse().unwrap()])
         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
-        .allow_headers([HeaderName::from_static("authorization"), HeaderName::from_static("content-type")])
+        .allow_headers([
+            HeaderName::from_static("authorization"),
+            HeaderName::from_static("content-type"),
+        ])
         .allow_credentials(true);
 
     // Build our application with routes
@@ -54,11 +62,10 @@ async fn main() {
         .merge(routes::create_public_router(pool.clone()))
         .nest("/api/auth", auth::create_router(pool.clone()))
         .merge(
-            routes::create_protected_router(pool)
-                .layer(from_fn_with_state(
-                    auth_middleware_state.clone(),
-                    auth::middleware::auth_middleware,
-                ))
+            routes::create_protected_router(pool).layer(from_fn_with_state(
+                auth_middleware_state.clone(),
+                auth::middleware::auth_middleware,
+            )),
         )
         .layer(cors)
         .layer(from_fn(request_logger));
@@ -68,8 +75,7 @@ async fn main() {
         .expect("PORT must be set")
         .parse::<u16>()
         .expect("PORT must be a valid number");
-    let host = env::var("HOST")
-        .expect("HOST must be set");
+    let host = env::var("HOST").expect("HOST must be set");
     let addr: SocketAddr = format!("{}:{}", host, port)
         .parse()
         .expect("Invalid HOST:PORT combination");
@@ -78,7 +84,5 @@ async fn main() {
         .expect("Failed to bind to address");
     tracing::info!("Server listening on {}", addr);
 
-    axum::serve(listener, app)
-        .await
-        .expect("Server failed");
+    axum::serve(listener, app).await.expect("Server failed");
 }
