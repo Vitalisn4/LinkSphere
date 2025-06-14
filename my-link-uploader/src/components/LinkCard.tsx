@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { LinkIcon } from 'lucide-react';
 import './LinkCard.css';
+import { format } from 'date-fns';
 
 interface LinkPreview {
   title?: string;
@@ -39,11 +40,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, onDelete }) => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    return format(date, 'MMM d, yyyy h:mm a', { timeZone: 'Africa/Douala' });
   };
 
   const DefaultPreview = () => (
