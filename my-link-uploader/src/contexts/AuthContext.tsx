@@ -11,7 +11,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const handleLogout = useCallback(() => {
     setUser(null);
-    setIsAuthenticated(false);
+        setIsAuthenticated(false);
     localStorage.removeItem('token');
     navigate('/login');
   }, [navigate]);
@@ -25,11 +25,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [handleLogout]);
 
   const login = async (email: string, password: string) => {
-    const response = await ApiService.login(email, password);
+      const response = await ApiService.login(email, password);
     const { token, user } = response;
     setUser(user);
     localStorage.setItem('token', token);
-    setIsAuthenticated(true);
+      setIsAuthenticated(true);
   };
 
   const register = async (email: string, username: string, password: string) => {
@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const verifyEmail = async (email: string, otp: string) => {
-    await ApiService.verifyEmail(email, otp);
+      await ApiService.verifyEmail(email, otp);
   };
 
   const value = {
