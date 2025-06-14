@@ -48,7 +48,11 @@ impl AuthService {
         .await
     }
 
-    pub async fn login(&self, email: String, password: String) -> Result<AuthResponse, sqlx::Error> {
+    pub async fn login(
+        &self,
+        email: String,
+        password: String,
+    ) -> Result<AuthResponse, sqlx::Error> {
         let user = sqlx::query_as!(
             User,
             r#"
@@ -109,4 +113,4 @@ impl AuthService {
         )
         .map_err(|e| sqlx::Error::Protocol(format!("Failed to create token: {}", e)))
     }
-} 
+}
