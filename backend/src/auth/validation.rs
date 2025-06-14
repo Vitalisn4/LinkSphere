@@ -1,5 +1,5 @@
-use regex::Regex;
 use lazy_static::lazy_static;
+use regex::Regex;
 use zxcvbn::zxcvbn;
 
 lazy_static! {
@@ -29,21 +29,21 @@ pub fn validate_password(password: &str) -> Result<(), PasswordError> {
 
     // Use zxcvbn to check password strength
     let estimate = zxcvbn(password, &[]);
-    
+
     // Score ranges from 0-4, where:
     // 0 - too guessable
     // 1 - very guessable
     // 2 - somewhat guessable
     // 3 - safely unguessable
     // 4 - very unguessable
-    
+
     if (estimate.score() as u8) < 3 {
         let feedback = estimate
             .feedback()
             .as_ref()
             .and_then(|f| f.warning().map(|w| w.to_string()))
             .unwrap_or_else(|| "Password is too weak".to_string());
-            
+
         return Err(PasswordError {
             score: estimate.score() as u8,
             feedback,
@@ -51,4 +51,4 @@ pub fn validate_password(password: &str) -> Result<(), PasswordError> {
     }
 
     Ok(())
-} 
+}
