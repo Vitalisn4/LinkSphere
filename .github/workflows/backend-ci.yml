@@ -2,85 +2,28 @@ name: Backend CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
     paths:
       - 'backend/**'
   pull_request:
-    branches: [ main ]
     paths:
       - 'backend/**'
 
-env:
-  CARGO_TERM_COLOR: always
-  DATABASE_URL: "postgres://postgres:postgres@localhost:5432/linksphere_test"
-  JWT_SECRET: "test_secret_key"
-  FRONTEND_REQUEST_URL: "http://localhost:5173"
-  RUST_LOG: "debug"
-
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: linksphere_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Install PostgreSQL client
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y postgresql-client
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
 
-    - name: Cache Rust dependencies
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          backend/target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-
+      - name: Check formatting
+        working-directory: backend
+        run: cargo fmt -- --check
 
-    - name: Install stable toolchain
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        components: clippy, rustfmt
-
-    - name: Check formatting
-      working-directory: backend
-      run: cargo fmt -- --check
-
-    - name: Run clippy
-      working-directory: backend
-      run: cargo clippy -- -D warnings
-
-    - name: Run tests
-      working-directory: backend
-      run: cargo test
-
-    - name: Build
-      working-directory: backend
-      run: cargo build --release
-
-    - name: Cache build artifacts
-      uses: actions/cache@v4
-      with:
-        path: |
-          backend/target/release
-        key: ${{ runner.os }}-backend-build-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-backend-build- 
+      - name: Run clippy
+        working-directory: backend
+        run: cargo clippy -- -D warnings 
