@@ -7,8 +7,8 @@ import {
   Check, 
   AlertCircle
 } from "lucide-react"
-import { useTheme } from "../../contexts/ThemeContext"
-import { useAuth } from "../../contexts/AuthContext"
+import { useTheme } from "../../hooks/useTheme"
+import { useAuth } from "../../hooks/useAuth"
 import { useNavigate } from "react-router-dom"
 import ApiService from "../../services/api"
 
