@@ -1,105 +1,35 @@
-import * as React from 'react'
-"use client"
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { AuthProvider } from './contexts/AuthContext';
+import Layout from './components/Layout';
+import RegisterPage from './pages/auth/RegisterPage';
+import LoginPage from './pages/auth/LoginPage';
+import VerifyEmailPage from './pages/auth/VerifyEmailPage';
+import DashboardPage from './pages/dashboard/DashboardPage';
+import UploadPage from './pages/dashboard/UploadPage';
+import MyAccountPage from './pages/dashboard/MyAccountPage';
+import LandingPage from './pages/LandingPage';
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
-import { AuthProvider } from "./contexts/AuthContext"
-import { useAuth } from "./hooks/useAuth"
-import { ThemeProvider } from "./contexts/ThemeContext"
-import Layout from "./components/Layout"
-import LandingPage from "./pages/LandingPage"
-import LoginPage from "./pages/auth/LoginPage"
-import RegisterPage from "./pages/auth/RegisterPage"
-import VerifyEmailPage from "./pages/auth/VerifyEmailPage"
-import UploadPage from "./pages/dashboard/UploadPage"
-import DashboardPage from "./pages/dashboard/DashboardPage"
-import MyAccountPage from "./pages/dashboard/MyAccountPage"
-
-// Move route protection components inside the main App component
-// so they have access to AuthContext
-export default function App() {
+function App() {
   return (
-    <ThemeProvider>
-      <Router>
+    <BrowserRouter>
+      <ThemeProvider>
         <AuthProvider>
           <Layout>
-            <AppRoutes />
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/verify-email" element={<VerifyEmailPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/dashboard/upload" element={<UploadPage />} />
+              <Route path="/dashboard/my-account" element={<MyAccountPage />} />
+            </Routes>
           </Layout>
         </AuthProvider>
-      </Router>
-    </ThemeProvider>
-  )
+      </ThemeProvider>
+    </BrowserRouter>
+  );
 }
 
-function AppRoutes() {
-  const { isAuthenticated, isLoading } = useAuth()
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    )
-  }
-
-  function PrivateRoute({ children }: { children: React.ReactNode }) {
-    return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
-  }
-
-  function PublicRoute({ children }: { children: React.ReactNode }) {
-    return !isAuthenticated ? <>{children}</> : <Navigate to="/dashboard" replace />
-  }
-
-  return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <PublicRoute>
-            <LandingPage />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/login"
-        element={
-          <PublicRoute>
-            <LoginPage />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/register"
-        element={
-          <PublicRoute>
-            <RegisterPage />
-          </PublicRoute>
-        }
-      />
-      <Route path="/verify-email" element={<VerifyEmailPage />} />
-      <Route
-        path="/dashboard"
-        element={
-          <PrivateRoute>
-            <DashboardPage />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/dashboard/upload"
-        element={
-          <PrivateRoute>
-            <UploadPage />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/dashboard/my-account"
-        element={
-          <PrivateRoute>
-            <MyAccountPage />
-          </PrivateRoute>
-        }
-      />
-    </Routes>
-  )
-}
+export default App;
