@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
-import axios, { AxiosError, AxiosRequestConfig } from "axios";
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface ApiResponse<T = unknown> {
   success: boolean;
@@ -33,19 +33,21 @@ export interface Link {
   };
 }
 
-interface User {
+export interface User {
   id: string;
   username: string;
   email: string;
 }
 
-interface AuthResponse {
-  token: string;
-  user: User;
+interface AuthResponse<T = unknown> {
+  success: boolean;
+  message: string;
+  data?: T;
 }
 
 interface ApiError {
   message: string;
+  error?: string;
   status: number;
 }
 
@@ -54,21 +56,53 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  validateStatus: (status) => status < 500,
 });
 
-api.interceptors.request.use((config: AxiosRequestConfig) => {
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = localStorage.getItem('token');
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  console.log('API Request:', {
+    url: config.url,
+    method: config.method,
+    data: config.data,
+  });
   return config;
 });
 
-const handleApiError = (error: AxiosError<ApiError>) => {
-  if (error.response) {
-    throw new Error(error.response.data.message || 'An error occurred');
+api.interceptors.response.use(
+  (response) => {
+    console.log('API Response:', {
+      url: response.config.url,
+      status: response.status,
+      data: response.data,
+    });
+    return response;
+  },
+  (error: AxiosError<ApiError>) => {
+    console.error('API Error:', {
+      url: error.config?.url,
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
+    return Promise.reject(error);
   }
-  throw new Error('Network error');
+);
+
+const handleApiError = (error: AxiosError<ApiError>) => {
+  if (error.response?.data) {
+    const message = error.response.data.message || 
+                   error.response.data.error ||
+                   'Server error occurred';
+    throw new Error(message);
+  }
+  if (error.request) {
+    throw new Error('No response from server. Please check your connection.');
+  }
+  throw new Error(error.message || 'An unexpected error occurred');
 };
 
 export const ApiService = {
@@ -98,10 +132,28 @@ export const ApiService = {
     }
   },
 
-  async login(email: string, password: string): Promise<AuthResponse> {
+  async login(email: string, password: string): Promise<{ token: string; user: User }> {
     try {
-      const response = await api.post<AuthResponse>('/auth/login', { email, password });
-      return response.data;
+      const response = await api.post<AuthResponse<{ token: string; user: User }>>(
+        '/auth/login', 
+        { email, password },
+        {
+          withCredentials: true,
+          headers: {
+            'Accept': 'application/json',
+          }
+        }
+      );
+
+      if (response.status >= 400) {
+        throw new Error(response.data.message || 'Login failed');
+      }
+
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Invalid response format');
+      }
+
+      return response.data.data;
     } catch (error) {
       handleApiError(error as AxiosError<ApiError>);
       throw error;
@@ -121,10 +173,13 @@ export const ApiService = {
     }
   },
 
-  async getLinks(): Promise<Link[]> {
+  async getAllLinks(): Promise<Link[]> {
     try {
-      const response = await api.get<Link[]>('/links');
-      return response.data;
+      const response = await api.get<ApiResponse<Link[]>>('/links');
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Failed to fetch links');
+      }
+      return response.data.data;
     } catch (error) {
       handleApiError(error as AxiosError<ApiError>);
       throw error;
