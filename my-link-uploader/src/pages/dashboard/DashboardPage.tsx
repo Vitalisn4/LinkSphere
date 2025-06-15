@@ -8,6 +8,7 @@ import { formatInTimeZone } from 'date-fns-tz'
 import { useAuth } from "../../hooks/useAuth"
 import { useTheme } from "../../hooks/useTheme"
 import ApiService, { Link } from "../../services/api"
+import { useNavigate } from "react-router-dom"
 
 export default function DashboardPage() {
   const [query, setQuery] = useState<string>("")
@@ -17,102 +18,103 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const retryTimeoutRef = useRef<NodeJS.Timeout>()
   const { user } = useAuth()
   const { isDark } = useTheme()
+  const navigate = useNavigate()
 
-  const fetchLinks = useCallback(async (retryCount = 0) => {
+  // Simplified fetch function
+  const fetchLinks = async () => {
     try {
-      setIsLoading(true)
-      setError(null)
-      const data = await ApiService.getAllLinks()
-      if (!data || !Array.isArray(data)) {
-        throw new Error('Invalid response format')
-      }
-      setLinks(data)
-      setFilteredLinks(data)
+      setIsLoading(true);
+      console.log('Fetching links...');
+      const data = await ApiService.getAllLinks();
+      console.log('Fetched links:', data);
+      setLinks(data);
+      setFilteredLinks(data); // Set both links and filteredLinks
+      setError(null);
     } catch (error) {
-      console.error('Error fetching links:', error)
-      
-      // Handle specific error cases
-      if (error instanceof Error) {
-        if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-          // Handle unauthorized access
-          setError('Session expired. Please log in again.')
-          // Trigger logout after a short delay
-          setTimeout(() => {
-            window.dispatchEvent(new CustomEvent('auth:expired'))
-          }, 100)
-        } else if (error.message.includes('pool timed out')) {
-          setError('Database connection issue. Retrying...')
-          // Retry with exponential backoff
-          if (retryCount < 3) {
-            const delay = Math.min(1000 * Math.pow(2, retryCount), 5000)
-            retryTimeoutRef.current = setTimeout(() => {
-              fetchLinks(retryCount + 1)
-            }, delay)
-          } else {
-            setError('Unable to connect to the database. Please try again later.')
-          }
-        } else if (error.message.includes('Failed to fetch')) {
-          setError('Unable to reach the server. Please check your connection.')
-        } else {
-          setError(error.message)
-        }
+      console.error('Error fetching links:', error);
+      if (error instanceof Error && error.message.includes('unauthorized')) {
+        navigate('/login');
       } else {
-        setError('An unexpected error occurred')
+        setError(error instanceof Error ? error.message : 'Failed to fetch links');
       }
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [])
+  };
 
+  // Initial fetch on mount
   useEffect(() => {
-    // Only fetch if user is authenticated
-    if (user) {
-      fetchLinks()
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
     }
+    fetchLinks();
+  }, []); // Only run on mount
+
+  // Handle search
+  useEffect(() => {
+    if (!links) return; // Guard against null links
     
-    // Cleanup function
-    return () => {
-      if (retryTimeoutRef.current) {
-        clearTimeout(retryTimeoutRef.current)
-      }
-    }
-  }, [fetchLinks, user])
-
-  // Debounced search
-  useEffect(() => {
     const timer = setTimeout(() => {
       if (query) {
         const results = links.filter(
           (link) =>
             link.title.toLowerCase().includes(query.toLowerCase()) ||
             link.description.toLowerCase().includes(query.toLowerCase())
-        )
-        setFilteredLinks(results)
+        );
+        setFilteredLinks(results);
       } else {
-        setFilteredLinks(links)
+        setFilteredLinks(links);
       }
-    }, 300)
+    }, 300);
 
-    return () => clearTimeout(timer)
-  }, [query, links])
+    return () => clearTimeout(timer);
+  }, [query, links]);
 
   const handleSearch = (searchQuery: string) => {
-    setQuery(searchQuery)
-  }
+    setQuery(searchQuery);
+  };
 
   const handleLinkClick = async (id: string, url: string) => {
     try {
-      await ApiService.incrementLinkClick(id)
-      window.open(url, '_blank', 'noopener,noreferrer')
+      await ApiService.incrementLinkClick(id);
+      window.open(url, '_blank', 'noopener,noreferrer');
     } catch (error) {
-      console.error('Error incrementing click count:', error)
-      // Still open the link even if tracking fails
-      window.open(url, '_blank', 'noopener,noreferrer')
+      console.error('Error incrementing click count:', error);
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
-  }
+  };
+
+  const formatDate = (dateString: string | null | undefined): string => {
+    if (!dateString) return 'N/A';
+    try {
+      // Remove any trailing 'Z' if it exists and add it back properly
+      const cleanDate = dateString.endsWith('Z') 
+        ? dateString 
+        : dateString + 'Z';
+      return formatInTimeZone(new Date(cleanDate), 'Africa/Douala', 'MMM d, yyyy');
+    } catch (error) {
+      console.error('Error formatting date:', dateString, error);
+      return 'Invalid date';
+    }
+  };
+
+  const formatTime = (dateString: string | null | undefined): string => {
+    if (!dateString) return 'N/A';
+    try {
+      // Remove any trailing 'Z' if it exists and add it back properly
+      const cleanDate = dateString.endsWith('Z') 
+        ? dateString 
+        : dateString + 'Z';
+      return formatInTimeZone(new Date(cleanDate), 'Africa/Douala', 'HH:mm');
+    } catch (error) {
+      console.error('Error formatting time:', dateString, error);
+      return 'Invalid time';
+    }
+  };
 
   return (
     <div className="w-full min-h-screen p-6 bg-gray-100/40 dark:bg-gray-900/50">
@@ -257,11 +259,11 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <Calendar size={16} />
-                      <span>{formatInTimeZone(new Date(link.created_at), 'Africa/Douala', 'MMM d, yyyy')}</span>
+                      <span>{formatDate(link.created_at)}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock size={16} />
-                      <span>{formatInTimeZone(new Date(link.updated_at + 'Z'), 'Africa/Douala', 'HH:mm')}</span>
+                      <span>{formatTime(link.updated_at)}</span>
                     </div>
                   </div>
 
