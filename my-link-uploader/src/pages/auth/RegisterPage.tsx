@@ -6,6 +6,13 @@ import { motion } from "framer-motion"
 import { UserPlus, Mail, Lock, User, ArrowRight } from "lucide-react"
 import ApiService, { Gender } from "../../services/api"
 
+interface ValidationErrors {
+  email?: string;
+  username?: string;
+  password?: string;
+  confirmPassword?: string;
+}
+
 export default function RegisterPage() {
   const [email, setEmail] = useState("")
   const [username, setUsername] = useState("")
@@ -13,40 +20,149 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [gender, setGender] = useState<Gender>("Other")
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [errors, setErrors] = useState<ValidationErrors>({})
   const navigate = useNavigate()
+
+  const validateEmail = (email: string): string | undefined => {
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    if (!email) {
+      return "Email is required";
+    }
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address";
+    }
+    return undefined;
+  };
+
+  const validateUsername = (username: string): string | undefined => {
+    const usernameRegex = /^[a-zA-Z0-9_]{3,50}$/;
+    if (!username) {
+      return "Username is required";
+    }
+    if (!usernameRegex.test(username)) {
+      return "Username must be 3-50 characters long and can only contain letters, numbers, and underscores";
+    }
+    return undefined;
+  };
+
+  const validatePassword = (password: string): string | undefined => {
+    if (!password) {
+      return "Password is required";
+    }
+    if (password.length < 8) {
+      return "Password must be at least 8 characters long";
+    }
+    if (!/(?=.*[a-z])/.test(password)) {
+      return "Password must contain at least one lowercase letter";
+    }
+    if (!/(?=.*[A-Z])/.test(password)) {
+      return "Password must contain at least one uppercase letter";
+    }
+    if (!/(?=.*\d)/.test(password)) {
+      return "Password must contain at least one number";
+    }
+    if (!/(?=.*[@$!%*?&])/.test(password)) {
+      return "Password must contain at least one special character (@$!%*?&)";
+    }
+    return undefined;
+  };
+
+  const validateConfirmPassword = (confirmPass: string): string | undefined => {
+    if (!confirmPass) {
+      return "Please confirm your password";
+    }
+    if (confirmPass !== password) {
+      return "Passwords do not match";
+    }
+    return undefined;
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+    setErrors(prev => ({
+      ...prev,
+      email: validateEmail(value)
+    }));
+  };
+
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setUsername(value);
+    setErrors(prev => ({
+      ...prev,
+      username: validateUsername(value)
+    }));
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPassword(value);
+    setErrors(prev => ({
+      ...prev,
+      password: validatePassword(value),
+      confirmPassword: confirmPassword ? validateConfirmPassword(confirmPassword) : undefined
+    }));
+  };
+
+  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setConfirmPassword(value);
+    setErrors(prev => ({
+      ...prev,
+      confirmPassword: validateConfirmPassword(value)
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    setError("")
 
-    // Password validation
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(password)) {
-      setError("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character");
+    // Validate all fields
+    const validationErrors: ValidationErrors = {
+      email: validateEmail(email),
+      username: validateUsername(username),
+      password: validatePassword(password),
+      confirmPassword: validateConfirmPassword(confirmPassword)
+    };
+
+    // Check if there are any validation errors
+    const hasErrors = Object.values(validationErrors).some(error => error !== undefined);
+    if (hasErrors) {
+      setErrors(validationErrors);
       setIsLoading(false);
       return;
     }
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match")
-      setIsLoading(false)
-      return
-    }
-
     try {
       await ApiService.register(email, username, password, gender)
-      navigate("/verify-email", { 
-        replace: true,
-        state: { email }
-      })
+      // Store email for verification
+      sessionStorage.setItem("pendingVerificationEmail", email)
+      navigate("/verify-email", { replace: true })
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to register")
+      setErrors(prev => ({
+        ...prev,
+        submit: error instanceof Error ? error.message : "Failed to register"
+      }))
     } finally {
       setIsLoading(false)
     }
   }
+
+  // Add function to check if form is valid
+  const isFormValid = () => {
+    return (
+      !errors.email &&
+      !errors.username &&
+      !errors.password &&
+      !errors.confirmPassword &&
+      email &&
+      username &&
+      password &&
+      confirmPassword &&
+      password === confirmPassword
+    );
+  };
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-br from-purple-50/90 via-white/90 to-pink-50/90 dark:from-gray-900/90 dark:via-gray-900/95 dark:to-gray-800/90 backdrop-blur-md">
@@ -76,13 +192,13 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        {error && (
+        {errors.submit && (
           <motion.div
             className="mb-8 p-4 rounded-lg bg-red-500/10 text-red-500 text-sm"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            {error}
+            {errors.submit}
           </motion.div>
         )}
 
@@ -93,12 +209,15 @@ export default function RegisterPage() {
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 placeholder="Email address"
                 required
-                className="w-full pl-12 pr-4 py-4 bg-white/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50"
+                className={`w-full pl-12 pr-4 py-4 bg-white/50 dark:bg-gray-900/50 border ${errors.email ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50`}
               />
             </div>
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+            )}
           </div>
 
           <div>
@@ -107,12 +226,15 @@ export default function RegisterPage() {
               <input
                 type="text"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={handleUsernameChange}
                 placeholder="Username"
                 required
-                className="w-full pl-12 pr-4 py-4 bg-white/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50"
+                className={`w-full pl-12 pr-4 py-4 bg-white/50 dark:bg-gray-900/50 border ${errors.username ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50`}
               />
             </div>
+            {errors.username && (
+              <p className="mt-1 text-sm text-red-500">{errors.username}</p>
+            )}
           </div>
 
           <div>
@@ -137,12 +259,15 @@ export default function RegisterPage() {
               <input
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 placeholder="Password"
                 required
-                className="w-full pl-12 pr-4 py-4 bg-white/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50"
+                className={`w-full pl-12 pr-4 py-4 bg-white/50 dark:bg-gray-900/50 border ${errors.password ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50`}
               />
             </div>
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+            )}
           </div>
 
           <div>
@@ -151,17 +276,20 @@ export default function RegisterPage() {
               <input
                 type="password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={handleConfirmPasswordChange}
                 placeholder="Confirm Password"
                 required
-                className="w-full pl-12 pr-4 py-4 bg-white/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50"
+                className={`w-full pl-12 pr-4 py-4 bg-white/50 dark:bg-gray-900/50 border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50`}
               />
             </div>
+            {errors.confirmPassword && (
+              <p className="mt-1 text-sm text-red-500">{errors.confirmPassword}</p>
+            )}
           </div>
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || !isFormValid()}
             className="w-full py-4 px-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-lg font-medium hover:shadow-lg hover:shadow-purple-500/20"
           >
             {isLoading ? (
