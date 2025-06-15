@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { motion } from "framer-motion"
 import { Search, ExternalLink, Calendar, User, Clock } from "lucide-react"
 import { format } from "date-fns"
+import { formatInTimeZone } from 'date-fns-tz'
 import { useAuth } from "../../hooks/useAuth"
 import { useTheme } from "../../hooks/useTheme"
 import ApiService, { Link } from "../../services/api"
@@ -22,17 +23,27 @@ export default function DashboardPage() {
 
   const fetchLinks = useCallback(async (retryCount = 0) => {
     try {
+      setIsLoading(true)
       setError(null)
       const data = await ApiService.getAllLinks()
+      if (!data || !Array.isArray(data)) {
+        throw new Error('Invalid response format')
+      }
       setLinks(data)
       setFilteredLinks(data)
-      setIsLoading(false)
     } catch (error) {
       console.error('Error fetching links:', error)
       
       // Handle specific error cases
       if (error instanceof Error) {
-        if (error.message.includes('pool timed out')) {
+        if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+          // Handle unauthorized access
+          setError('Session expired. Please log in again.')
+          // Trigger logout after a short delay
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('auth:expired'))
+          }, 100)
+        } else if (error.message.includes('pool timed out')) {
           setError('Database connection issue. Retrying...')
           // Retry with exponential backoff
           if (retryCount < 3) {
@@ -51,12 +62,16 @@ export default function DashboardPage() {
       } else {
         setError('An unexpected error occurred')
       }
+    } finally {
       setIsLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    fetchLinks()
+    // Only fetch if user is authenticated
+    if (user) {
+      fetchLinks()
+    }
     
     // Cleanup function
     return () => {
@@ -64,7 +79,7 @@ export default function DashboardPage() {
         clearTimeout(retryTimeoutRef.current)
       }
     }
-  }, [fetchLinks])
+  }, [fetchLinks, user])
 
   // Debounced search
   useEffect(() => {
@@ -242,11 +257,11 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <Calendar size={16} />
-                      <span>{format(new Date(link.created_at), 'MMM d, yyyy')}</span>
+                      <span>{formatInTimeZone(new Date(link.created_at), 'Africa/Douala', 'MMM d, yyyy')}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock size={16} />
-                      <span>{format(new Date(link.created_at), 'h:mm a', { timeZone: 'Africa/Douala' })}</span>
+                      <span>{formatInTimeZone(new Date(link.updated_at + 'Z'), 'Africa/Douala', 'HH:mm')}</span>
                     </div>
                   </div>
 
