@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "tsc && vite build",
+    "build": "tsc &&vite build",
     "lint": "eslint . --max-warnings 0",
     "preview": "vite preview",
     "type-check": "tsc --noEmit"
@@ -14,7 +14,8 @@
     "@heroicons/react": "^2.0.0",
     "@types/react-router-dom": "^5.3.3",
     "axios": "^1.9.0",
-    "date-fns": "^4.1.0",
+    "date-fns": "^2.30.0",
+    "date-fns-tz": "^2.0.0",
     "framer-motion": "^10.18.0",
     "lucide-react": "^0.292.0",
     "react": "^18.2.0",
