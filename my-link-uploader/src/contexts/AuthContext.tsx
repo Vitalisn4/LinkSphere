@@ -1,78 +1,111 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useState, Dispatch, SetStateAction } from 'react';
 import ApiService, { User } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
+  setUser: Dispatch<SetStateAction<User | null>>;
   isAuthenticated: boolean;
-  setUser: (user: User | null) => void;
-  setIsAuthenticated: (value: boolean) => void;
+  setIsAuthenticated: Dispatch<SetStateAction<boolean>>;
   login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
   register: (email: string, username: string, password: string, gender: string) => Promise<void>;
   verifyEmail: (email: string, otp: string) => Promise<void>;
   resendOtp: (email: string) => Promise<void>;
-  logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    const storedUser = localStorage.getItem('user');
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return !!localStorage.getItem('token');
-  });
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const login = async (email: string, password: string) => {
-    const response = await ApiService.login(email, password);
-    localStorage.setItem('token', response.token);
-    localStorage.setItem('user', JSON.stringify(response.user));
-    setUser(response.user);
-    setIsAuthenticated(true);
+    try {
+      console.log('Attempting login:', { email });
+      const { token, user } = await ApiService.login(email, password);
+      
+      // Set auth state
+      setUser(user);
+      setIsAuthenticated(true);
+      
+      // Store auth data
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      console.log('Login successful:', { user });
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await ApiService.logout();
+      setUser(null);
+      setIsAuthenticated(false);
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    } catch (error) {
+      throw error;
+    }
   };
 
   const register = async (email: string, username: string, password: string, gender: string) => {
-    await ApiService.register(email, username, password, gender as any);
-    // Store email for verification
-    sessionStorage.setItem('pendingVerificationEmail', email);
+    try {
+      await ApiService.register(email, username, password, gender as any);
+    } catch (error) {
+      throw error;
+    }
   };
 
   const verifyEmail = async (email: string, otp: string) => {
-    await ApiService.verifyEmail(email, otp);
-    // Clear stored email after successful verification
-    sessionStorage.removeItem('pendingVerificationEmail');
+    try {
+      await ApiService.verifyEmail(email, otp);
+    } catch (error) {
+      throw error;
+    }
   };
 
   const resendOtp = async (email: string) => {
-    await ApiService.resendOtp(email);
+    try {
+      await ApiService.resendOtp(email);
+    } catch (error) {
+      throw error;
+    }
   };
 
-  const logout = () => {
-    ApiService.logout();
-    setUser(null);
-    setIsAuthenticated(false);
-  };
+  // Initialize auth state from localStorage
+  React.useEffect(() => {
+    const token = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    
+    if (token && storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error('Failed to parse stored user:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
 
   const value = {
     user,
-    isAuthenticated,
     setUser,
+    isAuthenticated,
     setIsAuthenticated,
     login,
+    logout,
     register,
     verifyEmail,
     resendOtp,
-    logout,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
+};
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-} 
+export default AuthProvider; 
