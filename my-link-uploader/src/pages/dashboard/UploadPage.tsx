@@ -73,20 +73,36 @@ export default function UploadPage() {
   const validate = (): boolean => {
     const newErrors: FormErrors = {}
 
+    // Title validation
     if (!formData.title.trim()) {
       newErrors.title = "Title is required"
+    } else if (formData.title.length < 3) {
+      newErrors.title = "Title must be at least 3 characters"
+    } else if (formData.title.length > 100) {
+      newErrors.title = "Title must be less than 100 characters"
     }
 
+    // URL validation
     if (!formData.url) {
       newErrors.url = "URL is required"
-    } else if (!/^https?:\/\/\S+$/.test(formData.url)) {
-      newErrors.url = "Enter a valid URL starting with http:// or https://"
+    } else {
+      try {
+        const url = new URL(formData.url)
+        if (!['http:', 'https:'].includes(url.protocol)) {
+          newErrors.url = "URL must start with http:// or https://"
+        }
+      } catch {
+        newErrors.url = "Please enter a valid URL"
+      }
     }
 
+    // Description validation
     if (!formData.description.trim()) {
       newErrors.description = "Description is required"
     } else if (formData.description.length < 10) {
-      newErrors.description = "Description should be at least 10 characters"
+      newErrors.description = "Description must be at least 10 characters"
+    } else if (formData.description.length > 500) {
+      newErrors.description = "Description must be less than 500 characters"
     }
 
     setErrors(newErrors)
@@ -118,15 +134,21 @@ export default function UploadPage() {
         throw new Error("Authentication token not found. Please log in again.")
       }
 
+      console.log("Making API request to create link...")
       const response = await ApiService.createLink(formData)
       console.log("Link created successfully:", response)
+      
       setSuccessMessage("Link shared successfully!")
       setFormData({ title: "", url: "", description: "" })
+      
+      // Redirect to dashboard after short delay
+      setTimeout(() => {
+        navigate('/dashboard')
+      }, 2000)
     } catch (error) {
       console.error("Error submitting:", error)
       if (error instanceof Error) {
         if (error.message.includes("foreign key constraint")) {
-          // Handle authentication error
           localStorage.removeItem("token")
           localStorage.removeItem("user")
           setErrors({ url: "Your session has expired. Please log in again." })
