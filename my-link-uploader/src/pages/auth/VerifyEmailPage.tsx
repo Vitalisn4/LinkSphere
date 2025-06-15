@@ -16,11 +16,16 @@ export default function VerifyEmailPage() {
   const navigate = useNavigate()
   const { verifyEmail, resendOtp } = useAuth()
 
-  // Get email from navigation state
-  const email = location.state?.email
-  if (!email) {
-    navigate("/register", { replace: true })
-  }
+  // Get email from session storage (stored during registration)
+  const email = sessionStorage.getItem("pendingVerificationEmail")
+
+  // Redirect if no email is found
+  useEffect(() => {
+    if (!email) {
+      navigate("/register", { replace: true })
+      return
+    }
+  }, [email, navigate])
 
   // Handle countdown for resend button
   useEffect(() => {
@@ -38,7 +43,7 @@ export default function VerifyEmailPage() {
     setError("")
 
     try {
-      await verifyEmail(email, otp)
+      await verifyEmail(email!, otp)
       navigate("/login", { 
         replace: true,
         state: { 
@@ -57,7 +62,7 @@ export default function VerifyEmailPage() {
     setError("")
 
     try {
-      await resendOtp(email)
+      await resendOtp(email!)
       setResendDisabled(true)
       setCountdown(30)
     } catch (error) {
@@ -72,6 +77,11 @@ export default function VerifyEmailPage() {
     if (value.length <= 6) {
       setOtp(value)
     }
+  }
+
+  // Don't render anything if no email is found
+  if (!email) {
+    return null
   }
 
   return (
