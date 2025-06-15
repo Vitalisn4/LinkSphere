@@ -1,7 +1,6 @@
 import * as React from 'react'
 "use client"
 
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { AuthProvider } from "./contexts/AuthContext"
 import { useAuth } from "./hooks/useAuth"
@@ -15,76 +14,92 @@ import UploadPage from "./pages/dashboard/UploadPage"
 import DashboardPage from "./pages/dashboard/DashboardPage"
 import MyAccountPage from "./pages/dashboard/MyAccountPage"
 
-function PrivateRoute({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth()
-  return user ? <>{children}</> : <Navigate to="/login" />
-}
-
-function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth()
-  return !user ? <>{children}</> : <Navigate to="/dashboard" />
-}
-
+// Move route protection components inside the main App component
+// so they have access to AuthContext
 export default function App() {
   return (
-    <Router>
-      <ThemeProvider>
-      <AuthProvider>
-        <Layout>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <PublicRoute>
-                  <LandingPage />
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/login"
-              element={
-                <PublicRoute>
-                  <LoginPage />
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/register"
-              element={
-                <PublicRoute>
-                  <RegisterPage />
-                </PublicRoute>
-              }
-            />
-            <Route path="/verify-email" element={<VerifyEmailPage />} />
-            <Route
-              path="/dashboard"
-              element={
-                <PrivateRoute>
-                  <DashboardPage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/dashboard/upload"
-              element={
-                <PrivateRoute>
-                  <UploadPage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/dashboard/my-account"
-              element={
-                <PrivateRoute>
-                  <MyAccountPage />
-                </PrivateRoute>
-              }
-            />
-          </Routes>
-        </Layout>
-      </AuthProvider>
-      </ThemeProvider>
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <AuthProvider>
+          <Layout>
+            <AppRoutes />
+          </Layout>
+        </AuthProvider>
+      </Router>
+    </ThemeProvider>
+  )
+}
+
+function AppRoutes() {
+  const { isAuthenticated, isLoading } = useAuth()
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    )
+  }
+
+  function PrivateRoute({ children }: { children: React.ReactNode }) {
+    return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
+  }
+
+  function PublicRoute({ children }: { children: React.ReactNode }) {
+    return !isAuthenticated ? <>{children}</> : <Navigate to="/dashboard" replace />
+  }
+
+  return (
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <PublicRoute>
+            <LandingPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <RegisterPage />
+          </PublicRoute>
+        }
+      />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
+      <Route
+        path="/dashboard"
+        element={
+          <PrivateRoute>
+            <DashboardPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/dashboard/upload"
+        element={
+          <PrivateRoute>
+            <UploadPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/dashboard/my-account"
+        element={
+          <PrivateRoute>
+            <MyAccountPage />
+          </PrivateRoute>
+        }
+      />
+    </Routes>
   )
 }
