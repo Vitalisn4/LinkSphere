@@ -1,19 +1,13 @@
-import { createContext } from 'react';
-
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-}
+import { User } from '../services/api';
+import { Dispatch, SetStateAction, createContext } from 'react';
 
 export interface AuthContextType {
   user: User | null;
+  setUser: Dispatch<SetStateAction<User | null>>;
   isAuthenticated: boolean;
+  setIsAuthenticated: Dispatch<SetStateAction<boolean>>;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, username: string, password: string) => Promise<void>;
-  verifyEmail: (email: string, otp: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null); 
