@@ -49,7 +49,7 @@ interface ApiError {
   message: string;
   error?: string;
   status: number;
-}
+  }
 
 const api = axios.create({
   baseURL: API_URL,
@@ -148,11 +148,11 @@ export const ApiService = {
       if (response.status >= 400) {
         throw new Error(response.data.message || 'Login failed');
       }
-
+      
       if (!response.data.success || !response.data.data) {
         throw new Error(response.data.message || 'Invalid response format');
       }
-
+      
       return response.data.data;
     } catch (error) {
       handleApiError(error as AxiosError<ApiError>);
