@@ -34,9 +34,9 @@ export default function HomePage() {
               className="px-6 py-3 border border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
             >
               Login
-            </button>
+                      </button>
           </div>
-        </div>
+          </div>
       </main>
     </div>
   );
