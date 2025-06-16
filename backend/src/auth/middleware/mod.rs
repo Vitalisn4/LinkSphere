@@ -1,3 +1,4 @@
+use crate::models::auth::Claims;
 use axum::{
     body::Body,
     extract::State,
@@ -6,7 +7,6 @@ use axum::{
     response::Response,
 };
 use jsonwebtoken::{decode, DecodingKey, Validation};
-use crate::models::auth::Claims;
 
 #[derive(Clone)]
 pub struct AuthMiddlewareState {
@@ -45,4 +45,4 @@ pub async fn auth_middleware(
 
     request.extensions_mut().insert(token_data.claims);
     Ok(next.run(request).await)
-} 
+}
