@@ -111,7 +111,6 @@ export default function UploadPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Form submission started")
 
     if (!user) {
       setErrors({ url: "Please log in to submit links" })
@@ -120,33 +119,25 @@ export default function UploadPage() {
     }
 
     if (!validate()) {
-      console.log("Validation failed:", errors)
       return
     }
 
     setIsSubmitting(true)
-    console.log("Submitting form data:", formData)
 
     try {
-      // Check if token exists
       const token = localStorage.getItem("token")
       if (!token) {
         throw new Error("Authentication token not found. Please log in again.")
       }
 
-      console.log("Making API request to create link...")
       const response = await ApiService.createLink(formData)
-      console.log("Link created successfully:", response)
-      
       setSuccessMessage("Link shared successfully!")
       setFormData({ title: "", url: "", description: "" })
       
-      // Redirect to dashboard after short delay
       setTimeout(() => {
         navigate('/dashboard')
       }, 2000)
     } catch (error) {
-      console.error("Error submitting:", error)
       if (error instanceof Error) {
         if (error.message.includes("foreign key constraint")) {
           localStorage.removeItem("token")
