@@ -3,11 +3,11 @@ mod links;
 
 use crate::api::models::VerifyEmailRequest;
 use crate::api::{ApiResponse, ErrorResponse};
+use crate::database::models::Link;
 use crate::models::auth::{AuthResponse, LoginRequest, RegisterRequest, User, UserStatus};
 use crate::models::user::Gender;
-use crate::database::models::Link;
 use utoipa::OpenApi;
-    
+
 type EmptyResponse = ApiResponse<()>;
 type AuthResponseWrapper = ApiResponse<AuthResponse>;
 type LinkResponse = ApiResponse<Link>;
