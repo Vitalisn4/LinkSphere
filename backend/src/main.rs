@@ -1,5 +1,5 @@
 use backend::{
-    api::{docs::ApiDoc},
+    api::docs::ApiDoc,
     auth::{self, middleware::AuthMiddlewareState},
     database,
     logging::init_logging,
