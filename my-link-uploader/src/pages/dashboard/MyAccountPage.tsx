@@ -30,8 +30,8 @@ export default function MyAccountPage() {
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div>
+          <div className="space-y-6">
+            <div>
             <label className={`block text-sm font-medium ${
               isDark ? "text-gray-300" : "text-gray-700"
             } mb-2`}>
