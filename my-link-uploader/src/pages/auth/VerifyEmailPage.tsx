@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import { Mail, ArrowRight, RefreshCw } from "lucide-react"
 import { useAuth } from "../../hooks/useAuth"
@@ -12,7 +12,6 @@ export default function VerifyEmailPage() {
   const [error, setError] = useState("")
   const [resendDisabled, setResendDisabled] = useState(true)
   const [countdown, setCountdown] = useState(30)
-  const location = useLocation()
   const navigate = useNavigate()
   const { verifyEmail, resendOtp } = useAuth()
 
