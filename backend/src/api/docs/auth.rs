@@ -1,7 +1,6 @@
 use crate::api::models::{ResendOtpRequest, VerifyEmailRequest};
 use crate::api::{ApiResponse, ErrorResponse};
-use crate::auth::models::{AuthResponse, LoginRequest, RegisterRequest};
-
+use crate::models::auth::{AuthResponse, LoginRequest, RegisterRequest};
 type EmptyResponse = ApiResponse<()>;
 type AuthResponseWrapper = ApiResponse<AuthResponse>;
 
