@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 pub mod docs;
 pub mod models;
+pub mod utils;
 
 use axum::{http::StatusCode, response::IntoResponse, Json};
 use chrono::{DateTime, Utc};
