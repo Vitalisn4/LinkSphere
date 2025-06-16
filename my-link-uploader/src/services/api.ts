@@ -35,14 +35,8 @@ export interface Link {
 
 export interface User {
   id: string;
-  username: string;
   email: string;
-}
-
-interface AuthResponse<T = unknown> {
-  success: boolean;
-  message: string;
-  data?: T;
+  username: string;
 }
 
 interface ApiError {
