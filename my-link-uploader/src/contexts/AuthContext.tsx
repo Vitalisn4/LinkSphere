@@ -1,4 +1,5 @@
 import React, { createContext, useState, Dispatch, SetStateAction } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ApiService, { User } from '../services/api';
 
 interface AuthContextType {
@@ -18,6 +19,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
 
   const login = async (email: string, password: string) => {
     try {
@@ -46,6 +48,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAuthenticated(false);
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      // Navigate to login page after logout
+      navigate('/login');
     } catch (error) {
       throw error;
     }
