@@ -64,32 +64,12 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  console.log('API Request:', {
-    url: config.url,
-    method: config.method,
-    data: config.data,
-  });
   return config;
 });
 
 api.interceptors.response.use(
-  (response) => {
-    console.log('API Response:', {
-      url: response.config.url,
-      status: response.status,
-      data: response.data,
-    });
-    return response;
-  },
-  (error: AxiosError<ApiError>) => {
-    console.error('API Error:', {
-      url: error.config?.url,
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message,
-    });
-    return Promise.reject(error);
-  }
+  (response) => response,
+  (error: AxiosError<ApiError>) => Promise.reject(error)
 );
 
 const handleApiError = (error: AxiosError<ApiError>) => {
@@ -122,18 +102,15 @@ export const ApiService = {
 
   async verifyEmail(email: string, otp: string): Promise<void> {
     try {
-      console.log('Sending verification request:', { email, otp });
       const response = await api.post<ApiResponse>('/auth/verify', {
         email,
         otp
       });
-      console.log('Verification response:', response.data);
       
       if (!response.data.success) {
         throw new Error(response.data.message || 'Verification failed');
       }
     } catch (error) {
-      console.error('Verification error:', error);
       handleApiError(error as AxiosError<ApiError>);
       throw error;
     }
@@ -141,13 +118,10 @@ export const ApiService = {
 
   async login(email: string, password: string): Promise<{ token: string; user: User }> {
     try {
-      console.log('Sending login request:', { email });
       const response = await api.post<ApiResponse<{ token: string; user: User }>>('/auth/login', {
         email,
         password
       });
-      
-      console.log('Login response:', response.data);
       
       if (!response.data.success || !response.data.data) {
         throw new Error(response.data.message || 'Login failed');
@@ -155,7 +129,6 @@ export const ApiService = {
       
       return response.data.data;
     } catch (error) {
-      console.error('Login error:', error);
       handleApiError(error as AxiosError<ApiError>);
       throw error;
     }
@@ -176,10 +149,7 @@ export const ApiService = {
 
   async getAllLinks(): Promise<Link[]> {
     try {
-      console.log('Fetching all links...');
       const response = await api.get<ApiResponse<Link[]>>('/links');
-      
-      console.log('Get all links response:', response.data);
       
       if (!response.data.success || !response.data.data) {
         throw new Error(response.data.message || 'Failed to fetch links');
@@ -187,7 +157,6 @@ export const ApiService = {
       
       return response.data.data;
     } catch (error) {
-      console.error('Error fetching links:', error);
       handleApiError(error as AxiosError<ApiError>);
       throw error;
     }
@@ -195,10 +164,7 @@ export const ApiService = {
 
   async createLink(data: Omit<Link, 'id' | 'created_at' | 'user_id'>): Promise<Link> {
     try {
-      console.log('Creating link with data:', data);
       const response = await api.post<ApiResponse<Link>>('/links', data);
-      
-      console.log('Create link response:', response.data);
       
       if (!response.data.success || !response.data.data) {
         throw new Error(response.data.message || 'Failed to create link');
@@ -206,7 +172,6 @@ export const ApiService = {
       
       return response.data.data;
     } catch (error) {
-      console.error('Error creating link:', error);
       handleApiError(error as AxiosError<ApiError>);
       throw error;
     }
