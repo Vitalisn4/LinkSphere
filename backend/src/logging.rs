@@ -58,13 +58,7 @@ pub fn generate_request_id() -> String {
 }
 
 /// Log a request with timing information
-pub fn log_request(
-    method: &str,
-    path: &str,
-    status: u16,
-    duration: Duration,
-    request_id: &str,
-) {
+pub fn log_request(method: &str, path: &str, status: u16, duration: Duration, request_id: &str) {
     tracing::info!(
         request_id = request_id,
         method = method,
