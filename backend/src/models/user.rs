@@ -7,4 +7,4 @@ pub enum Gender {
     Male,
     Female,
     Other,
-} 
+}

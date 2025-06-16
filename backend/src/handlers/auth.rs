@@ -1,17 +1,12 @@
-use axum::{
-    extract::State,
-    http::StatusCode,
-    response::IntoResponse,
-    Json,
+use crate::{
+    api::{ApiResponse, ErrorResponse},
+    auth::routes::AppState,
+    models::auth::{LoginRequest, RegisterRequest, VerifyEmailRequest},
 };
+use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use serde_json::json;
 use tokio::spawn;
 use validator::Validate;
-use crate::{
-    api::{ApiResponse, ErrorResponse},
-    models::auth::{LoginRequest, RegisterRequest, VerifyEmailRequest},
-    auth::routes::AppState,
-};
 
 /// Register a new user
 pub async fn register(
@@ -44,7 +39,7 @@ pub async fn register(
                     "email": user.email,
                     "username": user.username
                 }),
-                "Registration successful. Please check your email for verification code."
+                "Registration successful. Please check your email for verification code.",
             );
             (StatusCode::CREATED, Json(response)).into_response()
         }
@@ -61,17 +56,17 @@ pub async fn login(
     State(state): State<AppState>,
     Json(payload): Json<LoginRequest>,
 ) -> impl IntoResponse {
-    match state.auth_service.login(&payload.email, &payload.password).await {
+    match state
+        .auth_service
+        .login(&payload.email, &payload.password)
+        .await
+    {
         Ok(auth_response) => {
-            let response = ApiResponse::success_with_message(
-                auth_response,
-                "Login successful"
-            );
+            let response = ApiResponse::success_with_message(auth_response, "Login successful");
             (StatusCode::OK, Json(response)).into_response()
         }
         Err(e) => {
-            let error = ErrorResponse::new(format!("Login failed: {}", e))
-                .with_code("LOGIN_ERROR");
+            let error = ErrorResponse::new(format!("Login failed: {}", e)).with_code("LOGIN_ERROR");
             (StatusCode::UNAUTHORIZED, Json(error)).into_response()
         }
     }
@@ -82,17 +77,24 @@ pub async fn verify_email(
     State(state): State<AppState>,
     Json(payload): Json<VerifyEmailRequest>,
 ) -> impl IntoResponse {
-    if !state.email_service.verify_otp(&payload.email, &payload.otp).await {
-        let error = ErrorResponse::new("Invalid or expired OTP")
-            .with_code("INVALID_OTP");
+    if !state
+        .email_service
+        .verify_otp(&payload.email, &payload.otp)
+        .await
+    {
+        let error = ErrorResponse::new("Invalid or expired OTP").with_code("INVALID_OTP");
         return (StatusCode::BAD_REQUEST, Json(error)).into_response();
     }
 
-    match state.auth_service.complete_verification(&payload.email).await {
+    match state
+        .auth_service
+        .complete_verification(&payload.email)
+        .await
+    {
         Ok(_) => {
             let response = ApiResponse::success_with_message(
                 json!({"email": payload.email}),
-                "Email verified successfully"
+                "Email verified successfully",
             );
             (StatusCode::OK, Json(response)).into_response()
         }
@@ -102,4 +104,4 @@ pub async fn verify_email(
             (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response()
         }
     }
-} 
+}

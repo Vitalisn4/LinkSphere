@@ -4,8 +4,8 @@ use jsonwebtoken::{encode, EncodingKey, Header};
 use sqlx::PgPool;
 
 use crate::{
-    models::auth::{AuthResponse, Claims, RegisterRequest, User, UserStatus},
     database::queries,
+    models::auth::{AuthResponse, Claims, RegisterRequest, User, UserStatus},
 };
 
 #[derive(Clone)]
@@ -55,11 +55,7 @@ impl AuthService {
         .await
     }
 
-    pub async fn login(
-        &self,
-        email: &str,
-        password: &str,
-    ) -> Result<AuthResponse, sqlx::Error> {
+    pub async fn login(&self, email: &str, password: &str) -> Result<AuthResponse, sqlx::Error> {
         let user = sqlx::query_as!(
             User,
             r#"
@@ -124,4 +120,4 @@ impl AuthService {
         )
         .map_err(|e| sqlx::Error::Protocol(format!("Failed to create token: {}", e)))
     }
-} 
+}

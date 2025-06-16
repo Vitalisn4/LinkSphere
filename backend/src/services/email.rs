@@ -1,10 +1,6 @@
 use lettre::{
-    transport::smtp::authentication::Credentials,
-    AsyncSmtpTransport,
-    AsyncTransport,
-    Message,
-    Tokio1Executor,
-    message::header::ContentType,
+    message::header::ContentType, transport::smtp::authentication::Credentials, AsyncSmtpTransport,
+    AsyncTransport, Message, Tokio1Executor,
 };
 use rand::Rng;
 use reqwest;
@@ -42,11 +38,11 @@ impl EmailService {
 
     pub async fn send_otp(&self, email: &str) -> Result<(), Box<dyn std::error::Error>> {
         let otp = self.generate_otp();
-        
+
         // Store OTP in Redis with expiration
         let client = reqwest::Client::new();
         let set_url = format!("{}/set/otp:{}", self.upstash_url, email);
-        
+
         client
             .post(&set_url)
             .header("Authorization", format!("Bearer {}", self.upstash_token))
@@ -130,4 +126,4 @@ impl EmailService {
             .map(|_| rng.random_range(0..10).to_string())
             .collect()
     }
-} 
+}

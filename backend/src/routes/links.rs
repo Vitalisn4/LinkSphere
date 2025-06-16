@@ -8,8 +8,8 @@ use axum::{
 use crate::database::queries::{create_link, increment_click_count};
 use crate::{
     api::{models::CreateLinkRequest, ApiResponse, ErrorResponse},
-    middleware::auth::AuthUser,
     database::{self, models::Link, PgPool},
+    middleware::auth::AuthUser,
     services::link_preview::fetch_link_preview,
 };
 use uuid::Uuid;
@@ -110,7 +110,7 @@ pub async fn handle_create_link(
     let pool_clone = pool.clone();
     let url = payload.url.clone();
     let link_id = link.id;
-    
+
     tokio::spawn(async move {
         if let Ok(preview) = fetch_link_preview(&url).await {
             // Update the link with the preview

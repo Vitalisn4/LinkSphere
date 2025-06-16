@@ -124,4 +124,4 @@ fn validate_username(username: &str) -> Result<(), validator::ValidationError> {
     } else {
         Err(validator::ValidationError::new("invalid_username"))
     }
-} 
+}

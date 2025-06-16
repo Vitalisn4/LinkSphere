@@ -8,11 +8,7 @@ use axum::{
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use uuid::Uuid;
 
-use crate::{
-    api::ErrorResponse,
-    models::auth::Claims,
-    services::auth::AuthService,
-};
+use crate::{api::ErrorResponse, models::auth::Claims, services::auth::AuthService};
 
 #[derive(Clone, Debug)]
 pub struct AuthUser {
@@ -56,8 +52,7 @@ pub async fn auth(
         &Validation::default(),
     )
     .map_err(|e| {
-        let error = ErrorResponse::new(format!("Invalid token: {}", e))
-            .with_code("INVALID_TOKEN");
+        let error = ErrorResponse::new(format!("Invalid token: {}", e)).with_code("INVALID_TOKEN");
         (StatusCode::UNAUTHORIZED, error)
     })?;
 
@@ -66,4 +61,4 @@ pub async fn auth(
     request.extensions_mut().insert(auth_user);
 
     Ok(next.run(request).await)
-} 
+}
