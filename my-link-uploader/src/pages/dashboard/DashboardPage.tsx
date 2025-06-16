@@ -26,14 +26,11 @@ export default function DashboardPage() {
   const fetchLinks = async () => {
     try {
       setIsLoading(true);
-      console.log('Fetching links...');
       const data = await ApiService.getAllLinks();
-      console.log('Fetched links:', data);
       setLinks(data);
-      setFilteredLinks(data); // Set both links and filteredLinks
+      setFilteredLinks(data);
       setError(null);
     } catch (error) {
-      console.error('Error fetching links:', error);
       if (error instanceof Error && error.message.includes('unauthorized')) {
         navigate('/login');
       } else {
@@ -91,13 +88,11 @@ export default function DashboardPage() {
   const formatDate = (dateString: string | null | undefined): string => {
     if (!dateString) return 'N/A';
     try {
-      // Remove any trailing 'Z' if it exists and add it back properly
       const cleanDate = dateString.endsWith('Z') 
         ? dateString 
         : dateString + 'Z';
       return formatInTimeZone(new Date(cleanDate), 'Africa/Douala', 'MMM d, yyyy');
     } catch (error) {
-      console.error('Error formatting date:', dateString, error);
       return 'Invalid date';
     }
   };
@@ -105,13 +100,11 @@ export default function DashboardPage() {
   const formatTime = (dateString: string | null | undefined): string => {
     if (!dateString) return 'N/A';
     try {
-      // Remove any trailing 'Z' if it exists and add it back properly
       const cleanDate = dateString.endsWith('Z') 
         ? dateString 
         : dateString + 'Z';
       return formatInTimeZone(new Date(cleanDate), 'Africa/Douala', 'HH:mm');
     } catch (error) {
-      console.error('Error formatting time:', dateString, error);
       return 'Invalid time';
     }
   };
