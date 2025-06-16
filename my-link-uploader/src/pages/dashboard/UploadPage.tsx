@@ -19,9 +19,7 @@ interface FormData {
 }
 
 interface FormErrors {
-  title?: string
   url?: string
-  description?: string
 }
 
 export default function UploadPage() {
@@ -70,86 +68,17 @@ export default function UploadPage() {
     }
   }
 
-  const validate = (): boolean => {
-    const newErrors: FormErrors = {}
-
-    // Title validation
-    if (!formData.title.trim()) {
-      newErrors.title = "Title is required"
-    } else if (formData.title.length < 3) {
-      newErrors.title = "Title must be at least 3 characters"
-    } else if (formData.title.length > 100) {
-      newErrors.title = "Title must be less than 100 characters"
-    }
-
-    // URL validation
-    if (!formData.url) {
-      newErrors.url = "URL is required"
-    } else {
-      try {
-        const url = new URL(formData.url)
-        if (!['http:', 'https:'].includes(url.protocol)) {
-          newErrors.url = "URL must start with http:// or https://"
-        }
-      } catch {
-        newErrors.url = "Please enter a valid URL"
-      }
-    }
-
-    // Description validation
-    if (!formData.description.trim()) {
-      newErrors.description = "Description is required"
-    } else if (formData.description.length < 10) {
-      newErrors.description = "Description must be at least 10 characters"
-    } else if (formData.description.length > 500) {
-      newErrors.description = "Description must be less than 500 characters"
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (!user) {
-      setErrors({ url: "Please log in to submit links" })
-      navigate('/login')
-      return
-    }
-
-    if (!validate()) {
-      return
-    }
-
     setIsSubmitting(true)
-
     try {
-      const token = localStorage.getItem("token")
-      if (!token) {
-        throw new Error("Authentication token not found. Please log in again.")
-      }
-
-      const response = await ApiService.createLink(formData)
+      await ApiService.createLink(formData)
       setSuccessMessage("Link shared successfully!")
       setFormData({ title: "", url: "", description: "" })
-      
-      setTimeout(() => {
-        navigate('/dashboard')
-      }, 2000)
+      navigate('/dashboard')
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.message.includes("foreign key constraint")) {
-          localStorage.removeItem("token")
-          localStorage.removeItem("user")
-          setErrors({ url: "Your session has expired. Please log in again." })
-          navigate('/login')
-        } else {
-          setErrors({ url: error.message })
-        }
-      } else {
-        setErrors({ url: "Failed to submit link. Please try again." })
-      }
+      console.error('Error creating link:', error)
+      setErrors({ url: "Failed to create link. Please try again." })
     } finally {
       setIsSubmitting(false)
     }
