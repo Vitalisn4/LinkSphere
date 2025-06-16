@@ -97,7 +97,7 @@ impl AuthService {
     }
 
     pub async fn complete_verification(&self, email: &str) -> Result<(), sqlx::Error> {
-        Ok(queries::complete_registration(&self.pool, email).await?)
+        queries::complete_registration(&self.pool, email).await
     }
 
     fn create_token(&self, user: &User) -> Result<String, sqlx::Error> {
