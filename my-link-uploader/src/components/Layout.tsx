@@ -28,11 +28,21 @@ export default function Layout({ children }: LayoutProps) {
 
   const isActive = (path: string) => location.pathname === path
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // Navigation is now handled in the AuthContext
+    } catch (error) {
+      // Handle any logout errors
+      console.error('Logout failed:', error);
+    }
+  };
+
   return (
-    <div className={`min-h-screen ${isDark ? "bg-gray-900 text-white" : "bg-white text-gray-900"}`}>
+    <div className={`min-h-screen flex flex-col ${isDark ? "bg-gray-900 text-white" : "bg-white text-gray-900"}`}>
       <header className={`sticky top-0 z-50 backdrop-blur-md border-b ${
-        isDark 
-          ? "bg-gray-800/80 border-gray-700" 
+        isDark
+          ? "bg-gray-800/80 border-gray-700"
           : "bg-white/80 border-gray-200"
       }`}>
         <div className="w-full px-6 py-4 flex items-center justify-between">
@@ -83,8 +93,8 @@ export default function Layout({ children }: LayoutProps) {
             <button
               onClick={toggleTheme}
               className={`p-3 rounded-lg transition-colors ${
-                isDark 
-                  ? "hover:bg-gray-700" 
+                isDark
+                  ? "hover:bg-gray-700"
                   : "hover:bg-gray-100"
               }`}
               aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
@@ -102,7 +112,7 @@ export default function Layout({ children }: LayoutProps) {
                   Welcome, {user.username}
                 </span>
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 text-base ${
                     isDark
                       ? "bg-red-500/10 text-red-400 hover:bg-red-500/20"
@@ -179,6 +189,17 @@ export default function Layout({ children }: LayoutProps) {
               <MobileNavLink to="/dashboard" icon={<LayoutDashboard size={20} />} label="Dashboard" isDark={isDark} />
               <MobileNavLink to="/dashboard/upload" icon={<Upload size={20} />} label="Upload" isDark={isDark} />
               <MobileNavLink to="/dashboard/my-account" icon={<User size={20} />} label="Account" isDark={isDark} />
+              <button
+                onClick={handleLogout}
+                className={`flex flex-col items-center p-2 rounded-lg transition-colors ${
+                  isDark
+                    ? "text-red-400 hover:bg-red-500/10"
+                    : "text-red-500 hover:bg-red-50"
+                }`}
+              >
+                <LogOut size={20} />
+                <span className="text-xs mt-1">Logout</span>
+              </button>
             </>
           ) : (
             <>
