@@ -1,13 +1,12 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import React, { useState, useEffect, useRef, useCallback } from "react"
 import { motion } from "framer-motion"
 import { Search, ExternalLink, Calendar, User, Clock } from "lucide-react"
-import { format } from "date-fns"
-import { formatInTimeZone } from 'date-fns-tz'
+import { Link } from "../../types"
 import { useAuth } from "../../hooks/useAuth"
 import { useTheme } from "../../hooks/useTheme"
-import ApiService, { Link } from "../../services/api"
+import ApiService from "../../services/api"
 import { useNavigate } from "react-router-dom"
 
 export default function DashboardPage() {
@@ -22,8 +21,7 @@ export default function DashboardPage() {
   const { isDark } = useTheme()
   const navigate = useNavigate()
 
-  // Simplified fetch function
-  const fetchLinks = async () => {
+  const fetchLinks = useCallback(async () => {
     try {
       setIsLoading(true);
       const data = await ApiService.getAllLinks();
@@ -39,17 +37,11 @@ export default function DashboardPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [navigate]);
 
-  // Initial fetch on mount
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
     fetchLinks();
-  }, []); // Only run on mount
+  }, [fetchLinks]);
 
   // Handle search
   useEffect(() => {
