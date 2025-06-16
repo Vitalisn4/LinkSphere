@@ -1,10 +1,7 @@
-use axum::{
-    routing::{post},
-    Router,
-};
-use sqlx::PgPool;
 use crate::handlers::auth::{login, register, verify_email};
 use crate::services::{auth::AuthService, email::EmailService};
+use axum::{routing::post, Router};
+use sqlx::PgPool;
 use std::env;
 
 #[derive(Clone)]
@@ -21,10 +18,10 @@ pub fn create_router(pool: PgPool) -> Router {
         auth_service,
         email_service,
     };
-    
+
     Router::new()
         .route("/register", post(register))
         .route("/login", post(login))
         .route("/verify-email", post(verify_email))
         .with_state(state)
-} 
+}
