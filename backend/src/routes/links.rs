@@ -8,7 +8,7 @@ use axum::{
 use crate::database::queries::{create_link, increment_click_count};
 use crate::{
     api::{models::CreateLinkRequest, ApiResponse, ErrorResponse},
-    auth::middleware::AuthUser,
+    middleware::auth::AuthUser,
     database::{self, models::Link, PgPool},
     services::link_preview::fetch_link_preview,
 };
@@ -87,36 +87,50 @@ pub async fn handle_create_link(
         return (StatusCode::UNPROCESSABLE_ENTITY, Json(error)).into_response();
     }
 
-    // Fetch link preview
-    let preview = match fetch_link_preview(&payload.url).await {
-        Ok(preview) => Some(preview),
-        Err(e) => {
-            eprintln!("Failed to fetch link preview: {}", e);
-            None
-        }
-    };
-
-    // Create the link using the user ID from the JWT token
-    match create_link(
+    // Create the link first without preview
+    let link = match create_link(
         &pool,
-        payload.url,
+        payload.url.clone(),
         payload.title,
         payload.description,
         user.id,
-        preview.as_ref(),
+        None, // No preview initially
     )
     .await
     {
-        Ok(link) => {
-            let response = ApiResponse::success_with_message(link, "Link created successfully");
-            (StatusCode::CREATED, Json(response)).into_response()
-        }
+        Ok(link) => link,
         Err(e) => {
             let error = ErrorResponse::new(format!("Failed to create link: {}", e))
                 .with_code("LINK_CREATE_ERROR");
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response()
+            return (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response();
         }
-    }
+    };
+
+    // Spawn a task to fetch and update the preview asynchronously
+    let pool_clone = pool.clone();
+    let url = payload.url.clone();
+    let link_id = link.id;
+    
+    tokio::spawn(async move {
+        if let Ok(preview) = fetch_link_preview(&url).await {
+            // Update the link with the preview
+            let _ = sqlx::query!(
+                r#"
+                UPDATE links 
+                SET preview = $1 
+                WHERE id = $2
+                "#,
+                serde_json::to_value(preview).ok() as _,
+                link_id
+            )
+            .execute(&pool_clone)
+            .await;
+        }
+    });
+
+    // Return the created link immediately
+    let response = ApiResponse::success_with_message(link, "Link created successfully");
+    (StatusCode::CREATED, Json(response)).into_response()
 }
 
 /// Track a link click
