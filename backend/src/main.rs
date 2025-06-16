@@ -1,14 +1,12 @@
-mod api;
-mod auth;
-mod database;
-mod logging;
-mod middleware;
-mod routes;
-mod services;
-use crate::api::docs::ApiDoc;
-use crate::auth::middleware::AuthMiddlewareState;
-use crate::logging::init_logging;
-use crate::middleware::request_logger::request_logger;
+use backend::{
+    api::{docs::ApiDoc},
+    auth::{self, middleware::AuthMiddlewareState},
+    database,
+    logging::init_logging,
+    middleware::request_logger::request_logger,
+    routes,
+};
+
 use axum::routing::get;
 use axum::{
     http::{HeaderName, Method},
