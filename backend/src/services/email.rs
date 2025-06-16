@@ -109,7 +109,9 @@ impl EmailService {
     </div>
   </div>
 </body>
-</html>"##, otp);
+</html>"##,
+            otp
+        );
 
         let email_message = Message::builder()
             .from("LinkSphere <noreply@linksphere.com>".parse()?)
@@ -138,7 +140,9 @@ impl EmailService {
                         if let Some(result) = json.get("result").and_then(|v| v.as_str()) {
                             match serde_json::from_str::<serde_json::Value>(result) {
                                 Ok(parsed) => {
-                                    if let Some(stored_otp) = parsed.get("value").and_then(|v| v.as_str()) {
+                                    if let Some(stored_otp) =
+                                        parsed.get("value").and_then(|v| v.as_str())
+                                    {
                                         return stored_otp == otp;
                                     }
                                     println!("No 'value' field found in parsed JSON: {:?}", parsed);
@@ -162,8 +166,6 @@ impl EmailService {
 
     fn generate_otp(&self) -> String {
         let mut rng = rand::thread_rng();
-        (0..6)
-            .map(|_| rng.gen_range(0..10).to_string())
-            .collect()
+        (0..6).map(|_| rng.gen_range(0..10).to_string()).collect()
     }
 }
