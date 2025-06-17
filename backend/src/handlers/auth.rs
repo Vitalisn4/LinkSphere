@@ -1,16 +1,18 @@
 use crate::{
     api::{ApiResponse, ErrorResponse},
     auth::routes::AppState,
-    models::auth::{LoginRequest, RegisterRequest, VerifyEmailRequest, ResendOtpRequest, UserStatus, User},
+    models::auth::{
+        LoginRequest, RegisterRequest, ResendOtpRequest, User, UserStatus, VerifyEmailRequest,
+    },
 };
 use axum::{
     extract::State,
-    http::{StatusCode, HeaderMap},
+    http::{HeaderMap, StatusCode},
     response::IntoResponse,
     Json,
 };
 use axum_macros::debug_handler;
-use serde::{Deserialize};
+use serde::Deserialize;
 use serde_json::json;
 use validator::Validate;
 
@@ -28,7 +30,11 @@ pub async fn register(
     }
 
     // Check if user already exists first
-    match state.auth_service.check_user_exists(&payload.email, &payload.username).await {
+    match state
+        .auth_service
+        .check_user_exists(&payload.email, &payload.username)
+        .await
+    {
         Ok(true) => {
             let error = ErrorResponse::new("User with this email or username already exists")
                 .with_code("USER_EXISTS");
@@ -304,7 +310,11 @@ pub async fn reset_otp_attempts(
     };
 
     // Reset attempts counter with admin privileges
-    if let Err(e) = state.email_service.admin_reset_attempts(&payload.email, "").await {
+    if let Err(e) = state
+        .email_service
+        .admin_reset_attempts(&payload.email, "")
+        .await
+    {
         let response = ApiResponse {
             success: false,
             message: format!("Failed to reset attempts: {}", e),
@@ -379,7 +389,11 @@ pub async fn admin_reset_otp_attempts(
     };
 
     // Reset attempts counter with admin privileges
-    if let Err(e) = state.email_service.admin_reset_attempts(&payload.email, admin_token).await {
+    if let Err(e) = state
+        .email_service
+        .admin_reset_attempts(&payload.email, admin_token)
+        .await
+    {
         let response = ApiResponse {
             success: false,
             message: format!("Failed to reset attempts: {}", e),
