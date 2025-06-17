@@ -1,10 +1,10 @@
 use backend::{
     api::docs::ApiDoc,
-    auth::{self, middleware::AuthMiddlewareState},
+    auth::{self},
     database,
     logging::init_logging,
-    middleware::request_logger::request_logger,
-    routes,
+    middleware::{auth::auth, request_logger::request_logger},
+    routes, services::auth::AuthService,
 };
 
 use axum::routing::get;
@@ -40,7 +40,7 @@ async fn main() {
 
     // JWT secret
     let jwt_secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
-    let auth_middleware_state = AuthMiddlewareState::new(jwt_secret.clone());
+    let auth_service = AuthService::new(pool.clone(), jwt_secret.clone());
     let frontend_request_url =
         env::var("FRONTEND_REQUEST_URL").expect("FRONTEND_REQUEST_URL must be set");
     // CORS configuration
@@ -61,8 +61,8 @@ async fn main() {
         .merge(auth::create_router(pool.clone()))
         .merge(
             routes::create_protected_router(pool).layer(from_fn_with_state(
-                auth_middleware_state.clone(),
-                auth::middleware::auth_middleware,
+                auth_service,
+                auth,
             )),
         )
         .layer(cors)
