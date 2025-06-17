@@ -44,7 +44,10 @@ impl EmailService {
         // Check rate limiting
         let attempts = self.get_attempt_count(email).await?;
         if attempts >= MAX_OTP_ATTEMPTS {
-            return Err("Maximum OTP attempts exceeded. Please contact support to unlock your account.".into());
+            return Err(
+                "Maximum OTP attempts exceeded. Please contact support to unlock your account."
+                    .into(),
+            );
         }
 
         let otp = self.generate_otp();
@@ -76,7 +79,7 @@ impl EmailService {
 
         // Create and send email with retry logic
         let email_message = self.create_email_message(email, &otp)?;
-        
+
         for attempt in 1..=MAX_RETRY_ATTEMPTS {
             match self.smtp_transport.send(email_message.clone()).await {
                 Ok(_) => return Ok(()),
@@ -121,22 +124,26 @@ impl EmailService {
     }
 
     /// Admin-only function to reset OTP attempts for blocked users
-    pub async fn admin_reset_attempts(&self, email: &str, admin_token: &str) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn admin_reset_attempts(
+        &self,
+        email: &str,
+        admin_token: &str,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         // Verify admin token
-        let expected_token = env::var("ADMIN_SECRET_KEY")
-            .map_err(|_| "Admin secret not configured")?;
-        
+        let expected_token =
+            env::var("ADMIN_SECRET_KEY").map_err(|_| "Admin secret not configured")?;
+
         if admin_token != expected_token {
             return Err("Invalid admin token".into());
         }
 
         // Delete both the OTP and attempts counter from Redis
         let client = reqwest::Client::new();
-        
+
         // Delete attempts counter
         let del_attempts_url = format!("{}/del/attempts:{}", self.upstash_url, email);
         let del_otp_url = format!("{}/del/otp:{}", self.upstash_url, email);
-        
+
         // Try to delete both keys, but don't fail if one doesn't exist
         for url in [del_attempts_url, del_otp_url] {
             match client
@@ -160,7 +167,11 @@ impl EmailService {
             .collect()
     }
 
-    fn create_email_message(&self, to_email: &str, otp: &str) -> Result<Message, Box<dyn std::error::Error>> {
+    fn create_email_message(
+        &self,
+        to_email: &str,
+        otp: &str,
+    ) -> Result<Message, Box<dyn std::error::Error>> {
         let email_html = format!(
             r####"<!DOCTYPE html>
 <html lang="en">
@@ -371,8 +382,8 @@ impl EmailService {
         let client = reqwest::Client::new();
         let get_url = format!("{}/get/otp:{}", self.upstash_url, email);
 
-        println!("Verifying OTP for email: {} with OTP: {}", email, otp);  // Debug log
-        println!("Redis URL: {}", get_url);  // Debug log
+        println!("Verifying OTP for email: {} with OTP: {}", email, otp); // Debug log
+        println!("Redis URL: {}", get_url); // Debug log
 
         match client
             .get(&get_url)
@@ -381,14 +392,14 @@ impl EmailService {
             .await
         {
             Ok(response) => {
-                println!("Redis response status: {}", response.status());  // Debug log
+                println!("Redis response status: {}", response.status()); // Debug log
                 let response_text = response.text().await.unwrap_or_default();
-                println!("Redis raw response: {}", response_text);  // Debug log
+                println!("Redis raw response: {}", response_text); // Debug log
 
                 match serde_json::from_str::<serde_json::Value>(&response_text) {
                     Ok(json) => {
-                        println!("Redis parsed JSON: {:?}", json);  // Debug log
-                        
+                        println!("Redis parsed JSON: {:?}", json); // Debug log
+
                         // Handle null result case
                         if json.get("result").is_none() || json.get("result").unwrap().is_null() {
                             println!("No OTP found for email");
@@ -396,19 +407,24 @@ impl EmailService {
                         }
 
                         // Parse the nested JSON string from the result
-                        let result_str = json.get("result")
+                        let result_str = json
+                            .get("result")
                             .and_then(|v| v.as_str())
                             .unwrap_or_default();
 
                         match serde_json::from_str::<serde_json::Value>(result_str) {
                             Ok(nested_json) => {
-                                let stored_otp = nested_json.get("value")
+                                let stored_otp = nested_json
+                                    .get("value")
                                     .and_then(|v| v.as_str())
                                     .unwrap_or_default();
 
-                                println!("Comparing OTP: stored='{}' vs provided='{}'", stored_otp, otp);  // Debug log
+                                println!(
+                                    "Comparing OTP: stored='{}' vs provided='{}'",
+                                    stored_otp, otp
+                                ); // Debug log
                                 let matches = stored_otp == otp;
-                                println!("OTP match result: {}", matches);  // Debug log
+                                println!("OTP match result: {}", matches); // Debug log
                                 matches
                             }
                             Err(e) => {
