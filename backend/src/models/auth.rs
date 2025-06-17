@@ -19,11 +19,12 @@ impl std::fmt::Display for Gender {
 }
 
 #[derive(Debug, Serialize, Deserialize, sqlx::Type, ToSchema, PartialEq, Clone)]
-#[sqlx(type_name = "user_status", rename_all = "lowercase")]
+#[sqlx(type_name = "user_status", rename_all = "snake_case")]
 pub enum UserStatus {
     Active,
     Inactive,
     Suspended,
+    PendingVerification,
 }
 
 #[derive(Debug, Serialize, Deserialize, Validate, ToSchema, Clone)]
