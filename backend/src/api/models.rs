@@ -8,7 +8,7 @@ use validator::Validate;
 #[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct CreateLinkRequest {
     /// The complete URL to be added. Must be a valid URL starting with http:// or https://
-    #[validate(url(message = "Invalid URL format"))]
+    #[validate(url(message = "Invalid URL format. Please ensure it starts with http:// or https://"))]
     #[schema(example = "https://www.rust-lang.org")]
     pub url: String,
 
@@ -32,8 +32,12 @@ pub struct CreateLinkRequest {
 }
 
 impl CreateLinkRequest {
-    pub fn validate_url(&self) -> Result<Url, url::ParseError> {
-        Url::parse(&self.url)
+    pub fn validate_url(&self) -> Result<Url, String> {
+        match Url::parse(&self.url) {
+            Ok(url) if url.scheme() == "http" || url.scheme() == "https" => Ok(url),
+            Ok(_) => Err("URL must use http or https protocol".to_string()),
+            Err(e) => Err(format!("Invalid URL: {}", e)),
+        }
     }
 }
 
