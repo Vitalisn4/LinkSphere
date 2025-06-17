@@ -15,6 +15,7 @@ use axum::{
     Router,
 };
 use dotenv::dotenv;
+use services::auth::AuthService;
 use std::env;
 use std::net::SocketAddr;
 use tower_http::cors::CorsLayer;
