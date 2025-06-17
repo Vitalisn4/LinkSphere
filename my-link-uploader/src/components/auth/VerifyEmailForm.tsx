@@ -3,12 +3,14 @@ import { motion } from "framer-motion";
 import { Mail, CheckCircle, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { formatInTimeZone } from 'date-fns-tz';
 
 export default function VerifyEmailForm() {
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState("");
+  const [countdown, setCountdown] = useState(0);
   const navigate = useNavigate();
   const { verifyEmail, resendOtp } = useAuth();
 
@@ -22,6 +24,18 @@ export default function VerifyEmailForm() {
     }
   }, [email, navigate]);
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [countdown]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -29,7 +43,14 @@ export default function VerifyEmailForm() {
     
     try {
       await verifyEmail(email!, otp);
-      navigate("/login");
+      // Clear the pending verification email
+      sessionStorage.removeItem("pendingVerificationEmail");
+      // Show success message and redirect to login
+      navigate("/login", { 
+        state: { 
+          message: "Email verified successfully! You can now login to your account." 
+        }
+      });
     } catch (error) {
       setError(error instanceof Error ? error.message : "Verification failed. Please try again.");
     } finally {
@@ -38,10 +59,13 @@ export default function VerifyEmailForm() {
   };
 
   const handleResendOtp = async () => {
+    if (countdown > 0) return;
+    
     setIsResending(true);
     setError("");
     try {
       await resendOtp(email!);
+      setCountdown(30); // Start 30 second countdown
     } catch (error) {
       setError(error instanceof Error ? error.message : "Failed to resend OTP. Please try again.");
     } finally {
@@ -136,11 +160,11 @@ export default function VerifyEmailForm() {
           <button
             type="button"
             onClick={handleResendOtp}
-            disabled={isResending}
+            disabled={countdown > 0 || isResending}
             className="text-purple-600 hover:text-purple-700 font-medium inline-flex items-center disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transition-transform duration-300"
           >
             <RefreshCw size={16} className={`mr-1 ${isResending ? "animate-spin" : ""}`} />
-            Resend verification code
+            {countdown > 0 ? `Resend in ${countdown}s` : "Resend verification code"}
           </button>
         </div>
       </motion.form>
