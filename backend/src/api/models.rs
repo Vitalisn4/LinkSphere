@@ -8,7 +8,9 @@ use validator::Validate;
 #[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct CreateLinkRequest {
     /// The complete URL to be added. Must be a valid URL starting with http:// or https://
-    #[validate(url(message = "Invalid URL format. Please ensure it starts with http:// or https://"))]
+    #[validate(url(
+        message = "Invalid URL format. Please ensure it starts with http:// or https://"
+    ))]
     #[schema(example = "https://www.rust-lang.org")]
     pub url: String,
 
@@ -49,17 +51,17 @@ lazy_static::lazy_static! {
 pub struct RegisterRequest {
     #[validate(email(message = "Invalid email format"))]
     pub email: String,
-    
+
     #[validate(length(min = 6, message = "Password must be at least 6 characters long"))]
     pub password: String,
-    
+
     #[validate(length(min = 3, max = 50))]
     #[validate(custom(
         function = "validate_username",
         message = "Username must be alphanumeric with underscores only"
     ))]
     pub username: String,
-    
+
     pub gender: crate::models::auth::Gender,
 }
 
