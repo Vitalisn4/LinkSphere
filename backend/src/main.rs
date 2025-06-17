@@ -4,7 +4,8 @@ use backend::{
     database,
     logging::init_logging,
     middleware::{auth::auth, request_logger::request_logger},
-    routes, services::auth::AuthService,
+    routes,
+    services::auth::AuthService,
 };
 
 use axum::routing::get;
@@ -59,12 +60,7 @@ async fn main() {
         .route("/health", get(routes::health::root))
         .merge(routes::create_public_router(pool.clone()))
         .merge(auth::create_router(pool.clone()))
-        .merge(
-            routes::create_protected_router(pool).layer(from_fn_with_state(
-                auth_service,
-                auth,
-            )),
-        )
+        .merge(routes::create_protected_router(pool).layer(from_fn_with_state(auth_service, auth)))
         .layer(cors)
         .layer(from_fn(request_logger));
 
