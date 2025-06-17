@@ -15,7 +15,7 @@ export default function DashboardPage() {
   const [filteredLinks, setFilteredLinks] = useState<Link[]>([])
   const [isSearchFocused, setIsSearchFocused] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [, setError] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const auth = useAuth()
   const { isDark } = useTheme()
