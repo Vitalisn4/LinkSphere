@@ -371,6 +371,9 @@ impl EmailService {
         let client = reqwest::Client::new();
         let get_url = format!("{}/get/otp:{}", self.upstash_url, email);
 
+        println!("Verifying OTP for email: {} with OTP: {}", email, otp);  // Debug log
+        println!("Redis URL: {}", get_url);  // Debug log
+
         match client
             .get(&get_url)
             .header("Authorization", format!("Bearer {}", self.upstash_token))
@@ -378,30 +381,50 @@ impl EmailService {
             .await
         {
             Ok(response) => {
-                match response.json::<serde_json::Value>().await {
+                println!("Redis response status: {}", response.status());  // Debug log
+                let response_text = response.text().await.unwrap_or_default();
+                println!("Redis raw response: {}", response_text);  // Debug log
+
+                match serde_json::from_str::<serde_json::Value>(&response_text) {
                     Ok(json) => {
-                        if let Some(result) = json.get("result").and_then(|v| v.as_str()) {
-                            match serde_json::from_str::<serde_json::Value>(result) {
-                                Ok(parsed) => {
-                                    if let Some(stored_otp) =
-                                        parsed.get("value").and_then(|v| v.as_str())
-                                    {
-                                        return stored_otp == otp;
-                                    }
-                                    println!("No 'value' field found in parsed JSON: {:?}", parsed);
-                                }
-                                Err(e) => println!("Failed to parse result JSON: {}", e),
+                        println!("Redis parsed JSON: {:?}", json);  // Debug log
+                        
+                        // Handle null result case
+                        if json.get("result").is_none() || json.get("result").unwrap().is_null() {
+                            println!("No OTP found for email");
+                            return false;
+                        }
+
+                        // Parse the nested JSON string from the result
+                        let result_str = json.get("result")
+                            .and_then(|v| v.as_str())
+                            .unwrap_or_default();
+
+                        match serde_json::from_str::<serde_json::Value>(result_str) {
+                            Ok(nested_json) => {
+                                let stored_otp = nested_json.get("value")
+                                    .and_then(|v| v.as_str())
+                                    .unwrap_or_default();
+
+                                println!("Comparing OTP: stored='{}' vs provided='{}'", stored_otp, otp);  // Debug log
+                                let matches = stored_otp == otp;
+                                println!("OTP match result: {}", matches);  // Debug log
+                                matches
                             }
-                        } else {
-                            println!("No 'result' field found in response: {:?}", json);
+                            Err(e) => {
+                                println!("Failed to parse nested JSON: {}", e);
+                                false
+                            }
                         }
                     }
-                    Err(e) => println!("Failed to parse response JSON: {}", e),
+                    Err(e) => {
+                        println!("Failed to parse Redis response: {}", e);
+                        false
+                    }
                 }
-                false
             }
             Err(e) => {
-                println!("Failed to send request: {}", e);
+                println!("Failed to send request to Redis: {}", e);
                 false
             }
         }
