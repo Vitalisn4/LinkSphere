@@ -178,9 +178,6 @@ export default function UploadPage() {
       
       setSuccessMessage("Link shared successfully!");
       setFormData({ title: "", url: "", description: "" });
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 2000);
     } catch (error) {
       console.error('Error creating link:', error);
       if (error instanceof Error) {
@@ -210,11 +207,14 @@ export default function UploadPage() {
           </div>
           <h2 className="text-2xl font-bold mb-4">{successMessage}</h2>
           <p className={isDark ? "text-gray-300" : "text-gray-600"}>
-            Your link has been successfully added to LinkSphere!
+            What would you like to do next?
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <button
-              onClick={() => setSuccessMessage(null)}
+              onClick={() => {
+                setSuccessMessage(null);
+                setFormData({ title: "", url: "", description: "" });
+              }}
               className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
                 isDark
                   ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
@@ -243,13 +243,11 @@ export default function UploadPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className={`text-3xl font-bold mb-2 ${
-            isDark ? "text-gray-100" : "text-gray-800"
-          }`}>
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
             Share a Link
           </h1>
           <motion.p
-            className={`text-xl ${
+            className={`text-xl font-bold ${
               isDark ? "text-gray-400" : "text-gray-600"
             }`}
             initial={{ opacity: 0 }}
