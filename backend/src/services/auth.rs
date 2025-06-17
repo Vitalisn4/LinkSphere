@@ -23,6 +23,14 @@ impl AuthService {
         &self.jwt_secret
     }
 
+    pub fn get_pool(&self) -> &PgPool {
+        &self.pool
+    }
+
+    pub async fn check_user_exists(&self, email: &str, username: &str) -> Result<bool, sqlx::Error> {
+        queries::check_user_exists(&self.pool, email, username).await
+    }
+
     pub async fn register(&self, req: RegisterRequest) -> Result<User, sqlx::Error> {
         let password_hash = hash(req.password.as_bytes(), DEFAULT_COST)
             .map_err(|e| sqlx::Error::Protocol(format!("Failed to hash password: {}", e)))?;
@@ -49,7 +57,7 @@ impl AuthService {
             req.username,
             password_hash,
             req.gender as _,
-            UserStatus::Inactive as _
+            UserStatus::PendingVerification as _
         )
         .fetch_one(&self.pool)
         .await
