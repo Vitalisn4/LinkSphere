@@ -68,11 +68,15 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
+}, (error) => {
+  return Promise.reject(error);
 });
 
 api.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<ApiError>) => Promise.reject(error)
+  (error: AxiosError<ApiError>) => {
+    return Promise.reject(error);
+  }
 );
 
 const handleApiError = (error: AxiosError<ApiError>) => {
@@ -136,13 +140,13 @@ export const ApiService = {
       });
       
       if (!response.data.success || !response.data.data) {
-        throw new Error(response.data.message || 'Login failed');
+        throw new Error('Invalid credentials');
       }
       
       return response.data.data;
     } catch (error) {
-      handleApiError(error as AxiosError<ApiError>);
-      throw error;
+      console.error('Login error:', error);
+      throw new Error('Invalid credentials');
     }
   },
 
@@ -174,9 +178,19 @@ export const ApiService = {
     }
   },
 
-  async createLink(data: Omit<Link, 'id' | 'created_at' | 'user_id'>): Promise<Link> {
+  async createLink(data: { url: string; title: string; description: string }): Promise<Link> {
     try {
-      const response = await api.post<ApiResponse<Link>>('/links', data);
+      // Get the token from localStorage
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await api.post<ApiResponse<Link>>('/links', {
+        url: data.url,
+        title: data.title,
+        description: data.description
+      });
       
       if (!response.data.success || !response.data.data) {
         throw new Error(response.data.message || 'Failed to create link');
@@ -184,7 +198,14 @@ export const ApiService = {
       
       return response.data.data;
     } catch (error) {
-      handleApiError(error as AxiosError<ApiError>);
+      const axiosError = error as AxiosError<ApiError>;
+      if (axiosError.response?.status === 401) {
+        throw new Error('Authentication required. Please log in again.');
+      }
+      if (axiosError.response?.status === 422) {
+        throw new Error(axiosError.response.data.message || 'Invalid link data');
+      }
+      handleApiError(axiosError);
       throw error;
     }
   },
