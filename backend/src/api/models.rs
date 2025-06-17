@@ -43,12 +43,28 @@ lazy_static::lazy_static! {
 
 #[derive(Debug, Deserialize, Validate)]
 pub struct RegisterRequest {
-    #[validate(email)]
+    #[validate(email(message = "Invalid email format"))]
     pub email: String,
-    #[validate(length(min = 8))]
+    
+    #[validate(length(min = 6, message = "Password must be at least 6 characters long"))]
     pub password: String,
-    #[validate(length(min = 3))]
+    
+    #[validate(length(min = 3, max = 50))]
+    #[validate(custom(
+        function = "validate_username",
+        message = "Username must be alphanumeric with underscores only"
+    ))]
     pub username: String,
+    
+    pub gender: crate::models::auth::Gender,
+}
+
+fn validate_username(username: &str) -> Result<(), validator::ValidationError> {
+    if USERNAME_REGEX.is_match(username) {
+        Ok(())
+    } else {
+        Err(validator::ValidationError::new("invalid_username"))
+    }
 }
 
 #[derive(Debug, Deserialize, Validate, ToSchema)]
