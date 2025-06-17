@@ -1,7 +1,7 @@
 use crate::{
     api::{ApiResponse, ErrorResponse},
     auth::routes::AppState,
-    models::auth::{LoginRequest, RegisterRequest, VerifyEmailRequest, ResendOtpRequest, User, UserStatus},
+    models::auth::{LoginRequest, RegisterRequest, VerifyEmailRequest, ResendOtpRequest, UserStatus, User},
 };
 use axum::{
     extract::State,
