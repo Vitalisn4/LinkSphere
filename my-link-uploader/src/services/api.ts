@@ -22,7 +22,7 @@ export interface Link {
   click_count: number;
   created_at: string;
   updated_at: string;
-  user: {
+  user?: {
     username: string;
   };
   preview?: {
@@ -37,6 +37,15 @@ export interface User {
   id: string;
   email: string;
   username: string;
+  gender: Gender;
+  is_verified: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: User;
 }
 
 interface ApiError {
@@ -82,14 +91,23 @@ const handleApiError = (error: AxiosError<ApiError>) => {
 export const ApiService = {
   async register(email: string, username: string, password: string, gender: Gender): Promise<void> {
     try {
-      await api.post<ApiResponse>('/auth/register', {
+      const response = await api.post<ApiResponse>('/auth/register', {
         email,
         username,
         password,
         gender
       });
+      
+      // Check for non-201 status codes
+      if (response.status !== 201) {
+        throw new Error(response.data.message || "Registration failed");
+      }
     } catch (error) {
-      handleApiError(error as AxiosError<ApiError>);
+      const axiosError = error as AxiosError<ApiError>;
+      if (axiosError.response?.status === 409) {
+        throw new Error("User with this email or username already exists");
+      }
+      handleApiError(axiosError);
       throw error;
     }
   },
