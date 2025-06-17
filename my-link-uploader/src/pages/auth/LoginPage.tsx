@@ -24,7 +24,7 @@ export default function LoginPage() {
       const { token, user } = await ApiService.login(email, password);
       
       if (!token || !user) {
-        throw new Error('Invalid login response');
+        throw new Error('Invalid credentials');
       }
 
       // Set token and user in localStorage
@@ -41,7 +41,7 @@ export default function LoginPage() {
       }, 100);
     } catch (error) {
       console.error('Login error:', error);
-      setError(error instanceof Error ? error.message : 'Failed to login');
+      setError('Invalid credentials');
       setUser(null);
       setIsAuthenticated(false);
       localStorage.removeItem('token');
