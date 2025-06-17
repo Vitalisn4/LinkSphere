@@ -115,8 +115,9 @@ export default function RegisterPage() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
+    setErrors({}); // Clear previous errors
 
     // Validate all fields
     const validationErrors: ValidationErrors = {
@@ -135,19 +136,26 @@ export default function RegisterPage() {
     }
 
     try {
-      await ApiService.register(email, username, password, gender)
-      // Store email for verification
-      sessionStorage.setItem("pendingVerificationEmail", email)
-      navigate("/verify-email", { replace: true })
+      await ApiService.register(email, username, password, gender);
+      // Registration successful, now we can store email and navigate
+      sessionStorage.setItem("pendingVerificationEmail", email);
+      navigate("/verify-email", { replace: true });
     } catch (error) {
-      setErrors(prev => ({
-        ...prev,
-        submit: error instanceof Error ? error.message : "Failed to register"
-      }))
-    } finally {
-      setIsLoading(false)
+      // Handle registration error
+      if (error instanceof Error) {
+        setErrors(prev => ({
+          ...prev,
+          submit: error.message
+        }));
+      } else {
+        setErrors(prev => ({
+          ...prev,
+          submit: "Failed to register. Please try again."
+        }));
+      }
+      setIsLoading(false);
     }
-  }
+  };
 
   // Add function to check if form is valid
   const isFormValid = () => {
