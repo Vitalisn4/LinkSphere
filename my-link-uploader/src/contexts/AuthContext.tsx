@@ -1,18 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ApiService, { User } from '../services/api';
 import { AuthContext } from './context';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(() => {
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!localStorage.getItem('token');
+  });
+
+  useEffect(() => {
+    // Initialize auth state from localStorage
+    const token = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    
+    if (token && storedUser) {
+      setIsAuthenticated(true);
+      setUser(JSON.parse(storedUser));
+    } else {
+      setIsAuthenticated(false);
+      setUser(null);
+    }
+  }, []);
 
   const login = async (email: string, password: string) => {
     const response = await ApiService.login(email, password);
     setUser(response.data.user);
     setIsAuthenticated(true);
     localStorage.setItem('token', response.data.token);
+    localStorage.setItem('user', JSON.stringify(response.data.user));
     navigate('/dashboard');
   };
 
@@ -20,6 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     navigate('/login');
   };
 
