@@ -17,12 +17,10 @@ export default function MyAccountPage() {
         <div className="flex items-center space-x-4 mb-6">
           <User size={48} className={isDark ? "text-gray-300" : "text-gray-700"} />
           <div>
-            <h1 className={`text-2xl font-bold ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}>
+            <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
               My Account
             </h1>
-            <p className={`${
+            <p className={`text-lg font-bold ${
               isDark ? "text-gray-400" : "text-gray-600"
             }`}>
               Manage your account settings
@@ -30,16 +28,14 @@ export default function MyAccountPage() {
           </div>
         </div>
 
-          <div className="space-y-6">
-            <div>
+        <div className="space-y-6">
+          <div>
             <label className={`block text-sm font-medium ${
               isDark ? "text-gray-300" : "text-gray-700"
             } mb-2`}>
               Username
             </label>
-            <p className={`${
-              isDark ? "text-gray-400" : "text-gray-600"
-            }`}>
+            <p className="text-xl font-bold text-gray-900 dark:text-white">
               {user?.username}
             </p>
           </div>
@@ -50,9 +46,7 @@ export default function MyAccountPage() {
             } mb-2`}>
               Email
             </label>
-            <p className={`${
-              isDark ? "text-gray-400" : "text-gray-600"
-            }`}>
+            <p className="text-xl font-bold text-gray-900 dark:text-white">
               {user?.email}
             </p>
           </div>
