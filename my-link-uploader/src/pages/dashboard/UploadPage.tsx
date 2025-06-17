@@ -5,7 +5,8 @@ import { useState, useRef, useEffect } from "react"
 import { motion } from "framer-motion"
 import { 
   Check, 
-  AlertCircle
+  AlertCircle,
+  Link as LinkIcon
 } from "lucide-react"
 import { useTheme } from "../../hooks/useTheme"
 import { useAuth } from "../../hooks/useAuth"
@@ -20,6 +21,9 @@ interface FormData {
 
 interface FormErrors {
   url?: string
+  title?: string
+  description?: string
+  submit?: string
 }
 
 export default function UploadPage() {
@@ -45,6 +49,7 @@ export default function UploadPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
+  const [isFormValid, setIsFormValid] = useState(false)
 
   const dropZoneRef = useRef<HTMLDivElement>(null)
 
@@ -64,28 +69,132 @@ export default function UploadPage() {
     
     const text = e.dataTransfer.getData('text')
     if (text.match(/^https?:\/\//)) {
-      setFormData(prev => ({ ...prev, url: text }))
+      handleInputChange('url', text)
     }
   }
+
+  const validateUrl = (url: string): string | null => {
+    if (!url) return "URL is required";
+    if (!url.match(/^https?:\/\/.+/)) {
+      return "Please enter a valid URL starting with http:// or https://";
+    }
+    try {
+      new URL(url);
+      return null;
+    } catch {
+      return "Please enter a valid URL";
+    }
+  }
+
+  const validateTitle = (title: string): string | null => {
+    if (!title) return "Title is required";
+    if (title.length < 3) return "Title must be at least 3 characters";
+    if (title.length > 255) return "Title must be less than 255 characters";
+    return null;
+  };
+
+  const validateDescription = (description: string): string | null => {
+    if (!description) return "Description is required";
+    if (description.length < 10) return "Description must be at least 10 characters";
+    if (description.length > 1000) return "Description must be less than 1000 characters";
+    return null;
+  };
+
+  // Add real-time validation
+  const handleInputChange = (field: keyof FormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Clear error when user starts typing
+    setErrors(prev => ({ ...prev, [field]: undefined }));
+    
+    // Validate after a short delay
+    const validationTimeout = setTimeout(() => {
+      let error: string | null = null;
+      
+      switch (field) {
+        case 'url':
+          error = validateUrl(value);
+          break;
+        case 'title':
+          error = validateTitle(value);
+          break;
+        case 'description':
+          error = validateDescription(value);
+          break;
+      }
+      
+      if (error) {
+        setErrors(prev => ({ ...prev, [field]: error }));
+      }
+    }, 500);
+
+    return () => clearTimeout(validationTimeout);
+  };
+
+  // Check form validity whenever form data or errors change
+  useEffect(() => {
+    const isValid = 
+      !errors.url && !errors.title && !errors.description &&
+      formData.url.trim() !== "" &&
+      formData.title.trim() !== "" &&
+      formData.description.trim() !== "";
+    
+    setIsFormValid(isValid);
+  }, [formData, errors]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    try {
-      await ApiService.createLink(formData)
-      setSuccessMessage("Link shared successfully!")
-      setFormData({ title: "", url: "", description: "" })
-      navigate('/dashboard')
-    } catch (error) {
-      console.error('Error creating link:', error)
-      setErrors({ url: "Failed to create link. Please try again." })
-    } finally {
-      setIsSubmitting(false)
+    e.preventDefault();
+    setIsSubmitting(true);
+    setErrors({});
+
+    // Validate all fields
+    const urlError = validateUrl(formData.url);
+    const titleError = validateTitle(formData.title);
+    const descError = validateDescription(formData.description);
+
+    const validationErrors: FormErrors = {};
+    if (urlError) validationErrors.url = urlError;
+    if (titleError) validationErrors.title = titleError;
+    if (descError) validationErrors.description = descError;
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setIsSubmitting(false);
+      return;
     }
-  }
+
+    try {
+      // Ensure URL has protocol
+      let url = formData.url;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+
+      await ApiService.createLink({
+        url,
+        title: formData.title,
+        description: formData.description
+      });
+      
+      setSuccessMessage("Link shared successfully!");
+      setFormData({ title: "", url: "", description: "" });
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 2000);
+    } catch (error) {
+      console.error('Error creating link:', error);
+      if (error instanceof Error) {
+        setErrors({ submit: error.message });
+      } else {
+        setErrors({ submit: "Failed to create link. Please try again." });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (successMessage) {
-  return (
+    return (
       <div className="w-full min-h-screen p-6 flex items-center justify-center">
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
@@ -104,8 +213,8 @@ export default function UploadPage() {
             Your link has been successfully added to LinkSphere!
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() => setSuccessMessage(null)}
+            <button
+              onClick={() => setSuccessMessage(null)}
               className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
                 isDark
                   ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
@@ -119,11 +228,11 @@ export default function UploadPage() {
               className="px-6 py-3 rounded-lg font-medium text-white transition-all duration-300 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 shadow-md hover:shadow-lg shadow-purple-500/20"
             >
               View All Links
-              </button>
+            </button>
           </div>
         </motion.div>
-        </div>
-    )
+      </div>
+    );
   }
 
   return (
@@ -134,8 +243,13 @@ export default function UploadPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
+          <h1 className={`text-3xl font-bold mb-2 ${
+            isDark ? "text-gray-100" : "text-gray-800"
+          }`}>
+            Share a Link
+          </h1>
           <motion.p
-            className={`text-xl md:text-2xl ${
+            className={`text-xl ${
               isDark ? "text-gray-400" : "text-gray-600"
             }`}
             initial={{ opacity: 0 }}
@@ -157,8 +271,8 @@ export default function UploadPage() {
           }`}
         >
           <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Link Input with Drop Zone */}
-          <div>
+            {/* URL Input with Drop Zone */}
+            <div>
               <label className={`block text-lg font-medium mb-3 ${
                 isDark ? "text-gray-300" : "text-gray-700"
               }`}>
@@ -170,7 +284,7 @@ export default function UploadPage() {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 className={`
-                  border-2 border-dashed rounded-xl p-5 transition-colors
+                  relative border-2 border-dashed rounded-xl transition-colors
                   ${isDragging 
                     ? 'border-purple-400 bg-purple-500/10' 
                     : isDark
@@ -180,28 +294,28 @@ export default function UploadPage() {
                   ${errors.url ? 'border-red-400' : ''}
                 `}
               >
-              <input
-                type="url"
+                <input
+                  type="url"
                   value={formData.url}
-                  onChange={e => setFormData(prev => ({ ...prev, url: e.target.value }))}
-                  placeholder="Paste or drop a link here..."
-                  className={`w-full outline-none transition-colors text-lg ${
-                    isDark
-                      ? "bg-transparent text-white placeholder-gray-500"
-                      : "bg-transparent text-gray-900 placeholder-gray-400"
-                  }`}
-              />
+                  onChange={(e) => handleInputChange('url', e.target.value)}
+                  placeholder="https://example.com"
+                  className={`
+                    w-full px-4 py-3 bg-transparent rounded-xl focus:outline-none
+                    ${isDark ? 'text-white' : 'text-gray-900'}
+                    ${errors.url ? 'placeholder-red-300' : isDark ? 'placeholder-gray-500' : 'placeholder-gray-400'}
+                  `}
+                />
+                {errors.url && (
+                  <div className="mt-2 text-red-400 text-sm flex items-center gap-1">
+                    <AlertCircle size={16} />
+                    {errors.url}
+                  </div>
+                )}
               </div>
-              {errors.url && (
-                <p className="mt-2 text-base text-red-400 flex items-center">
-                  <AlertCircle className="w-5 h-5 mr-2" />
-                  {errors.url}
-                </p>
-              )}
-          </div>
+            </div>
 
-            {/* Title */}
-          <div>
+            {/* Title Input */}
+            <div>
               <label className={`block text-lg font-medium mb-3 ${
                 isDark ? "text-gray-300" : "text-gray-700"
               }`}>
@@ -210,70 +324,88 @@ export default function UploadPage() {
               <input
                 type="text"
                 value={formData.title}
-                onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Give your link a title..."
+                onChange={(e) => handleInputChange('title', e.target.value)}
+                placeholder="Enter a descriptive title"
                 className={`
-                  w-full rounded-xl p-4 outline-none transition-colors text-lg
-                  ${isDark
-                    ? "bg-gray-700/50 text-white placeholder-gray-500 focus:bg-gray-700"
-                    : "bg-white/50 text-gray-900 placeholder-gray-400 focus:bg-white"
+                  w-full px-4 py-3 rounded-xl border-2 transition-colors
+                  ${isDark 
+                    ? 'bg-gray-800/30 border-gray-600 text-white' 
+                    : 'bg-white/50 border-gray-200 text-gray-900'
                   }
-                  ${errors.title ? 'border-2 border-red-400' : ''}
+                  ${errors.title ? 'border-red-400' : ''}
+                  focus:outline-none focus:border-purple-500
                 `}
               />
               {errors.title && (
-                <p className="mt-2 text-base text-red-400 flex items-center">
-                  <AlertCircle className="w-5 h-5 mr-2" />
+                <div className="mt-2 text-red-400 text-sm flex items-center gap-1">
+                  <AlertCircle size={16} />
                   {errors.title}
-                </p>
+                </div>
               )}
-          </div>
+            </div>
 
-            {/* Description */}
-          <div>
+            {/* Description Input */}
+            <div>
               <label className={`block text-lg font-medium mb-3 ${
                 isDark ? "text-gray-300" : "text-gray-700"
               }`}>
-              Description
+                Description
               </label>
               <textarea
                 value={formData.description}
-                onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="What makes this link valuable?"
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                placeholder="Describe what this link is about"
+                rows={4}
                 className={`
-                  w-full h-36 rounded-xl p-4 outline-none transition-colors resize-none text-lg
-                  ${isDark
-                    ? "bg-gray-700/50 text-white placeholder-gray-500 focus:bg-gray-700"
-                    : "bg-white/50 text-gray-900 placeholder-gray-400 focus:bg-white"
+                  w-full px-4 py-3 rounded-xl border-2 transition-colors
+                  ${isDark 
+                    ? 'bg-gray-800/30 border-gray-600 text-white' 
+                    : 'bg-white/50 border-gray-200 text-gray-900'
                   }
-                  ${errors.description ? 'border-2 border-red-400' : ''}
+                  ${errors.description ? 'border-red-400' : ''}
+                  focus:outline-none focus:border-purple-500
                 `}
               />
               {errors.description && (
-                <p className="mt-2 text-base text-red-400 flex items-center">
-                  <AlertCircle className="w-5 h-5 mr-2" />
+                <div className="mt-2 text-red-400 text-sm flex items-center gap-1">
+                  <AlertCircle size={16} />
                   {errors.description}
-                </p>
+                </div>
               )}
-          </div>
+            </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={!isFormValid || isSubmitting}
               className={`
-                w-full py-4 rounded-xl font-medium transition-all duration-300 flex items-center justify-center text-lg
-                ${isSubmitting
-                  ? 'bg-gray-600 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600'
+                w-full py-4 px-6 rounded-xl font-medium flex items-center justify-center gap-2
+                transition-all duration-300 
+                ${isFormValid && !isSubmitting
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white shadow-lg hover:shadow-xl shadow-purple-500/20'
+                  : isDark
+                    ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                 }
-                text-white shadow-sm hover:shadow-md hover:shadow-purple-500/20
               `}
             >
-              {isSubmitting ? 'Uploading...' : 'Upload'}
-          </button>
+              <LinkIcon size={20} />
+              {isSubmitting ? 'Sharing Link...' : 'Share Link'}
+            </button>
+
+            {/* Error Message */}
+            {errors.submit && (
+              <div className={`p-4 rounded-lg text-center ${
+                isDark
+                  ? "bg-red-900/20 text-red-400 border border-red-800"
+                  : "bg-red-50 text-red-500 border border-red-200"
+              }`}>
+                {errors.submit}
+              </div>
+            )}
           </form>
         </motion.div>
       </div>
     </div>
-  )
+  );
 } 
