@@ -3,11 +3,11 @@
 import React, { useState, useEffect, useRef, useCallback } from "react"
 import { motion } from "framer-motion"
 import { Search, ExternalLink, Calendar, User, Clock } from "lucide-react"
-import { Link } from "../../types"
 import { useAuth } from "../../hooks/useAuth"
 import { useTheme } from "../../hooks/useTheme"
-import ApiService from "../../services/api"
+import ApiService, { Link } from "../../services/api"
 import { useNavigate } from "react-router-dom"
+import { formatInTimeZone } from 'date-fns-tz'
 
 export default function DashboardPage() {
   const [query, setQuery] = useState<string>("")
@@ -17,7 +17,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const { user } = useAuth()
+  const auth = useAuth()
   const { isDark } = useTheme()
   const navigate = useNavigate()
 
@@ -80,11 +80,11 @@ export default function DashboardPage() {
   const formatDate = (dateString: string | null | undefined): string => {
     if (!dateString) return 'N/A';
     try {
-      const cleanDate = dateString.endsWith('Z') 
-        ? dateString 
-        : dateString + 'Z';
-      return formatInTimeZone(new Date(cleanDate), 'Africa/Douala', 'MMM d, yyyy');
+      // Parse the date string directly, it's already in UTC format from the backend
+      const date = new Date(dateString);
+      return formatInTimeZone(date, 'Africa/Douala', 'MMM d, yyyy');
     } catch (error) {
+      console.error('Error formatting date:', error);
       return 'Invalid date';
     }
   };
@@ -92,100 +92,54 @@ export default function DashboardPage() {
   const formatTime = (dateString: string | null | undefined): string => {
     if (!dateString) return 'N/A';
     try {
-      const cleanDate = dateString.endsWith('Z') 
-        ? dateString 
-        : dateString + 'Z';
-      return formatInTimeZone(new Date(cleanDate), 'Africa/Douala', 'HH:mm');
+      // Parse the date string directly, it's already in UTC format from the backend
+      const date = new Date(dateString);
+      return formatInTimeZone(date, 'Africa/Douala', 'HH:mm');
     } catch (error) {
+      console.error('Error formatting time:', error);
       return 'Invalid time';
     }
   };
 
   return (
-    <div className="w-full min-h-screen p-6 bg-gray-100/40 dark:bg-gray-900/50">
-      <div className="max-w-6xl mx-auto">
-        {/* Welcome Message */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
-        >
-          <h1 className={`text-3xl font-bold mb-2 ${
-            isDark ? "text-gray-100" : "text-gray-600"
-          }`}>
-            Welcome to Your Dashboard
-          </h1>
-          <p className={`text-lg ${
-            isDark ? "text-gray-400" : "text-gray-500"
-          }`}>
-            Search and manage your links below
-          </p>
-        </motion.div>
-
+    <div className="w-full min-h-screen p-6">
+      <div className="max-w-7xl mx-auto">
         {/* Search Bar */}
-        <motion.div
-          className="relative w-full max-w-4xl mx-auto mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <div
-            className={`relative transition-all duration-300 ${
-              isSearchFocused 
-                ? "ring-2 ring-purple-400/20 ring-opacity-50 shadow-lg" 
-                : "shadow hover:shadow-md hover:ring-1 hover:ring-purple-400/10"
-            }`}
-          >
-            <Search
-              size={20}
-              className={`absolute left-4 top-1/2 transform -translate-y-1/2 transition-colors duration-300 ${
-                isSearchFocused 
-                  ? isDark ? "text-purple-400" : "text-purple-400/70"
-                  : "text-gray-400"
-              }`}
-            />
+        <div className="mb-8">
+          <div className="relative">
             <input
               ref={searchInputRef}
               type="text"
-              className={`w-full pl-12 pr-4 py-4 rounded-full border focus:outline-none transition-all duration-300 ${
-                isDark
-                  ? "bg-gray-800/80 border-gray-700 text-gray-100 placeholder-gray-500"
-                  : "bg-gray-100/60 border-gray-200/60 text-gray-600 placeholder-gray-400"
-              }`}
               value={query}
               onChange={(e) => handleSearch(e.target.value)}
-              placeholder="Search for links..."
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setIsSearchFocused(false)}
+              placeholder="Search links by title or description..."
+              className={`
+                w-full px-6 py-4 rounded-2xl transition-all duration-300
+                ${isDark
+                  ? 'bg-gray-800/50 text-white placeholder-gray-500 focus:bg-gray-800'
+                  : 'bg-gray-100/50 text-gray-900 placeholder-gray-400 focus:bg-white'
+                }
+                ${isSearchFocused
+                  ? isDark
+                    ? 'shadow-lg shadow-purple-500/10'
+                    : 'shadow-lg shadow-purple-500/5'
+                  : ''
+                }
+              `}
+            />
+            <Search
+              className={`absolute right-6 top-1/2 transform -translate-y-1/2 ${
+                isDark ? 'text-gray-500' : 'text-gray-400'
+              }`}
+              size={20}
             />
           </div>
-        </motion.div>
-
-        {/* Error Message */}
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`mb-6 p-4 rounded-lg text-center ${
-              isDark
-                ? "bg-red-900/20 text-red-400 border border-red-800"
-                : "bg-red-50/30 text-red-500/80 border border-red-200/30"
-            }`}
-          >
-            {error}
-            <button
-              onClick={() => fetchLinks()}
-              className={`ml-4 underline hover:no-underline ${
-                isDark ? "text-purple-400" : "text-purple-400/70"
-              }`}
-            >
-              Retry
-            </button>
-          </motion.div>
-        )}
+        </div>
 
         {/* Links Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading ? (
             <div className="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
               Loading links...
@@ -240,7 +194,7 @@ export default function DashboardPage() {
                   }`}>
                     <div className="flex items-center gap-1">
                       <User size={16} />
-                      <span>{link.user?.username || user?.username || 'Unknown user'}</span>
+                      <span>{link.user?.username || auth?.user?.username || 'Unknown user'}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Calendar size={16} />
@@ -248,7 +202,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock size={16} />
-                      <span>{formatTime(link.updated_at)}</span>
+                      <span>{formatTime(link.created_at)}</span>
                     </div>
                   </div>
 
@@ -271,5 +225,5 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
-  )
+  );
 } 
