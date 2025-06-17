@@ -27,7 +27,11 @@ impl AuthService {
         &self.pool
     }
 
-    pub async fn check_user_exists(&self, email: &str, username: &str) -> Result<bool, sqlx::Error> {
+    pub async fn check_user_exists(
+        &self,
+        email: &str,
+        username: &str,
+    ) -> Result<bool, sqlx::Error> {
         queries::check_user_exists(&self.pool, email, username).await
     }
 
