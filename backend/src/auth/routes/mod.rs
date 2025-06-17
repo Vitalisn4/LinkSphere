@@ -1,4 +1,4 @@
-use crate::handlers::auth::{login, register, verify_email, resend_otp, admin_reset_otp_attempts};
+use crate::handlers::auth::{admin_reset_otp_attempts, login, register, resend_otp, verify_email};
 use crate::services::{auth::AuthService, email::EmailService};
 use axum::{routing::post, Router};
 use sqlx::PgPool;
@@ -24,6 +24,9 @@ pub fn create_router(pool: PgPool) -> Router {
         .route("/api/auth/login", post(login))
         .route("/api/auth/verify", post(verify_email))
         .route("/api/auth/resend-otp", post(resend_otp))
-        .route("/api/admin/auth/reset-otp-attempts", post(admin_reset_otp_attempts))
+        .route(
+            "/api/admin/auth/reset-otp-attempts",
+            post(admin_reset_otp_attempts),
+        )
         .with_state(state)
 }
