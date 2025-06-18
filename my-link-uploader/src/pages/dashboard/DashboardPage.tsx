@@ -209,7 +209,7 @@ export default function DashboardPage() {
                   }`}>
                     <div className="flex items-center gap-1">
                       <User size={16} />
-                      <span>{auth?.user?.username || 'Unknown user'}</span>
+                      <span>{link.user?.username || 'Unknown user'}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Calendar size={16} />
