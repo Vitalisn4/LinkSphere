@@ -44,6 +44,34 @@ impl From<Option<&LinkPreview>> for JsonLinkPreview {
     }
 }
 
+/// Simple user representation for link associations
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct SimpleUser {
+    pub username: String,
+}
+
+#[derive(Debug, sqlx::Type)]
+#[sqlx(transparent)]
+pub struct OptionalJsonUser(pub Json<Option<SimpleUser>>);
+
+impl From<JsonValue> for OptionalJsonUser {
+    fn from(value: JsonValue) -> Self {
+        OptionalJsonUser(Json(serde_json::from_value(value).ok()))
+    }
+}
+
+impl From<OptionalJsonUser> for Option<SimpleUser> {
+    fn from(wrapper: OptionalJsonUser) -> Self {
+        wrapper.0 .0
+    }
+}
+
+impl From<Option<SimpleUser>> for OptionalJsonUser {
+    fn from(user: Option<SimpleUser>) -> Self {
+        OptionalJsonUser(Json(user))
+    }
+}
+
 /// Represents a link in the system
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct Link {
@@ -74,6 +102,9 @@ pub struct Link {
     /// Preview metadata from the link
     #[serde(with = "preview_serde")]
     pub preview: Option<LinkPreview>,
+    /// User who created the link
+    #[serde(with = "user_serde")]
+    pub user: Option<SimpleUser>,
 }
 
 // Custom serialization for preview field to handle JSON conversion
@@ -97,5 +128,29 @@ mod preview_serde {
     {
         let json_value = JsonValue::deserialize(deserializer)?;
         Ok(JsonLinkPreview::from(json_value).into())
+    }
+}
+
+// Custom serialization for user field to handle JSON conversion
+mod user_serde {
+    use super::*;
+    use serde::{Deserializer, Serializer};
+
+    pub fn serialize<S>(user: &Option<SimpleUser>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match user {
+            Some(user) => user.serialize(serializer),
+            None => serializer.serialize_none(),
+        }
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<SimpleUser>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let json_value = JsonValue::deserialize(deserializer)?;
+        Ok(OptionalJsonUser::from(json_value).into())
     }
 }
