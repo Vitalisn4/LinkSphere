@@ -1,4 +1,4 @@
-use super::models::{JsonLinkPreview, Link, LinkPreview};
+use super::models::{JsonLinkPreview, Link, LinkPreview, OptionalJsonUser};
 use chrono::Utc;
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -12,17 +12,22 @@ pub async fn get_all_links(pool: &PgPool) -> Result<Vec<Link>, sqlx::Error> {
         Link,
         r#"
         SELECT 
-            id,
-            url as "url!",
-            title as "title!",
-            description as "description!",
-            user_id as "user_id!",
-            click_count as "click_count!",
-            created_at as "created_at!",
-            updated_at as "updated_at!",
-            preview as "preview: JsonLinkPreview"
-        FROM links
-        ORDER BY created_at DESC
+            l.id,
+            l.url as "url!",
+            l.title as "title!",
+            l.description as "description!",
+            l.user_id as "user_id!",
+            l.click_count as "click_count!",
+            l.created_at as "created_at!",
+            l.updated_at as "updated_at!",
+            l.preview as "preview: JsonLinkPreview",
+            COALESCE(
+                jsonb_build_object('username', u.username)::jsonb,
+                'null'::jsonb
+            ) as "user!: OptionalJsonUser"
+        FROM links l
+        LEFT JOIN users u ON l.user_id = u.id
+        ORDER BY l.created_at DESC
         "#
     )
     .fetch_all(pool)
@@ -55,18 +60,27 @@ pub async fn create_link(
     sqlx::query_as!(
         Link,
         r#"
-        INSERT INTO links (url, title, description, user_id, created_at, updated_at, preview)
-        VALUES ($1, $2, $3, $4, $5, $5, $6)
-        RETURNING 
-            id,
-            url as "url!",
-            title as "title!",
-            description as "description!",
-            user_id as "user_id!",
-            click_count as "click_count!",
-            created_at as "created_at!",
-            updated_at as "updated_at!",
-            preview as "preview: JsonLinkPreview"
+        WITH inserted_link AS (
+            INSERT INTO links (url, title, description, user_id, created_at, updated_at, preview)
+            VALUES ($1, $2, $3, $4, $5, $5, $6)
+            RETURNING *
+        )
+        SELECT 
+            l.id,
+            l.url as "url!",
+            l.title as "title!",
+            l.description as "description!",
+            l.user_id as "user_id!",
+            l.click_count as "click_count!",
+            l.created_at as "created_at!",
+            l.updated_at as "updated_at!",
+            l.preview as "preview: JsonLinkPreview",
+            COALESCE(
+                jsonb_build_object('username', u.username)::jsonb,
+                'null'::jsonb
+            ) as "user!: OptionalJsonUser"
+        FROM inserted_link l
+        LEFT JOIN users u ON l.user_id = u.id
         "#,
         url,
         title,
@@ -131,17 +145,22 @@ pub async fn get_link_by_id(pool: &PgPool, link_id: Uuid) -> Result<Option<Link>
         Link,
         r#"
         SELECT 
-            id,
-            url as "url!",
-            title as "title!",
-            description as "description!",
-            user_id as "user_id!",
-            click_count as "click_count!",
-            created_at as "created_at!",
-            updated_at as "updated_at!",
-            preview as "preview: JsonLinkPreview"
-        FROM links
-        WHERE id = $1
+            l.id,
+            l.url as "url!",
+            l.title as "title!",
+            l.description as "description!",
+            l.user_id as "user_id!",
+            l.click_count as "click_count!",
+            l.created_at as "created_at!",
+            l.updated_at as "updated_at!",
+            l.preview as "preview: JsonLinkPreview",
+            COALESCE(
+                jsonb_build_object('username', u.username)::jsonb,
+                'null'::jsonb
+            ) as "user!: OptionalJsonUser"
+        FROM links l
+        LEFT JOIN users u ON l.user_id = u.id
+        WHERE l.id = $1
         "#,
         link_id
     )
