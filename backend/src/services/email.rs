@@ -5,10 +5,10 @@ use lettre::{
 use rand::random;
 use reqwest;
 use serde_json::json;
-use std::{env, time::Duration};
-use tokio::{task, time::sleep};
 use std::error::Error;
 use std::sync::OnceLock;
+use std::{env, time::Duration};
+use tokio::{task, time::sleep};
 
 const OTP_EXPIRY_SECONDS: u64 = 300; // 5 minutes
 const MAX_RETRY_ATTEMPTS: u32 = 3;
@@ -64,10 +64,10 @@ impl EmailService {
         // Spawn Redis operation in parallel with email sending
         let store_otp_future = self.store_otp_with_retry(email, &otp);
         let send_email_future = self.send_email_with_retry(email, &otp);
-        
+
         // Run both operations concurrently
         let (store_result, send_result) = tokio::join!(store_otp_future, send_email_future);
-        
+
         // Check results
         store_result?;
         send_result?;
@@ -94,7 +94,7 @@ impl EmailService {
 
         for attempt in 0..MAX_RETRY_ATTEMPTS {
             match client
-                .post(&set_url.clone())
+                .post(set_url.clone())
                 .header("Authorization", format!("Bearer {}", self.upstash_token))
                 .json(&payload)
                 .send()
@@ -116,7 +116,7 @@ impl EmailService {
 
     async fn send_email_with_retry(&self, to_email: &str, otp: &str) -> Result<(), BoxError> {
         let email_message = self.create_email_message(to_email, otp)?;
-        
+
         for attempt in 0..MAX_RETRY_ATTEMPTS {
             match self.smtp_transport.send(email_message.clone()).await {
                 Ok(_) => return Ok(()),
@@ -164,7 +164,11 @@ impl EmailService {
     }
 
     /// Admin-only function to reset OTP attempts for blocked users
-    pub async fn admin_reset_attempts(&self, email: &str, admin_token: &str) -> Result<(), BoxError> {
+    pub async fn admin_reset_attempts(
+        &self,
+        email: &str,
+        admin_token: &str,
+    ) -> Result<(), BoxError> {
         // Verify admin token
         let expected_token =
             env::var("ADMIN_SECRET_KEY").map_err(|_| "Admin secret not configured")?;
@@ -258,9 +262,7 @@ impl EmailService {
                                 println!("OTP match result: {}", matches);
                                 matches
                             }
-                            Err(_) => {
-                                false
-                            }
+                            Err(_) => false,
                         }
                     }
                     Err(e) => {
