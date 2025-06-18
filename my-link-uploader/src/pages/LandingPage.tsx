@@ -24,12 +24,10 @@ export default function LandingPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50/90 via-white/90 to-pink-50/90 dark:from-gray-900/90 dark:via-gray-900/95 dark:to-gray-800/90">
-      <div className="absolute inset-0 bg-white/40 dark:bg-gray-900/40 -z-10" />
-      
+    <div className="container mx-auto px-4 py-8">
       {/* Hero Section */}
       <div className="relative pt-20 pb-16 sm:pt-24 sm:pb-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center">
             <motion.h1
               className="text-5xl sm:text-6xl lg:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 mb-6"
@@ -66,14 +64,14 @@ export default function LandingPage() {
 
       {/* Features Section */}
       <div className="py-16 sm:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
                 <motion.div
                   key={feature.title}
-                  className="bg-white/80 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 border border-purple-100 dark:border-gray-700/50"
+                  className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-xl border border-purple-100 dark:border-gray-700"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 + 0.3 }}
@@ -95,8 +93,8 @@ export default function LandingPage() {
       </div>
 
       {/* Footer */}
-      <footer className="py-8 border-t border-purple-100 dark:border-gray-700/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <footer className="py-8 border-t border-purple-100 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto">
           <p className="text-center text-gray-600 dark:text-gray-400">
             Already have an account?{" "}
             <Link
