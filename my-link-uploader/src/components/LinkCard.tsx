@@ -42,7 +42,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, onDelete }) => {
     try {
       // Ensure the date string is in UTC format
       const date = new Date(dateString);
-      return formatInTimeZone(date, 'Africa/Douala', 'MMM d, yyyy HH:mm');
+    return formatInTimeZone(date, 'Africa/Douala', 'MMM d, yyyy HH:mm');
     } catch (error) {
       console.error('Error formatting date:', error);
       return 'Invalid date';
