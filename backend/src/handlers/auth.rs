@@ -38,7 +38,7 @@ pub async fn register(
         Ok(true) => {
             let error = ErrorResponse::new("User with this email or username already exists")
                 .with_code("USER_EXISTS");
-            return (StatusCode::CONFLICT, Json(error)).into_response();
+            (StatusCode::CONFLICT, Json(error)).into_response()
         }
         Ok(false) => {
             // User doesn't exist, proceed with OTP
