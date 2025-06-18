@@ -87,36 +87,36 @@ export default function VerifyEmailPage() {
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-br from-purple-50/90 via-white/90 to-pink-50/90 dark:from-gray-900/90 dark:via-gray-900/95 dark:to-gray-800/90 backdrop-blur-md">
       <div className="absolute inset-0 bg-white/40 dark:bg-gray-900/40 -z-10" />
       <motion.div
-        className="w-full max-w-xl bg-white/80 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 border border-purple-100 dark:border-gray-700/50"
+        className="w-full max-w-xl mx-4 bg-white/80 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-4 sm:p-8 border border-purple-100 dark:border-gray-700/50"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="text-center mb-12">
+        <div className="text-center mb-8 sm:mb-12">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="flex items-center justify-center mb-8"
+            className="flex items-center justify-center mb-6 sm:mb-8"
           >
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
-              <Mail className="w-10 h-10 text-white" />
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+              <Mail className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
             </div>
           </motion.div>
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             Verify Your Email
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 text-lg mb-2">
+          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-2">
             We've sent a verification code to
           </p>
-          <p className="text-purple-600 dark:text-purple-400 text-lg font-medium">
+          <p className="text-base sm:text-lg text-purple-600 dark:text-purple-400 font-medium break-all">
             {email}
           </p>
         </div>
 
         {error && (
           <motion.div
-            className="mb-8 p-4 rounded-lg bg-red-500/10 text-red-500 text-sm"
+            className="mb-6 sm:mb-8 p-3 sm:p-4 rounded-lg bg-red-500/10 text-red-500 text-sm"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
           >
@@ -124,7 +124,7 @@ export default function VerifyEmailPage() {
           </motion.div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div>
             <div className="relative">
               <input
@@ -134,7 +134,7 @@ export default function VerifyEmailPage() {
                 placeholder="Enter 6-digit code"
                 required
                 pattern="[0-9]{6}"
-                className="w-full px-4 py-6 bg-white/50 dark:bg-gray-900/50 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-4xl text-center tracking-[1em] font-mono text-gray-900 dark:text-white placeholder:text-base placeholder:tracking-normal placeholder:font-sans placeholder:text-gray-500 dark:placeholder:text-gray-400 transition-all duration-300 hover:border-purple-500/50 letter-spacing-1"
+                className="w-full px-2 sm:px-4 py-4 sm:py-6 bg-white/50 dark:bg-gray-900/50 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-2xl sm:text-4xl text-center tracking-[0.5em] sm:tracking-[1em] font-mono text-gray-900 dark:text-white placeholder:text-sm placeholder:tracking-normal placeholder:font-sans placeholder:text-gray-500 dark:placeholder:text-gray-400 transition-all duration-300 hover:border-purple-500/50 letter-spacing-1"
                 style={{ 
                   '-webkit-text-security': otp.length < 6 ? 'disc' : 'none'
                 } as React.CSSProperties}
