@@ -125,7 +125,7 @@ export default function UploadPage() {
       
       if (error) {
         setErrors(prev => ({ ...prev, [field]: error }));
-      }
+    }
     }, 500);
 
     return () => clearTimeout(validationTimeout);
@@ -191,7 +191,7 @@ export default function UploadPage() {
   };
 
   if (successMessage) {
-    return (
+  return (
       <div className="w-full min-h-screen p-6 flex items-center justify-center">
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
@@ -210,7 +210,7 @@ export default function UploadPage() {
             What would you like to do next?
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-            <button
+              <button
               onClick={() => {
                 setSuccessMessage(null);
                 setFormData({ title: "", url: "", description: "" });
@@ -228,10 +228,10 @@ export default function UploadPage() {
               className="px-6 py-3 rounded-lg font-medium text-white transition-all duration-300 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 shadow-md hover:shadow-lg shadow-purple-500/20"
             >
               View All Links
-            </button>
+              </button>
           </div>
         </motion.div>
-      </div>
+        </div>
     );
   }
 
@@ -270,7 +270,7 @@ export default function UploadPage() {
         >
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* URL Input with Drop Zone */}
-            <div>
+          <div>
               <label className={`block text-lg font-medium mb-3 ${
                 isDark ? "text-gray-300" : "text-gray-700"
               }`}>
@@ -292,8 +292,8 @@ export default function UploadPage() {
                   ${errors.url ? 'border-red-400' : ''}
                 `}
               >
-                <input
-                  type="url"
+              <input
+                type="url"
                   value={formData.url}
                   onChange={(e) => handleInputChange('url', e.target.value)}
                   placeholder="https://example.com"
@@ -310,10 +310,10 @@ export default function UploadPage() {
                   </div>
                 )}
               </div>
-            </div>
+          </div>
 
             {/* Title Input */}
-            <div>
+          <div>
               <label className={`block text-lg font-medium mb-3 ${
                 isDark ? "text-gray-300" : "text-gray-700"
               }`}>
@@ -326,7 +326,7 @@ export default function UploadPage() {
                 placeholder="Enter a descriptive title"
                 className={`
                   w-full px-4 py-3 rounded-xl border-2 transition-colors
-                  ${isDark 
+                  ${isDark
                     ? 'bg-gray-800/30 border-gray-600 text-white' 
                     : 'bg-white/50 border-gray-200 text-gray-900'
                   }
@@ -340,14 +340,14 @@ export default function UploadPage() {
                   {errors.title}
                 </div>
               )}
-            </div>
+          </div>
 
             {/* Description Input */}
-            <div>
+          <div>
               <label className={`block text-lg font-medium mb-3 ${
                 isDark ? "text-gray-300" : "text-gray-700"
               }`}>
-                Description
+              Description
               </label>
               <textarea
                 value={formData.description}
@@ -356,7 +356,7 @@ export default function UploadPage() {
                 rows={4}
                 className={`
                   w-full px-4 py-3 rounded-xl border-2 transition-colors
-                  ${isDark 
+                  ${isDark
                     ? 'bg-gray-800/30 border-gray-600 text-white' 
                     : 'bg-white/50 border-gray-200 text-gray-900'
                   }
@@ -370,7 +370,7 @@ export default function UploadPage() {
                   {errors.description}
                 </div>
               )}
-            </div>
+          </div>
 
             {/* Submit Button */}
             <button
@@ -389,7 +389,7 @@ export default function UploadPage() {
             >
               <LinkIcon size={20} />
               {isSubmitting ? 'Sharing Link...' : 'Share Link'}
-            </button>
+          </button>
 
             {/* Error Message */}
             {errors.submit && (
