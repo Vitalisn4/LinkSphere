@@ -17,7 +17,6 @@ use serde_json::json;
 use validator::Validate;
 
 /// Register a new user
-#[debug_handler]
 pub async fn register(
     State(state): State<AppState>,
     Json(payload): Json<RegisterRequest>,
@@ -78,7 +77,6 @@ pub async fn register(
 }
 
 /// Login user
-#[debug_handler]
 pub async fn login(
     State(state): State<AppState>,
     Json(payload): Json<LoginRequest>,
@@ -100,7 +98,6 @@ pub async fn login(
 }
 
 /// Verify email with OTP
-#[debug_handler]
 pub async fn verify_email(
     State(state): State<AppState>,
     Json(payload): Json<VerifyEmailRequest>,
