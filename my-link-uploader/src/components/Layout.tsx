@@ -31,9 +31,7 @@ export default function Layout({ children }: LayoutProps) {
   const handleLogout = async () => {
     try {
       await logout();
-      // Navigation is now handled in the AuthContext
     } catch (error) {
-      // Handle any logout errors
       console.error('Logout failed:', error);
     }
   };
@@ -45,16 +43,17 @@ export default function Layout({ children }: LayoutProps) {
           ? "bg-gray-800/80 border-gray-700"
           : "bg-white/80 border-gray-200"
       }`}>
-        <div className="w-full px-6 py-4 flex items-center justify-between">
-          <Link to={user ? "/dashboard" : "/"} className="flex items-center space-x-3 group">
-            <div className="w-14 h-14 bg-gradient-to-br from-purple-600 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20 group-hover:shadow-purple-500/40 transition-all duration-300 group-hover:scale-105">
-              <LinkIcon size={28} className="text-white" />
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+          <Link to={user ? "/dashboard" : "/"} className="flex items-center space-x-2 sm:space-x-3 group">
+            <div className="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-purple-600 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20 group-hover:shadow-purple-500/40 transition-all duration-300 group-hover:scale-105">
+              <LinkIcon size={20} className="text-white sm:hidden" />
+              <LinkIcon size={28} className="text-white hidden sm:block" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+              <h1 className="text-xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
                 LinkSphere
               </h1>
-              <p className={`text-base ${isDark ? "text-gray-400" : "text-gray-600"}`}>
+              <p className={`text-sm sm:text-base ${isDark ? "text-gray-400" : "text-gray-600"} hidden sm:block`}>
                 Link Management System
               </p>
             </div>
@@ -89,10 +88,10 @@ export default function Layout({ children }: LayoutProps) {
             )}
           </nav>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <button
               onClick={toggleTheme}
-              className={`p-3 rounded-lg transition-colors ${
+              className={`p-2 sm:p-3 rounded-lg transition-colors ${
                 isDark
                   ? "hover:bg-gray-700"
                   : "hover:bg-gray-100"
@@ -100,14 +99,19 @@ export default function Layout({ children }: LayoutProps) {
               aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
             >
               {isDark ? (
-                <Sun size={24} className="text-yellow-300" />
+                <Sun size={20} className="text-yellow-300 sm:hidden" />
               ) : (
-                <Moon size={24} className="text-gray-600" />
+                <Moon size={20} className="text-gray-600 sm:hidden" />
+              )}
+              {isDark ? (
+                <Sun size={24} className="text-yellow-300 hidden sm:block" />
+              ) : (
+                <Moon size={24} className="text-gray-600 hidden sm:block" />
               )}
             </button>
 
             {user ? (
-              <div className="flex items-center space-x-4">
+              <div className="hidden md:flex items-center space-x-4">
                 <span className={`text-base ${isDark ? "text-gray-300" : "text-gray-700"}`}>
                   Welcome, {user.username}
                 </span>
@@ -124,7 +128,7 @@ export default function Layout({ children }: LayoutProps) {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-3">
+              <div className="hidden md:flex items-center space-x-3">
                 {location.pathname !== "/register" && (
                   <Link
                     to="/register"
@@ -157,7 +161,7 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </header>
 
-      <main className="w-full px-4 py-8">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8 mb-16 md:mb-0">
         <motion.div
           key={location.pathname}
           initial={{ opacity: 0, y: 20 }}
@@ -169,7 +173,7 @@ export default function Layout({ children }: LayoutProps) {
         </motion.div>
       </main>
 
-      <footer className={`w-full px-4 py-6 mt-auto border-t text-center text-sm ${
+      <footer className={`w-full px-4 py-4 sm:py-6 mt-auto border-t text-center text-xs sm:text-sm ${
         isDark
           ? "border-gray-800 text-gray-400"
           : "border-gray-200 text-gray-600"
@@ -180,10 +184,10 @@ export default function Layout({ children }: LayoutProps) {
       {/* Mobile Navigation */}
       <div className={`md:hidden fixed bottom-0 left-0 right-0 backdrop-blur-md border-t z-50 ${
         isDark
-          ? "bg-gray-800/80 border-gray-700"
-          : "bg-white/80 border-gray-200"
+          ? "bg-gray-800/90 border-gray-700"
+          : "bg-white/90 border-gray-200"
       }`}>
-        <div className="flex justify-around py-3">
+        <div className="flex justify-around items-center py-2 px-4">
           {user ? (
             <>
               <MobileNavLink to="/dashboard" icon={<LayoutDashboard size={20} />} label="Dashboard" isDark={isDark} />
