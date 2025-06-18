@@ -55,33 +55,33 @@ export default function LoginPage() {
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-br from-purple-50/90 via-white/90 to-pink-50/90 dark:from-gray-900/90 dark:via-gray-900/95 dark:to-gray-800/90 backdrop-blur-md">
       <div className="absolute inset-0 bg-white/40 dark:bg-gray-900/40 -z-10" />
       <motion.div
-        className="w-full max-w-xl bg-white/80 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 border border-purple-100 dark:border-gray-700/50"
+        className="w-full max-w-xl mx-4 bg-white/80 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-4 sm:p-8 border border-purple-100 dark:border-gray-700/50"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="text-center mb-12">
+        <div className="text-center mb-8 sm:mb-12">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="flex items-center justify-center mb-8"
+            className="flex items-center justify-center mb-6 sm:mb-8"
           >
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
-              <LogIn className="w-10 h-10 text-white" />
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+              <LogIn className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
             </div>
           </motion.div>
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             Welcome Back
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 text-lg">
+          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400">
             Sign in to continue to LinkSphere
           </p>
         </div>
 
         {error && (
           <motion.div
-            className="mb-8 p-4 rounded-lg bg-red-500/10 text-red-500 text-sm"
+            className="mb-6 sm:mb-8 p-3 sm:p-4 rounded-lg bg-red-500/10 text-red-500 text-sm"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
           >
@@ -89,10 +89,10 @@ export default function LoginPage() {
           </motion.div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div>
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <Mail className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="email"
                 name="email"
@@ -101,14 +101,14 @@ export default function LoginPage() {
                 placeholder="Email address"
                 required
                 autoComplete="email"
-                className="w-full pl-12 pr-4 py-4 bg-white/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50"
+                className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 bg-white/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50 text-sm sm:text-base"
               />
             </div>
           </div>
 
           <div>
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <Lock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="password"
                 name="password"
@@ -117,7 +117,7 @@ export default function LoginPage() {
                 placeholder="Password"
                 required
                 autoComplete="current-password"
-                className="w-full pl-12 pr-4 py-4 bg-white/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50"
+                className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 bg-white/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50 text-sm sm:text-base"
               />
             </div>
           </div>
@@ -125,20 +125,20 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-4 px-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-lg font-medium hover:shadow-lg hover:shadow-purple-500/20"
+            className="w-full py-3 sm:py-4 px-4 sm:px-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-base sm:text-lg font-medium hover:shadow-lg hover:shadow-purple-500/20"
           >
             {isLoading ? (
-              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
                 <span>Sign In</span>
-                <ArrowRight size={20} />
+                <ArrowRight size={18} className="sm:w-5 sm:h-5" />
               </>
             )}
           </button>
         </form>
 
-        <p className="text-center text-gray-600 dark:text-gray-400 mt-10">
+        <p className="text-center text-gray-600 dark:text-gray-400 mt-8 sm:mt-10 text-sm sm:text-base">
           Don't have an account?{" "}
           <Link
             to="/register"
