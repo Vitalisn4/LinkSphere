@@ -16,7 +16,7 @@
   }
 
   body.light {
-    @apply bg-gray-100/40 text-gray-600;
+    @apply bg-gray-50 text-gray-600;
   }
 
   /* Custom scrollbar */
