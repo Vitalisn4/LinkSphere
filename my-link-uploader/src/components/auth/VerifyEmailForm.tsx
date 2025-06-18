@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Mail, CheckCircle, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import { formatInTimeZone } from 'date-fns-tz';
 
 export default function VerifyEmailForm() {
   const [otp, setOtp] = useState("");
