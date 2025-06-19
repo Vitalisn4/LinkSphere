@@ -10,10 +10,11 @@ LinkSphere is a modern, user-friendly web application that helps you organize, m
 ### Authentication & Security
 - Secure user registration and login system with JWT
 - Email verification with OTP
-- Password reset functionality
 - Protected routes and secure session management
 - Password hashing with bcrypt
 - Rate limiting and CSRF protection
+- OTP attempt management and reset functionality
+- Secure session timeout handling
 
 ### Link Management
 - Create and organize your links with custom titles and descriptions
@@ -32,10 +33,10 @@ LinkSphere is a modern, user-friendly web application that helps you organize, m
 - Toast notifications for user feedback
 
 ### Account Management
-- Profile customization
-- Account settings
-- Secure password updates
-- Account deletion with confirmation
+- Profile customization(coming soon)
+- Account settings(coming soon)
+- Secure password updates(coming soon)
+- Account deletion with (coming soon)
 
 ### Technical Features
 #### Frontend
@@ -51,7 +52,7 @@ LinkSphere is a modern, user-friendly web application that helps you organize, m
 - SQLx for type-safe database operations
 - PostgreSQL database
 - JWT-based authentication
-- Email integration with SMTP
+- Email integration with RESEND
 - Docker containerization
 - Comprehensive error handling
 
@@ -100,12 +101,10 @@ cd backend
 ```env
 DATABASE_URL=postgres://user:password@localhost:5432/linksphere
 JWT_SECRET=your_jwt_secret
-SMTP_USERNAME=your_smtp_username
-SMTP_PASSWORD=your_smtp_password
 FRONTEND_REQUEST_URL=http://localhost:5173
-SMTP_SERVER=smtp.gmail.com
 UPSTASH_REDIS_REST_URL=""
 UPSTASH_REDIS_REST_TOKEN=""
+RESEND_API_KEY=""
 PORT=""
 HOST=""
 ```
@@ -121,7 +120,7 @@ sqlx migrate run
 cargo run
 ```
 
-The backend API will be available at `http://localhost:8000`
+The backend API will be available at `http://HOST:PORT`
 
 ## 🛠️ Tech Stack
 
@@ -143,7 +142,6 @@ The backend API will be available at `http://localhost:8000`
 - **Authentication:** JWT
 - **Email:** Lettre
 - **Containerization:** Docker
-- **Testing:** Rust's built-in testing framework
 
 ## 🎨 Theme Support
 
@@ -171,6 +169,8 @@ LinkSphere features a beautiful dual theme system:
 - Input sanitization
 - SQL injection prevention through SQLx
 - Secure headers
+- OTP attempt tracking and management
+- Session timeout mechanisms
 
 ## 📱 Responsive Design
 
@@ -190,6 +190,7 @@ LinkSphere features a beautiful dual theme system:
 - Advanced search filters
 - Link collections and folders
 - Real-time collaboration features
+- Others...
 
 ## 🤝 Contributing
 
