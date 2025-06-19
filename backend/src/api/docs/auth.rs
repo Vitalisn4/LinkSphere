@@ -60,3 +60,23 @@ pub fn resend_otp_docs() {}
     tag = "auth"
 )]
 pub fn login_docs() {}
+
+#[utoipa::path(
+    post,
+    path = "/api/auth/admin/reset-otp-attempts",
+    params(
+        ("X-Admin-Token" = String, Header, description = "Admin authentication token")
+    ),
+    responses(
+        (status = 200, description = "OTP attempts reset successfully", body = EmptyResponse),
+        (status = 400, description = "Invalid request data", body = ErrorResponse),
+        (status = 403, description = "Insufficient permissions", body = ErrorResponse),
+        (status = 404, description = "User not found", body = ErrorResponse),
+        (status = 500, description = "Internal server error", body = ErrorResponse)
+    ),
+    security(
+        ("bearer_auth" = [])
+    ),
+    tag = "auth"
+)]
+pub fn reset_otp_attempts_docs() {}
