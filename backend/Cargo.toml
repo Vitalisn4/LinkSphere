@@ -46,7 +46,7 @@ scraper = "0.18"
 anyhow = "1.0"
 
 # Add resend client
-resend = "0.2.2"
+resend = "0.1.4"
 
 [workspace]
 members = ["."]
