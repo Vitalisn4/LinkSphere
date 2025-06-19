@@ -46,6 +46,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added email verification system
 - Set up protected routes
 - Added user registration and login flows
+- Added OTP attempt tracking and management
+- Implemented admin endpoint for OTP attempt reset
+- Enhanced session security with timeout mechanisms
+- Removed deprecated delete endpoint
 
 ### Infrastructure
 - Set up GitHub Actions workflows
@@ -61,3 +65,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added changelog
 
 [Unreleased]: https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/ 
+
+### Security Updates
+- Implemented rate limiting for authentication endpoints
+- Added OTP attempt tracking to prevent brute force
+- Enhanced session management with secure timeouts
+- Improved API documentation with OpenAPI specs 
