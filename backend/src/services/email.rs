@@ -29,8 +29,10 @@ pub struct EmailService {
 impl EmailService {
     pub fn new() -> Result<Self, BoxError> {
         let resend_api_key = env::var("RESEND_API_KEY").expect("RESEND_API_KEY must be set");
-        let upstash_url = env::var("UPSTASH_REDIS_URL").expect("UPSTASH_REDIS_URL must be set");
-        let upstash_token = env::var("UPSTASH_REDIS_TOKEN").expect("UPSTASH_REDIS_TOKEN must be set");
+        let upstash_url =
+            env::var("UPSTASH_REDIS_REST_URL").expect("UPSTASH_REDIS_REST_URL must be set");
+        let upstash_token =
+            env::var("UPSTASH_REDIS_REST_TOKEN").expect("UPSTASH_REDIS_REST_TOKEN must be set");
 
         Ok(Self {
             resend_api_key,
@@ -241,7 +243,8 @@ impl EmailService {
                 let response_text = response.text().await.unwrap_or_default();
                 match serde_json::from_str::<serde_json::Value>(&response_text) {
                     Ok(json) => {
-                        let stored_otp = json.get("result")
+                        let stored_otp = json
+                            .get("result")
                             .and_then(|v| v.as_str())
                             .unwrap_or_default();
                         stored_otp == otp
