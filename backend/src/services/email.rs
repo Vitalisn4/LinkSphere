@@ -261,43 +261,61 @@ fn create_html_template() -> String {
     r####"<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify Your LinkSphere Account</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>LinkSphere OTP Verification</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; line-height: 1.6; color: #333333;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8f9fa;">
-        <tr>
-            <td style="padding: 20px;">
-                <table width="100%" max-width="600px" cellpadding="0" cellspacing="0" style="margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <tr>
-                        <td style="padding: 40px 30px; text-align: center;">
-                            <h1 style="margin: 0; color: #6b46c1; font-size: 24px;">LinkSphere</h1>
-                            <p style="margin: 10px 0 30px; color: #666666;">Verify Your Account</p>
-                            
-                            <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                                <p style="margin: 0 0 10px; font-size: 16px;">Your verification code:</p>
-                                <div style="font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #4c1d95;">{otp}</div>
-                                <p style="margin: 10px 0 0; font-size: 14px; color: #666666;">This code will expire in 5 minutes</p>
-                            </div>
+<body style="margin: 0; padding: 0; background: linear-gradient(to bottom right, #ffffff, #f3e8ff); color: #1f2937; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.5; min-height: 100vh;">
+    <div style="max-width: 600px; margin: 48px auto; padding: 32px 16px;">
+        <div style="background-color: #ffffff; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 32px 40px; border: 1px solid #e9d5ff;">
+            <!-- Header Section -->
+            <div style="text-align: center; padding-bottom: 32px; margin-bottom: 32px; border-bottom: 1px solid #f3f4f6;">
+                <div style="margin-bottom: 16px;">
+                    <img src="https://raw.githubusercontent.com/Nkwenti-Severian-Ndongtsop/LinkSphere/refs/heads/master/my-link-uploader/public/logo.png" 
+                         alt="LinkSphere Logo" 
+                         style="height: 80px; width: auto; margin-bottom: 16px; border-radius: 9999px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <h1 style="margin: 0; background: linear-gradient(to right, #7e22ce, #4f46e5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 48px; font-weight: 800; line-height: 1; letter-spacing: -0.025em;">
+                        LinkSphere
+                    </h1>
+                </div>
+                <p style="color: #4b5563; font-size: 20px; font-weight: 300; margin: 0;">Organize, manage, and share your links — beautifully.</p>
+            </div>
 
-                            <p style="margin: 20px 0; font-size: 14px; color: #666666;">If you didn't request this code, please ignore this email.</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 20px 30px; background-color: #f8f9fa; border-top: 1px solid #e5e7eb; font-size: 12px; color: #666666; text-align: center;">
-                            <p style="margin: 0 0 10px;">© 2024 LinkSphere. All rights reserved.</p>
-                            <p style="margin: 0;">123 Tech Street, Digital City, DC 12345</p>
-                            <p style="margin: 10px 0 0;">
-                                <a href="https://linksphere.com/unsubscribe" style="color: #6b46c1; text-decoration: none;">Unsubscribe</a> |
-                                <a href="https://linksphere.com/privacy" style="color: #6b46c1; text-decoration: none;">Privacy Policy</a>
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+            <!-- Main Verification Message -->
+            <h2 style="font-size: 32px; font-weight: 700; color: #111827; margin-bottom: 24px; text-align: center; line-height: 1.2;">
+                Verify Your Identity
+            </h2>
+            
+            <p style="font-size: 18px; color: #374151; margin-bottom: 32px; text-align: center; line-height: 1.6;">
+                To keep your account secure and your links protected, please use the one-time password (OTP) below to complete your login on <strong>LinkSphere</strong>.
+            </p>
+            
+            <!-- OTP Display -->
+            <div style="background-color: #f3e8ff; border-radius: 16px; padding: 32px; margin: 32px 0; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                <p style="color: #6b21a8; font-size: 18px; margin-bottom: 16px; font-weight: 500;">Your OTP code:</p>
+                <div style="background-color: #ffffff; border-radius: 12px; display: inline-block; padding: 20px 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #e9d5ff;">
+                    <span style="font-size: 48px; font-weight: 800; color: #000000; letter-spacing: 0.1em; line-height: 1;">
+                        {otp}
+                    </span>
+                </div>
+                <p style="margin-top: 24px; font-size: 16px; color: #6b21a8; font-weight: 500;">
+                    This code will expire in <span style="font-weight: 800; color: #581c87;">5 minutes</span>. Please don't share it with anyone.
+                </p>
+            </div>
+
+            <!-- Security Notice -->
+            <p style="font-size: 16px; color: #4b5563; margin-bottom: 32px; padding-top: 24px; border-top: 1px solid #f3f4f6;">
+                If you didn't request this code, simply ignore this email — your data is safe, and no changes will be made.
+            </p>
+
+            <!-- Footer Section -->
+            <div style="text-align: center; margin-top: 40px; padding-top: 24px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px;">
+                <p style="margin-bottom: 8px;">Need help? Visit our <a href="#" style="color: #7c3aed; text-decoration: none; font-weight: 500;">Help Center</a> or reach us at <a href="mailto:support@linksphere.com" style="color: #7c3aed; text-decoration: none; font-weight: 500;">support@linksphere.com</a>.</p>
+                <p style="margin: 0;">&copy; 2024 LinkSphere. All rights reserved.</p>
+                <p style="margin-top: 4px; font-style: italic;">This is an automated message — please do not reply.</p>
+            </div>
+        </div>
+    </div>
 </body>
 </html>"####.to_string()
 }
@@ -316,9 +334,8 @@ The LinkSphere Team
 
 ---
 © 2024 LinkSphere. All rights reserved.
-123 Tech Street, Digital City, DC 12345
+Need help? Contact us at support@linksphere.com
 
-To unsubscribe: https://linksphere.com/unsubscribe
-Privacy Policy: https://linksphere.com/privacy"####
+This is an automated message — please do not reply."####
         .to_string()
 }
