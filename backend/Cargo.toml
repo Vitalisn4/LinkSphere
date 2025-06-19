@@ -45,5 +45,8 @@ zxcvbn = "3.1.0"
 scraper = "0.18"
 anyhow = "1.0"
 
+# Add resend client
+resend = "0.2.2"
+
 [workspace]
 members = ["."]
