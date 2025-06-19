@@ -1,5 +1,3 @@
-use resend::Error as ResendError;
-use resend::Resend;
 use rand::random;
 use reqwest;
 use serde_json::json;
@@ -21,7 +19,7 @@ type BoxError = Box<dyn Error + Send + Sync + 'static>;
 
 #[derive(Clone)]
 pub struct EmailService {
-    resend_client: Resend,
+    resend_api_key: String,
     upstash_url: String,
     upstash_token: String,
     sender_email: String,
@@ -30,18 +28,15 @@ pub struct EmailService {
 
 impl EmailService {
     pub fn new() -> Result<Self, BoxError> {
-        let resend_api_key = env::var("RESEND_API_KEY")
-            .expect("RESEND_API_KEY must be set");
-        let upstash_url = env::var("UPSTASH_REDIS_URL")
-            .expect("UPSTASH_REDIS_URL must be set");
-        let upstash_token = env::var("UPSTASH_REDIS_TOKEN")
-            .expect("UPSTASH_REDIS_TOKEN must be set");
-        
+        let resend_api_key = env::var("RESEND_API_KEY").expect("RESEND_API_KEY must be set");
+        let upstash_url = env::var("UPSTASH_REDIS_URL").expect("UPSTASH_REDIS_URL must be set");
+        let upstash_token = env::var("UPSTASH_REDIS_TOKEN").expect("UPSTASH_REDIS_TOKEN must be set");
+
         Ok(Self {
-            resend_client: Resend::new(resend_api_key),
+            resend_api_key,
             upstash_url,
             upstash_token,
-            sender_email: "verify@resend.dev".to_string(), // Resend's verified domain
+            sender_email: "verify@resend.dev".to_string(),
             sender_name: "LinkSphere Team".to_string(),
         })
     }
@@ -50,7 +45,10 @@ impl EmailService {
         // Check rate limiting
         let attempts = self.get_attempt_count(email).await?;
         if attempts >= MAX_OTP_ATTEMPTS {
-            return Err("Maximum OTP attempts exceeded. Please contact support to unlock your account.".into());
+            return Err(
+                "Maximum OTP attempts exceeded. Please contact support to unlock your account."
+                    .into(),
+            );
         }
 
         let otp = self.generate_otp();
@@ -79,19 +77,31 @@ impl EmailService {
 
     async fn send_email_with_retry(&self, to_email: &str, otp: &str) -> Result<(), BoxError> {
         let (html_content, text_content) = self.create_email_content(otp);
+        let client = reqwest::Client::new();
 
         for attempt in 0..MAX_RETRY_ATTEMPTS {
-            let params = resend::SendEmailRequest::new()
-                .from(format!("{} <{}>", self.sender_name, self.sender_email))
-                .to(to_email.to_string())
-                .subject("Verify Your LinkSphere Account")
-                .html(html_content.clone())
-                .text(text_content.clone());
+            let send_url = "https://api.resend.com/emails";
+            let payload = json!({
+                "from": format!("{} <{}>", self.sender_name, self.sender_email),
+                "to": to_email,
+                "subject": "Verify Your LinkSphere Account",
+                "html": html_content,
+                "text": text_content
+            });
 
-            match self.resend_client.send_email(&params).await {
-                Ok(_) => return Ok(()),
-                Err(e) if attempt == MAX_RETRY_ATTEMPTS - 1 => return Err(Box::new(e)),
-                Err(_) => {
+            match client
+                .post(send_url)
+                .header("Authorization", format!("Bearer {}", self.resend_api_key))
+                .json(&payload)
+                .send()
+                .await
+            {
+                Ok(response) if response.status().is_success() => return Ok(()),
+                Ok(response) if attempt == MAX_RETRY_ATTEMPTS - 1 => {
+                    let error_text = response.text().await.unwrap_or_default();
+                    return Err(format!("Failed to send email: {}", error_text).into());
+                }
+                _ => {
                     sleep(Duration::from_millis(RETRY_DELAY_MS * attempt as u64)).await;
                     continue;
                 }
@@ -102,8 +112,12 @@ impl EmailService {
     }
 
     fn create_email_content(&self, otp: &str) -> (String, String) {
-        let html = EMAIL_TEMPLATE_HTML.get_or_init(|| create_html_template()).replace("{otp}", otp);
-        let text = EMAIL_TEMPLATE_TEXT.get_or_init(|| create_text_template()).replace("{otp}", otp);
+        let html = EMAIL_TEMPLATE_HTML
+            .get_or_init(create_html_template)
+            .replace("{otp}", otp);
+        let text = EMAIL_TEMPLATE_TEXT
+            .get_or_init(create_text_template)
+            .replace("{otp}", otp);
         (html, text)
     }
 
@@ -212,6 +226,32 @@ impl EmailService {
             .map(|n| n.to_string())
             .collect()
     }
+
+    pub async fn verify_otp(&self, email: &str, otp: &str) -> bool {
+        let client = reqwest::Client::new();
+        let get_url = format!("{}/get/otp:{}", self.upstash_url, email);
+
+        match client
+            .get(&get_url)
+            .header("Authorization", format!("Bearer {}", self.upstash_token))
+            .send()
+            .await
+        {
+            Ok(response) => {
+                let response_text = response.text().await.unwrap_or_default();
+                match serde_json::from_str::<serde_json::Value>(&response_text) {
+                    Ok(json) => {
+                        let stored_otp = json.get("result")
+                            .and_then(|v| v.as_str())
+                            .unwrap_or_default();
+                        stored_otp == otp
+                    }
+                    Err(_) => false,
+                }
+            }
+            Err(_) => false,
+        }
+    }
 }
 
 fn create_html_template() -> String {
@@ -276,5 +316,6 @@ The LinkSphere Team
 123 Tech Street, Digital City, DC 12345
 
 To unsubscribe: https://linksphere.com/unsubscribe
-Privacy Policy: https://linksphere.com/privacy"####.to_string()
+Privacy Policy: https://linksphere.com/privacy"####
+        .to_string()
 }
