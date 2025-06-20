@@ -58,7 +58,7 @@ async fn main() {
     let app = Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/health", get(routes::health::root))
-        .merge(routes::create_public_router(pool.clone()))
+        .merge(routes::create_ping_router(pool.clone()))
         .merge(auth::create_router(pool.clone()))
         .merge(routes::create_protected_router(pool).layer(from_fn_with_state(auth_service, auth)))
         .layer(cors)
