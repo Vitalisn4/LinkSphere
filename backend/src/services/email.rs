@@ -1,3 +1,8 @@
+use lettre::{
+    transport::smtp::authentication::Credentials,
+    transport::smtp::client::{Tls, TlsParameters},
+    AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor,
+};
 use rand::random;
 use reqwest;
 use serde_json::json;
@@ -5,11 +10,6 @@ use std::error::Error;
 use std::sync::OnceLock;
 use std::{env, time::Duration};
 use tokio::time::sleep;
-use lettre::{
-    AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor,
-    transport::smtp::{authentication::Credentials},
-    transport::smtp::client::{TlsParameters, Tls},
-};
 
 const OTP_EXPIRY_SECONDS: u64 = 300; // 5 minutes
 const MAX_RETRY_ATTEMPTS: u32 = 3;
@@ -41,10 +41,13 @@ impl EmailService {
             .parse::<u16>()
             .expect("SMTP_PORT must be a valid number");
         let sender_email = env::var("SMTP_FROM_EMAIL").expect("SMTP_FROM_EMAIL must be set");
-        let sender_name = env::var("SMTP_FROM_NAME").unwrap_or_else(|_| "LinkSphere Team".to_string());
-        
-        let upstash_url = env::var("UPSTASH_REDIS_REST_URL").expect("UPSTASH_REDIS_REST_URL must be set");
-        let upstash_token = env::var("UPSTASH_REDIS_REST_TOKEN").expect("UPSTASH_REDIS_REST_TOKEN must be set");
+        let sender_name =
+            env::var("SMTP_FROM_NAME").unwrap_or_else(|_| "LinkSphere Team".to_string());
+
+        let upstash_url =
+            env::var("UPSTASH_REDIS_REST_URL").expect("UPSTASH_REDIS_REST_URL must be set");
+        let upstash_token =
+            env::var("UPSTASH_REDIS_REST_TOKEN").expect("UPSTASH_REDIS_REST_TOKEN must be set");
 
         let creds = Credentials::new(smtp_username, smtp_password);
 
@@ -94,7 +97,10 @@ impl EmailService {
         // Spawn background task
         tokio::spawn(async move {
             match self_clone.process_and_send_otp(&email).await {
-                Ok(_) => tracing::info!("Background OTP process completed successfully for {}", email),
+                Ok(_) => tracing::info!(
+                    "Background OTP process completed successfully for {}",
+                    email
+                ),
                 Err(e) => tracing::error!("Background OTP process failed for {}: {}", email, e),
             }
         });
@@ -105,7 +111,7 @@ impl EmailService {
     /// Internal method to process and send OTP
     async fn process_and_send_otp(&self, email: &str) -> Result<(), BoxError> {
         let otp = self.generate_otp();
-        
+
         // Store OTP and send email concurrently
         let store_otp_future = self.store_otp_with_retry(email, &otp);
         let send_email_future = self.send_email_with_retry(email, &otp);
@@ -140,12 +146,8 @@ impl EmailService {
                 .subject("Verify Your LinkSphere Account")
                 .multipart(
                     lettre::message::MultiPart::alternative()
-                        .singlepart(
-                            lettre::message::SinglePart::plain(text_content.clone())
-                        )
-                        .singlepart(
-                            lettre::message::SinglePart::html(html_content.clone())
-                        )
+                        .singlepart(lettre::message::SinglePart::plain(text_content.clone()))
+                        .singlepart(lettre::message::SinglePart::html(html_content.clone())),
                 )?;
 
             match self.smtp_transport.send(email).await {
@@ -204,8 +206,14 @@ impl EmailService {
                         return Ok(());
                     } else if attempt == MAX_RETRY_ATTEMPTS - 1 {
                         let error_text = resp.text().await.unwrap_or_default();
-                        tracing::error!("Failed to store OTP. Status: {}, Error: {}", status, error_text);
-                        return Err("Failed to store OTP: server returned non-success status".into());
+                        tracing::error!(
+                            "Failed to store OTP. Status: {}, Error: {}",
+                            status,
+                            error_text
+                        );
+                        return Err(
+                            "Failed to store OTP: server returned non-success status".into()
+                        );
                     }
                 }
                 Err(e) => {
@@ -322,7 +330,11 @@ impl EmailService {
                     .get("result")
                     .and_then(|result| result.as_str())
                     .and_then(|s| serde_json::from_str::<serde_json::Value>(s).ok())
-                    .and_then(|data| data.get("value").and_then(|v| v.as_str()).map(|s| s.to_string()))
+                    .and_then(|data| {
+                        data.get("value")
+                            .and_then(|v| v.as_str())
+                            .map(|s| s.to_string())
+                    })
                     .unwrap_or_default();
 
                 if stored_otp.is_empty() {
@@ -343,7 +355,7 @@ impl EmailService {
 
                 matches
             }
-            Err(_) => false
+            Err(_) => false,
         }
     }
 
