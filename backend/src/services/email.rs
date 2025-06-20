@@ -4,7 +4,12 @@ use serde_json::json;
 use std::error::Error;
 use std::sync::OnceLock;
 use std::{env, time::Duration};
-use tokio::{task, time::sleep};
+use tokio::time::sleep;
+use lettre::{
+    AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor,
+    transport::smtp::{authentication::Credentials},
+    transport::smtp::client::{TlsParameters, Tls},
+};
 
 const OTP_EXPIRY_SECONDS: u64 = 300; // 5 minutes
 const MAX_RETRY_ATTEMPTS: u32 = 3;
@@ -19,7 +24,7 @@ type BoxError = Box<dyn Error + Send + Sync + 'static>;
 
 #[derive(Clone)]
 pub struct EmailService {
-    resend_api_key: String,
+    smtp_transport: AsyncSmtpTransport<Tokio1Executor>,
     upstash_url: String,
     upstash_token: String,
     sender_email: String,
@@ -28,23 +33,52 @@ pub struct EmailService {
 
 impl EmailService {
     pub fn new() -> Result<Self, BoxError> {
-        let resend_api_key = env::var("RESEND_API_KEY").expect("RESEND_API_KEY must be set");
-        let upstash_url =
-            env::var("UPSTASH_REDIS_REST_URL").expect("UPSTASH_REDIS_REST_URL must be set");
-        let upstash_token =
-            env::var("UPSTASH_REDIS_REST_TOKEN").expect("UPSTASH_REDIS_REST_TOKEN must be set");
+        let smtp_host = env::var("SMTP_HOST").expect("SMTP_HOST must be set");
+        let smtp_username = env::var("SMTP_USERNAME").expect("SMTP_USERNAME must be set");
+        let smtp_password = env::var("SMTP_PASSWORD").expect("SMTP_PASSWORD must be set");
+        let smtp_port = env::var("SMTP_PORT")
+            .expect("SMTP_PORT must be set")
+            .parse::<u16>()
+            .expect("SMTP_PORT must be a valid number");
+        let sender_email = env::var("SMTP_FROM_EMAIL").expect("SMTP_FROM_EMAIL must be set");
+        let sender_name = env::var("SMTP_FROM_NAME").unwrap_or_else(|_| "LinkSphere Team".to_string());
+        
+        let upstash_url = env::var("UPSTASH_REDIS_REST_URL").expect("UPSTASH_REDIS_REST_URL must be set");
+        let upstash_token = env::var("UPSTASH_REDIS_REST_TOKEN").expect("UPSTASH_REDIS_REST_TOKEN must be set");
+
+        let creds = Credentials::new(smtp_username, smtp_password);
+
+        // Configure TLS parameters
+        let tls_parameters = TlsParameters::new(smtp_host.clone())?;
+
+        let transport = if smtp_port == 465 {
+            // Use implicit TLS for port 465
+            AsyncSmtpTransport::<Tokio1Executor>::relay(&smtp_host)?
+                .port(smtp_port)
+                .credentials(creds)
+                .tls(Tls::Wrapper(tls_parameters))
+                .build()
+        } else {
+            // Use STARTTLS for port 587 and others
+            AsyncSmtpTransport::<Tokio1Executor>::relay(&smtp_host)?
+                .port(smtp_port)
+                .credentials(creds)
+                .tls(Tls::Required(tls_parameters))
+                .build()
+        };
 
         Ok(Self {
-            resend_api_key,
+            smtp_transport: transport,
             upstash_url,
             upstash_token,
-            sender_email: "verify@resend.dev".to_string(),
-            sender_name: "LinkSphere Team".to_string(),
+            sender_email,
+            sender_name,
         })
     }
 
-    pub async fn send_otp(&self, email: &str) -> Result<(), BoxError> {
-        // Check rate limiting
+    /// Initiates OTP sending process without waiting for completion
+    pub async fn initiate_otp_process(&self, email: &str) -> Result<(), BoxError> {
+        // Check rate limiting first - this needs to be synchronous
         let attempts = self.get_attempt_count(email).await?;
         if attempts >= MAX_OTP_ATTEMPTS {
             return Err(
@@ -53,8 +87,25 @@ impl EmailService {
             );
         }
 
-        let otp = self.generate_otp();
+        // Clone necessary data for the background task
+        let email = email.to_string();
+        let self_clone = self.clone();
 
+        // Spawn background task
+        tokio::spawn(async move {
+            match self_clone.process_and_send_otp(&email).await {
+                Ok(_) => tracing::info!("Background OTP process completed successfully for {}", email),
+                Err(e) => tracing::error!("Background OTP process failed for {}: {}", email, e),
+            }
+        });
+
+        Ok(())
+    }
+
+    /// Internal method to process and send OTP
+    async fn process_and_send_otp(&self, email: &str) -> Result<(), BoxError> {
+        let otp = self.generate_otp();
+        
         // Store OTP and send email concurrently
         let store_otp_future = self.store_otp_with_retry(email, &otp);
         let send_email_future = self.send_email_with_retry(email, &otp);
@@ -65,45 +116,49 @@ impl EmailService {
         store_result?;
         send_result?;
 
-        // Increment attempt counter in the background
-        let email_owned = email.to_string();
-        let self_clone = self.clone();
-        task::spawn(async move {
-            if let Err(e) = self_clone.increment_attempt_count(&email_owned).await {
-                eprintln!("Failed to increment attempt counter: {}", e);
-            }
-        });
+        // Increment attempt counter
+        if let Err(e) = self.increment_attempt_count(email).await {
+            tracing::error!("Failed to increment attempt counter: {}", e);
+        }
 
         Ok(())
     }
 
+    /// Deprecated: Use initiate_otp_process instead
+    #[deprecated(note = "Use initiate_otp_process for better performance")]
+    pub async fn send_otp(&self, email: &str) -> Result<(), BoxError> {
+        self.initiate_otp_process(email).await
+    }
+
     async fn send_email_with_retry(&self, to_email: &str, otp: &str) -> Result<(), BoxError> {
         let (html_content, text_content) = self.create_email_content(otp);
-        let client = reqwest::Client::new();
 
         for attempt in 0..MAX_RETRY_ATTEMPTS {
-            let send_url = "https://api.resend.com/emails";
-            let payload = json!({
-                "from": format!("{} <{}>", self.sender_name, self.sender_email),
-                "to": to_email,
-                "subject": "Verify Your LinkSphere Account",
-                "html": html_content,
-                "text": text_content
-            });
+            let email = Message::builder()
+                .from(format!("{} <{}>", self.sender_name, self.sender_email).parse()?)
+                .to(to_email.parse()?)
+                .subject("Verify Your LinkSphere Account")
+                .multipart(
+                    lettre::message::MultiPart::alternative()
+                        .singlepart(
+                            lettre::message::SinglePart::plain(text_content.clone())
+                        )
+                        .singlepart(
+                            lettre::message::SinglePart::html(html_content.clone())
+                        )
+                )?;
 
-            match client
-                .post(send_url)
-                .header("Authorization", format!("Bearer {}", self.resend_api_key))
-                .json(&payload)
-                .send()
-                .await
-            {
-                Ok(response) if response.status().is_success() => return Ok(()),
-                Ok(response) if attempt == MAX_RETRY_ATTEMPTS - 1 => {
-                    let error_text = response.text().await.unwrap_or_default();
-                    return Err(format!("Failed to send email: {}", error_text).into());
+            match self.smtp_transport.send(email).await {
+                Ok(_) => {
+                    tracing::debug!("Email sent successfully to {}", to_email);
+                    return Ok(());
                 }
-                _ => {
+                Err(e) if attempt == MAX_RETRY_ATTEMPTS - 1 => {
+                    tracing::error!("Failed to send email after all attempts: {}", e);
+                    return Err(format!("Failed to send email: {}", e).into());
+                }
+                Err(e) => {
+                    tracing::warn!("Failed to send email (attempt {}): {}", attempt + 1, e);
                     sleep(Duration::from_millis(RETRY_DELAY_MS * attempt as u64)).await;
                     continue;
                 }
@@ -131,6 +186,8 @@ impl EmailService {
             "ex": OTP_EXPIRY_SECONDS
         });
 
+        tracing::debug!("Attempting to store OTP for email: {}", email);
+
         for attempt in 0..MAX_RETRY_ATTEMPTS {
             match client
                 .post(set_url.clone())
@@ -139,13 +196,24 @@ impl EmailService {
                 .send()
                 .await
             {
-                Ok(resp) if resp.status().is_success() => return Ok(()),
-                Ok(_) if attempt == MAX_RETRY_ATTEMPTS - 1 => {
-                    return Err("Failed to store OTP: server returned non-success status".into())
+                Ok(resp) => {
+                    let status = resp.status();
+                    if status.is_success() {
+                        let response_text = resp.text().await.unwrap_or_default();
+                        tracing::debug!("Successfully stored OTP. Response: {}", response_text);
+                        return Ok(());
+                    } else if attempt == MAX_RETRY_ATTEMPTS - 1 {
+                        let error_text = resp.text().await.unwrap_or_default();
+                        tracing::error!("Failed to store OTP. Status: {}, Error: {}", status, error_text);
+                        return Err("Failed to store OTP: server returned non-success status".into());
+                    }
                 }
-                _ => {
+                Err(e) => {
+                    tracing::error!("Error storing OTP (attempt {}): {}", attempt + 1, e);
+                    if attempt == MAX_RETRY_ATTEMPTS - 1 {
+                        return Err(format!("Failed to store OTP: {}", e).into());
+                    }
                     sleep(Duration::from_millis(RETRY_DELAY_MS * attempt as u64)).await;
-                    continue;
                 }
             }
         }
@@ -240,20 +308,56 @@ impl EmailService {
             .await
         {
             Ok(response) => {
-                let response_text = response.text().await.unwrap_or_default();
-                match serde_json::from_str::<serde_json::Value>(&response_text) {
-                    Ok(json) => {
-                        let stored_otp = json
-                            .get("result")
-                            .and_then(|v| v.as_str())
-                            .unwrap_or_default();
-                        stored_otp == otp
-                    }
-                    Err(_) => false,
+                if !response.status().is_success() {
+                    return false;
                 }
+
+                let json: serde_json::Value = match response.json().await {
+                    Ok(json) => json,
+                    Err(_) => return false,
+                };
+
+                // Get the stored OTP directly from the nested structure
+                let stored_otp = json
+                    .get("result")
+                    .and_then(|result| result.as_str())
+                    .and_then(|s| serde_json::from_str::<serde_json::Value>(s).ok())
+                    .and_then(|data| data.get("value").and_then(|v| v.as_str()).map(|s| s.to_string()))
+                    .unwrap_or_default();
+
+                if stored_otp.is_empty() {
+                    return false;
+                }
+
+                let matches = stored_otp == otp;
+                if matches {
+                    // Delete OTP in background
+                    let email = email.to_string();
+                    let service = self.clone();
+                    tokio::spawn(async move {
+                        if let Err(e) = service.delete_otp(&email).await {
+                            tracing::error!("Failed to delete used OTP: {}", e);
+                        }
+                    });
+                }
+
+                matches
             }
-            Err(_) => false,
+            Err(_) => false
         }
+    }
+
+    async fn delete_otp(&self, email: &str) -> Result<(), BoxError> {
+        let client = reqwest::Client::new();
+        let del_url = format!("{}/del/otp:{}", self.upstash_url, email);
+
+        client
+            .post(&del_url)
+            .header("Authorization", format!("Bearer {}", self.upstash_token))
+            .send()
+            .await?;
+
+        Ok(())
     }
 }
 
