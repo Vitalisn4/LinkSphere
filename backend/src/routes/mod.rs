@@ -21,3 +21,9 @@ pub fn create_protected_router(pool: PgPool) -> Router {
         .route("/api/links/{id}/click", post(links::track_click))
         .with_state(pool)
 }
+
+pub fn create_router(pool: PgPool) -> Router {
+    Router::new()
+        .route("/db/health", get(health::health_check))
+        .with_state(pool)
+}
