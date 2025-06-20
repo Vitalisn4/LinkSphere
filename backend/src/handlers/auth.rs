@@ -21,55 +21,101 @@ pub async fn register(
     State(state): State<AppState>,
     Json(payload): Json<RegisterRequest>,
 ) -> impl IntoResponse {
-    // Validate the request
+    // Validate the request first - this must be synchronous
     if let Err(validation_errors) = payload.validate() {
         let error = ErrorResponse::new(format!("Validation error: {}", validation_errors))
             .with_code("VALIDATION_ERROR");
         return (StatusCode::UNPROCESSABLE_ENTITY, Json(error)).into_response();
     }
 
-    // Check if user already exists first
-    match state
-        .auth_service
-        .check_user_exists(&payload.email, &payload.username)
-        .await
-    {
-        Ok(true) => {
-            let error = ErrorResponse::new("User with this email or username already exists")
-                .with_code("USER_EXISTS");
-            (StatusCode::CONFLICT, Json(error)).into_response()
-        }
-        Ok(false) => {
-            // User doesn't exist, proceed with OTP
-            if let Err(e) = state.email_service.send_otp(&payload.email).await {
-                let error = ErrorResponse::new(format!("Failed to send verification email: {}", e))
-                    .with_code("EMAIL_ERROR");
-                return (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response();
+    // Check if user exists and get their status - this needs to be synchronous to make the right decision
+    let existing_user = sqlx::query_as!(
+        User,
+        r#"
+        SELECT 
+            id, email, username, password_hash, 
+            gender as "gender: _",
+            status as "status: _",
+            is_verified,
+            verification_attempts,
+            verified_at,
+            created_at, 
+            updated_at
+        FROM users
+        WHERE email = $1 OR username = $2
+        "#,
+        payload.email,
+        payload.username
+    )
+    .fetch_optional(state.auth_service.get_pool())
+    .await;
+
+    match existing_user {
+        Ok(Some(user)) => {
+            if user.status != UserStatus::PendingVerification {
+                // Only reject if user exists and is not pending verification
+                let error = ErrorResponse::new("User with this email or username already exists")
+                    .with_code("USER_EXISTS");
+                return (StatusCode::CONFLICT, Json(error)).into_response();
             }
 
-            // Register user
-            match state.auth_service.register(payload.clone()).await {
-                Ok(user) => {
-                    let response = ApiResponse::success_with_message(
-                        json!({
-                            "id": user.id,
-                            "email": user.email,
-                            "username": user.username,
-                            "status": "pending_verification"
-                        }),
-                        "Registration successful. Please enter the verification code sent to your email.",
-                    );
-                    (StatusCode::CREATED, Json(response)).into_response()
+            // For pending verification users, proceed with new OTP
+            let email_clone = user.email.clone();
+            let state_clone = state.clone();
+            tokio::spawn(async move {
+                if let Err(e) = state_clone.email_service.initiate_otp_process(&email_clone).await {
+                    tracing::error!("Failed to send OTP to existing pending user: {}", e);
                 }
-                Err(e) => {
-                    let error = ErrorResponse::new(format!("Registration failed: {}", e))
-                        .with_code("REGISTRATION_ERROR");
-                    (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response()
+            });
+
+            // Wait 2 seconds for better UX
+            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+
+            // Return success for pending verification users
+            let response = ApiResponse::success_with_message(
+                json!({
+                    "id": user.id,
+                    "email": user.email,
+                    "username": user.username,
+                    "status": "pending_verification",
+                    "redirect": "/verify-email"
+                }),
+                "Please enter the verification code sent to your email.",
+            );
+            (StatusCode::OK, Json(response)).into_response()
+        }
+        Ok(None) => {
+            // For new users, start background processing
+            let state_clone = state.clone();
+            let payload_clone = payload.clone();
+            tokio::spawn(async move {
+                match state_clone.auth_service.register(payload_clone).await {
+                    Ok(new_user) => {
+                        if let Err(e) = state_clone.email_service.initiate_otp_process(&new_user.email).await {
+                            tracing::error!("Failed to send OTP to new user: {}", e);
+                        }
+                    }
+                    Err(e) => tracing::error!("Failed to register new user: {}", e),
                 }
-            }
+            });
+
+            // Wait 2 seconds for better UX
+            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+
+            // Return success for new users
+            let response = ApiResponse::success_with_message(
+                json!({
+                    "email": payload.email,
+                    "username": payload.username,
+                    "status": "pending_verification",
+                    "redirect": "/verify-email"
+                }),
+                "Please enter the verification code sent to your email.",
+            );
+            (StatusCode::CREATED, Json(response)).into_response()
         }
         Err(e) => {
-            let error = ErrorResponse::new(format!("Failed to check user existence: {}", e))
+            let error = ErrorResponse::new(format!("Database error: {}", e))
                 .with_code("DATABASE_ERROR");
             (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response()
         }
@@ -224,7 +270,7 @@ pub async fn resend_otp(
     }
 
     // Send new OTP
-    match state.email_service.send_otp(&payload.email).await {
+    match state.email_service.initiate_otp_process(&payload.email).await {
         Ok(_) => {
             let response = ApiResponse::success_with_message(
                 json!({"email": payload.email}),
