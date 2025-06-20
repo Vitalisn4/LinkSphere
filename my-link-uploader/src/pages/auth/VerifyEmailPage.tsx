@@ -27,10 +27,10 @@ export default function VerifyEmailPage() {
 
   // Redirect if no email is found
   useEffect(() => {
-    if (!email) {
+  if (!email) {
       navigate("/register", { replace: true });
       return;
-    }
+  }
   }, [email, navigate]);
 
   // Handle countdown for resend button
