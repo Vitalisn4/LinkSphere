@@ -64,10 +64,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added contribution guidelines
 - Added changelog
 
-[Unreleased]: https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/ 
+### Added
+- Database health monitoring endpoint at `/api/admin/db/health`
+- Automated health checks every 5 minutes via GitHub Actions
+- Admin token authentication for system endpoints
+- Improved error handling and standardized API responses
 
-### Security Updates
-- Implemented rate limiting for authentication endpoints
-- Added OTP attempt tracking to prevent brute force
-- Enhanced session management with secure timeouts
-- Improved API documentation with OpenAPI specs 
+### Changed
+- Moved admin endpoints under `/api/admin/*` path
+- Enhanced security with `ADMIN_SECRET_KEY` for system operations
+
+### Security
+- Added `X-Admin-Token` header validation for admin endpoints
+- Protected system endpoints with environment-based secret key
+
+[Unreleased]: https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/ 
+ 
