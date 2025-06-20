@@ -131,10 +131,10 @@ export default function RegisterPage() {
       navigate("/verify-email", { replace: true });
     } catch (error) {
       setIsLoading(false);
-      setErrors(prev => ({
-        ...prev,
-        submit: "Failed to register. Please try again."
-      }));
+        setErrors(prev => ({
+          ...prev,
+          submit: "Failed to register. Please try again."
+        }));
     }
   };
 
