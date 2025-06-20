@@ -1,0 +1,19 @@
+name: Database Health Check
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  health_check:
+    runs-on: ubuntu-latest
+    env:
+      BACKEND_URL: ${{ secrets.RENDER_BACKEND_URL }}
+    steps:
+      - name: Check database health
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: '${{ env.BACKEND_URL }}/db/health'
+          method: 'GET'
+          timeout: 5000 
