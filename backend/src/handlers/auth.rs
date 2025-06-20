@@ -63,7 +63,11 @@ pub async fn register(
             let email_clone = user.email.clone();
             let state_clone = state.clone();
             tokio::spawn(async move {
-                if let Err(e) = state_clone.email_service.initiate_otp_process(&email_clone).await {
+                if let Err(e) = state_clone
+                    .email_service
+                    .initiate_otp_process(&email_clone)
+                    .await
+                {
                     tracing::error!("Failed to send OTP to existing pending user: {}", e);
                 }
             });
@@ -91,7 +95,11 @@ pub async fn register(
             tokio::spawn(async move {
                 match state_clone.auth_service.register(payload_clone).await {
                     Ok(new_user) => {
-                        if let Err(e) = state_clone.email_service.initiate_otp_process(&new_user.email).await {
+                        if let Err(e) = state_clone
+                            .email_service
+                            .initiate_otp_process(&new_user.email)
+                            .await
+                        {
                             tracing::error!("Failed to send OTP to new user: {}", e);
                         }
                     }
@@ -115,8 +123,8 @@ pub async fn register(
             (StatusCode::CREATED, Json(response)).into_response()
         }
         Err(e) => {
-            let error = ErrorResponse::new(format!("Database error: {}", e))
-                .with_code("DATABASE_ERROR");
+            let error =
+                ErrorResponse::new(format!("Database error: {}", e)).with_code("DATABASE_ERROR");
             (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response()
         }
     }
@@ -270,7 +278,11 @@ pub async fn resend_otp(
     }
 
     // Send new OTP
-    match state.email_service.initiate_otp_process(&payload.email).await {
+    match state
+        .email_service
+        .initiate_otp_process(&payload.email)
+        .await
+    {
         Ok(_) => {
             let response = ApiResponse::success_with_message(
                 json!({"email": payload.email}),
