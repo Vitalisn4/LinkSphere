@@ -222,4 +222,36 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [PostgreSQL](https://www.postgresql.org/)
 - [Docker](https://www.docker.com/)
 
+## System Monitoring
+
+### Health Check Endpoint
+
+The system includes an automated health monitoring system that checks the database connection status. This is implemented through:
+
+- **Endpoint**: `/api/admin/db/health`
+- **Method**: GET
+- **Authentication**: Requires `X-Admin-Token`
+- **Automated Monitoring**: GitHub Actions workflow runs every 5 minutes
+
+## Development Setup
+
+### Frontend
+- **Framework:** React with TypeScript
+- **Styling:** Tailwind CSS
+- **Animations:** Framer Motion
+- **State Management:** React Context
+- **Routing:** React Router
+- **Form Handling:** React Hook Form
+- **API Client:** Axios
+- **Build Tool:** Vite
+
+### Backend
+- **Language:** Rust
+- **Web Framework:** Axum
+- **Database:** PostgreSQL
+- **ORM:** SQLx
+- **Authentication:** JWT
+- **Email:** Lettre
+- **Containerization:** Docker
+
 ---
