@@ -1,9 +1,15 @@
 use crate::api::ApiResponse;
-use axum::{http::StatusCode, response::IntoResponse, Json};
+use axum::{
+    http::{StatusCode, HeaderMap},
+    response::IntoResponse,
+    Json,
+    extract::State,
+};
 use serde::Serialize;
 use utoipa::ToSchema;
 use serde_json::json;
 use sqlx::PgPool;
+use std::env;
 
 #[derive(Serialize, ToSchema)]
 struct HealthStatus {
@@ -27,8 +33,26 @@ pub async fn root() -> impl IntoResponse {
     (StatusCode::OK, axum::Json(response)).into_response()
 }
 
-pub async fn health_check(pool: axum::extract::State<PgPool>) -> impl IntoResponse {
-    match sqlx::query("SELECT 1").execute(&*pool).await {
+pub async fn health_check(
+    State(pool): State<PgPool>,
+    headers: HeaderMap,
+) -> impl IntoResponse {
+    // Check admin token
+    let admin_token = env::var("ADMIN_TOKEN").unwrap_or_default();
+    let provided_token = headers
+        .get("X-Admin-Token")
+        .and_then(|value| value.to_str().ok())
+        .unwrap_or_default();
+
+    if admin_token.is_empty() || admin_token != provided_token {
+        let response = json!({
+            "status": "error",
+            "message": "Unauthorized access"
+        });
+        return (StatusCode::UNAUTHORIZED, Json(response));
+    }
+
+    match sqlx::query("SELECT 1").execute(&pool).await {
         Ok(_) => {
             let response = json!({
                 "status": "healthy",
