@@ -119,41 +119,22 @@ export default function RegisterPage() {
     setIsLoading(true);
     setErrors({}); // Clear previous errors
 
-    // Validate all fields
-    const validationErrors: ValidationErrors = {
-      email: validateEmail(email),
-      username: validateUsername(username),
-      password: validatePassword(password),
-      confirmPassword: validateConfirmPassword(confirmPassword)
-    };
-
-    // Check if there are any validation errors
-    const hasErrors = Object.values(validationErrors).some(error => error !== undefined);
-    if (hasErrors) {
-      setErrors(validationErrors);
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      await ApiService.register(email, username, password, gender);
-      // Registration successful, now we can store email and navigate
+      // Start registration request - don't await the response
+      ApiService.register(email, username, password, gender);
+      
+      // Store email for verification page
       sessionStorage.setItem("pendingVerificationEmail", email);
+      
+      // Wait 2 seconds then redirect
+      await new Promise(resolve => setTimeout(resolve, 2000));
       navigate("/verify-email", { replace: true });
     } catch (error) {
-      // Handle registration error
-      if (error instanceof Error) {
-        setErrors(prev => ({
-          ...prev,
-          submit: error.message
-        }));
-      } else {
-        setErrors(prev => ({
-          ...prev,
-          submit: "Failed to register. Please try again."
-        }));
-      }
       setIsLoading(false);
+      setErrors(prev => ({
+        ...prev,
+        submit: "Failed to register. Please try again."
+      }));
     }
   };
 
