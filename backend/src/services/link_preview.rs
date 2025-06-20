@@ -1,6 +1,6 @@
 use crate::database::models::LinkPreview;
-use anyhow::{Result, Context, anyhow};
-use reqwest::{Client, header};
+use anyhow::{anyhow, Context, Result};
+use reqwest::{header, Client};
 use scraper::{Html, Selector};
 use std::time::Duration;
 use url::Url;
@@ -12,24 +12,25 @@ pub async fn fetch_link_preview(url: &str) -> Result<LinkPreview> {
         .build()?;
 
     let base_url = Url::parse(url)?;
-    
+
     // Special handling for YouTube URLs
     if is_youtube_url(&base_url) {
         return fetch_youtube_preview(&client, &base_url).await;
     }
-    
-    let response = client.get(url)
+
+    let response = client
+        .get(url)
         .send()
         .await
         .context("Failed to fetch URL")?;
-        
+
     // Check content type
     let content_type = response
         .headers()
         .get(header::CONTENT_TYPE)
         .and_then(|v| v.to_str().ok())
         .unwrap_or("");
-        
+
     if !content_type.contains("text/html") {
         return Ok(LinkPreview {
             title: Some(url.to_string()),
@@ -96,27 +97,21 @@ fn resolve_url(base: &Url, path: &str) -> String {
 
 fn is_youtube_url(url: &Url) -> bool {
     url.host_str()
-        .map(|host| {
-            host == "youtube.com" || 
-            host == "www.youtube.com" || 
-            host == "youtu.be"
-        })
+        .map(|host| host == "youtube.com" || host == "www.youtube.com" || host == "youtu.be")
         .unwrap_or(false)
 }
 
 async fn fetch_youtube_preview(client: &Client, url: &Url) -> Result<LinkPreview> {
     let video_id = extract_youtube_video_id(url)?;
-    
+
     // First try the YouTube Data API v3 public endpoint
     let api_url = format!(
         "https://www.googleapis.com/youtube/v3/videos?part=snippet&id={}&key=AIzaSyDqOtZx4Tq8h9J-uG9-1cxNNmj_iE8cRb4",
         video_id
     );
-    
-    let api_response = client.get(&api_url)
-        .send()
-        .await;
-        
+
+    let api_response = client.get(&api_url).send().await;
+
     if let Ok(response) = api_response {
         if let Ok(data) = response.json::<serde_json::Value>().await {
             if let Some(items) = data["items"].as_array() {
@@ -124,20 +119,27 @@ async fn fetch_youtube_preview(client: &Client, url: &Url) -> Result<LinkPreview
                     if let Some(snippet) = first_item["snippet"].as_object() {
                         let title = snippet["title"].as_str().map(String::from);
                         let description = snippet["description"].as_str().map(String::from);
-                        let channel_title = snippet["channelTitle"].as_str().unwrap_or("Unknown Channel");
-                        
+                        let channel_title = snippet["channelTitle"]
+                            .as_str()
+                            .unwrap_or("Unknown Channel");
+
                         // Get the best thumbnail available
                         let thumbnails = &snippet["thumbnails"];
-                        let image = thumbnails["maxres"].as_object()
+                        let image = thumbnails["maxres"]
+                            .as_object()
                             .or_else(|| thumbnails["high"].as_object())
                             .or_else(|| thumbnails["medium"].as_object())
                             .or_else(|| thumbnails["default"].as_object())
                             .and_then(|thumb| thumb["url"].as_str())
                             .map(String::from);
-                            
+
                         return Ok(LinkPreview {
                             title,
-                            description: Some(format!("{} - {}", description.unwrap_or_default(), channel_title)),
+                            description: Some(format!(
+                                "{} - {}",
+                                description.unwrap_or_default(),
+                                channel_title
+                            )),
                             image,
                             favicon: Some("https://www.youtube.com/favicon.ico".to_string()),
                         });
@@ -146,40 +148,44 @@ async fn fetch_youtube_preview(client: &Client, url: &Url) -> Result<LinkPreview
             }
         }
     }
-    
+
     // Fallback to oEmbed if API fails
     let oembed_url = format!(
         "https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={}&format=json",
         video_id
     );
-    
-    let oembed_response = client.get(&oembed_url)
+
+    let oembed_response = client
+        .get(&oembed_url)
         .send()
         .await
         .context("Failed to fetch YouTube oEmbed data")?;
-        
+
     if oembed_response.status().is_success() {
         let oembed_data: serde_json::Value = oembed_response.json().await?;
-        
+
         // Get high quality thumbnail
         let thumbnail_url = format!("https://i.ytimg.com/vi/{}/maxresdefault.jpg", video_id);
-        
+
         // Check if maxresdefault exists
-        let thumb_response = client.get(&thumbnail_url)
+        let thumb_response = client
+            .get(&thumbnail_url)
             .send()
             .await
             .map_err(|_| anyhow!("Failed to check thumbnail"))?;
-            
+
         let image = if thumb_response.status().is_success() {
             thumbnail_url
         } else {
             format!("https://i.ytimg.com/vi/{}/hqdefault.jpg", video_id)
         };
-        
+
         Ok(LinkPreview {
             title: oembed_data["title"].as_str().map(String::from),
-            description: Some(format!("YouTube video by {}", 
-                oembed_data["author_name"].as_str().unwrap_or("Unknown"))),
+            description: Some(format!(
+                "YouTube video by {}",
+                oembed_data["author_name"].as_str().unwrap_or("Unknown")
+            )),
             image: Some(image),
             favicon: Some("https://www.youtube.com/favicon.ico".to_string()),
         })
@@ -202,12 +208,13 @@ fn extract_youtube_video_id(url: &Url) -> Result<String> {
             return Ok(path.split('?').next().unwrap_or(path).to_string());
         }
     }
-    
+
     // Handle youtube.com URLs
-    let video_id = url.query_pairs()
+    let video_id = url
+        .query_pairs()
         .find(|(key, _)| key == "v")
         .map(|(_, value)| value.into_owned())
         .context("Could not find video ID in YouTube URL")?;
-        
+
     Ok(video_id)
 }
