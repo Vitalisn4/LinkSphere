@@ -7,9 +7,11 @@ use axum::{
     Router,
 };
 
-// Public routes that don't require authentication
-pub fn create_public_router(pool: PgPool) -> Router {
-    Router::new().with_state(pool)
+
+pub fn create_ping_router(pool: PgPool) -> Router {
+    Router::new()
+        .route("/api/admin/db/health", get(health::health_check))
+        .with_state(pool)
 }
 
 // Protected routes that require authentication
@@ -19,6 +21,5 @@ pub fn create_protected_router(pool: PgPool) -> Router {
         .route("/api/links", post(links::handle_create_link))
         .route("/api/links/{id}", delete(links::delete_link))
         .route("/api/links/{id}/click", post(links::track_click))
-        .route("/api/admin/health", get(health::health_check))
         .with_state(pool)
 }
