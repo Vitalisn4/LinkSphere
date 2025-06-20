@@ -9,7 +9,6 @@ import { useAuth } from "../../hooks/useAuth"
 export default function VerifyEmailPage() {
   const [otp, setOtp] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
   const [resendDisabled, setResendDisabled] = useState(true)
   const [countdown, setCountdown] = useState(30)
   const navigate = useNavigate()
@@ -17,14 +16,22 @@ export default function VerifyEmailPage() {
 
   // Get email from session storage (stored during registration)
   const email = sessionStorage.getItem("pendingVerificationEmail")
+  const [error, setError] = useState(() => {
+    const regError = sessionStorage.getItem("registrationError");
+    if (regError) {
+      sessionStorage.removeItem("registrationError"); // Clear the error
+      return regError;
+    }
+    return "";
+  });
 
   // Redirect if no email is found
   useEffect(() => {
-  if (!email) {
-    navigate("/register", { replace: true })
-      return
-  }
-  }, [email, navigate])
+    if (!email) {
+      navigate("/register", { replace: true });
+      return;
+    }
+  }, [email, navigate]);
 
   // Handle countdown for resend button
   useEffect(() => {
