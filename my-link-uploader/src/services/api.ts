@@ -96,10 +96,10 @@ export const ApiService = {
   async register(email: string, username: string, password: string, gender: Gender): Promise<void> {
     // Fire and forget - don't wait for response
     api.post('/auth/register', {
-      email,
-      username,
-      password,
-      gender
+        email,
+        username,
+        password,
+        gender
     }).catch(error => {
       console.error('Registration error:', error);
     });
