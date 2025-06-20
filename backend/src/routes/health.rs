@@ -1,15 +1,15 @@
 use crate::api::{ApiResponse, ErrorResponse};
 use axum::{
-    http::{StatusCode, HeaderMap},
+    extract::State,
+    http::{HeaderMap, StatusCode},
     response::IntoResponse,
     Json,
-    extract::State,
 };
 use serde::Serialize;
-use utoipa::ToSchema;
 use serde_json::json;
 use sqlx::PgPool;
 use std::env;
+use utoipa::ToSchema;
 
 #[derive(Serialize, ToSchema)]
 struct HealthStatus {
@@ -47,10 +47,7 @@ pub async fn root() -> impl IntoResponse {
     ),
     tag = "admin"
 )]
-pub async fn health_check(
-    State(pool): State<PgPool>,
-    headers: HeaderMap,
-) -> impl IntoResponse {
+pub async fn health_check(State(pool): State<PgPool>, headers: HeaderMap) -> impl IntoResponse {
     // Check admin token
     let admin_token = env::var("ADMIN_SECRET_KEY").unwrap_or_default();
     let provided_token = headers
