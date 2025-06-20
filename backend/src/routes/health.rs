@@ -1,4 +1,4 @@
-use crate::api::ApiResponse;
+use crate::api::{ApiResponse, ErrorResponse};
 use axum::{
     http::{StatusCode, HeaderMap},
     response::IntoResponse,
@@ -33,39 +33,68 @@ pub async fn root() -> impl IntoResponse {
     (StatusCode::OK, axum::Json(response)).into_response()
 }
 
+/// Health check endpoint protected by admin token
+#[utoipa::path(
+    get,
+    path = "/api/admin/health",
+    params(
+        ("X-Admin-Token" = String, Header, description = "Admin authentication token")
+    ),
+    responses(
+        (status = 200, description = "Database connection healthy", body = ApiResponse<serde_json::Value>),
+        (status = 401, description = "Missing or invalid admin token", body = ErrorResponse),
+        (status = 503, description = "Database connection failed", body = ErrorResponse)
+    ),
+    tag = "admin"
+)]
 pub async fn health_check(
     State(pool): State<PgPool>,
     headers: HeaderMap,
 ) -> impl IntoResponse {
     // Check admin token
-    let admin_token = env::var("ADMIN_TOKEN").unwrap_or_default();
+    let admin_token = env::var("ADMIN_SECRET_KEY").unwrap_or_default();
     let provided_token = headers
         .get("X-Admin-Token")
         .and_then(|value| value.to_str().ok())
         .unwrap_or_default();
 
     if admin_token.is_empty() || admin_token != provided_token {
-        let response = json!({
-            "status": "error",
-            "message": "Unauthorized access"
-        });
+        let response = ApiResponse {
+            success: false,
+            message: "Missing or invalid authorization header".to_string(),
+            data: json!({ "code": "UNAUTHORIZED" }),
+            pagination: None,
+            timestamp: chrono::Utc::now(),
+        };
         return (StatusCode::UNAUTHORIZED, Json(response));
     }
 
     match sqlx::query("SELECT 1").execute(&pool).await {
         Ok(_) => {
-            let response = json!({
-                "status": "healthy",
-                "database": "connected"
-            });
+            let response = ApiResponse {
+                success: true,
+                message: "Database connection is healthy".to_string(),
+                data: json!({
+                    "status": "healthy",
+                    "database": "connected"
+                }),
+                pagination: None,
+                timestamp: chrono::Utc::now(),
+            };
             (StatusCode::OK, Json(response))
         }
         Err(e) => {
-            let response = json!({
-                "status": "unhealthy",
-                "database": "disconnected",
-                "error": e.to_string()
-            });
+            let response = ApiResponse {
+                success: false,
+                message: format!("Database connection failed: {}", e),
+                data: json!({
+                    "status": "unhealthy",
+                    "database": "disconnected",
+                    "error": e.to_string()
+                }),
+                pagination: None,
+                timestamp: chrono::Utc::now(),
+            };
             (StatusCode::SERVICE_UNAVAILABLE, Json(response))
         }
     }
