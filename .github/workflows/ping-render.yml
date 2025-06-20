@@ -1,4 +1,4 @@
-name: Keep Render Service Active
+name: Keep Backend Service Active
 
 on:
   schedule:
