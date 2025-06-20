@@ -1,0 +1,13 @@
+name: Keep Render Service Active
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  health_check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend
+        run: curl -f ${{ secrets.RENDER_BACKEND_URL }}/health
