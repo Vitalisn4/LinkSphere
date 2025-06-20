@@ -3,7 +3,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-interface ApiResponse<T = unknown> {
+interface ApiResponse<T = { redirect?: string }> {
   success: boolean;
   message: string;
   data?: T;
@@ -94,26 +94,15 @@ const handleApiError = (error: AxiosError<ApiError>) => {
 
 export const ApiService = {
   async register(email: string, username: string, password: string, gender: Gender): Promise<void> {
-    try {
-      const response = await api.post<ApiResponse>('/auth/register', {
-        email,
-        username,
-        password,
-        gender
-      });
-      
-      // Check for non-201 status codes
-      if (response.status !== 201) {
-        throw new Error(response.data.message || "Registration failed");
-      }
-    } catch (error) {
-      const axiosError = error as AxiosError<ApiError>;
-      if (axiosError.response?.status === 409) {
-        throw new Error("User with this email or username already exists");
-      }
-      handleApiError(axiosError);
-      throw error;
-    }
+    // Fire and forget - don't wait for response
+    api.post('/auth/register', {
+      email,
+      username,
+      password,
+      gender
+    }).catch(error => {
+      console.error('Registration error:', error);
+    });
   },
 
   async verifyEmail(email: string, otp: string): Promise<void> {
