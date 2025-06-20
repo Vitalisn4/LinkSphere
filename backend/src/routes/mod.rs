@@ -7,7 +7,6 @@ use axum::{
     Router,
 };
 
-
 pub fn create_ping_router(pool: PgPool) -> Router {
     Router::new()
         .route("/api/admin/db/health", get(health::health_check))
