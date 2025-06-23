@@ -1,66 +1,23 @@
 "use client"
-import { createContext } from "react"
-import { useState, useEffect } from "react"
-import type { ReactNode } from "react"
+import React, { useState, useEffect } from 'react';
+import { ThemeContext } from './context';
 
-type Theme = "light" | "dark"
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isDark, setIsDark] = useState(() => {
+    const savedTheme = localStorage.getItem('theme');
+    return savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  });
 
-interface ThemeContextType {
-  theme: Theme
-  toggleTheme: () => void
-}
-
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
-
-// Export ThemeContext so the hook can import it
-export { ThemeContext };
-
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  // Check for user preference or stored preference
-  const getInitialTheme = (): Theme => {
-    if (typeof window !== "undefined") {
-      const storedTheme = localStorage.getItem("theme") as Theme | null
-
-      if (storedTheme) {
-        return storedTheme
-      }
-
-      const userPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-      return userPrefersDark ? "dark" : "light"
-    }
-
-    return "light"
-  }
-
-  const [theme, setTheme] = useState<Theme>(getInitialTheme)
-
-  // Apply theme to document
   useEffect(() => {
-    const root = window.document.documentElement
+    document.documentElement.classList.toggle('dark', isDark);
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  }, [isDark]);
 
-    root.classList.remove("light", "dark")
-    root.classList.add(theme)
+  const toggleTheme = () => setIsDark(!isDark);
 
-    localStorage.setItem("theme", theme)
-  }, [theme])
-
-  // Listen for system preference changes
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
-
-    const handleChange = () => {
-      if (!localStorage.getItem("theme")) {
-        setTheme(mediaQuery.matches ? "dark" : "light")
-      }
-    }
-
-    mediaQuery.addEventListener("change", handleChange)
-    return () => mediaQuery.removeEventListener("change", handleChange)
-  }, [])
-
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"))
-  }
-
-  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>
-}
+  return (
+    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+};

@@ -93,6 +93,24 @@ module.exports = {
           900: "#064e3b",
         },
       },
+      backgroundColor: {
+        'light': 'rgba(249, 250, 251, 0.4)',
+        'light-card': 'rgba(255, 255, 255, 0.4)',
+        'light-hover': 'rgba(243, 244, 246, 0.6)',
+        'dark': '#111827',
+        'dark-card': '#1f2937',
+        'dark-hover': '#374151',
+      },
+      textColor: {
+        'light': 'rgba(75, 85, 99, 0.9)',
+        'light-muted': 'rgba(107, 114, 128, 0.8)',
+        'dark': '#f9fafb',
+        'dark-muted': '#d1d5db',
+      },
+      borderColor: {
+        'light': 'rgba(229, 231, 235, 0.6)',
+        'dark': '#374151',
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

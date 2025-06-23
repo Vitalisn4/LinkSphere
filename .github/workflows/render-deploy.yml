@@ -1,0 +1,35 @@
+name: Render Deploy
+
+on:
+  workflow_run:
+    workflows: ['Backend CI', 'Frontend CI']
+    types:
+      - completed
+    branches: [ master ]
+
+jobs:
+  deploy-backend:
+    name: Deploy Backend to Render
+    runs-on: ubuntu-latest
+    if: |
+      github.event.workflow_run.conclusion == 'success' && 
+      github.event.workflow_run.name == 'Backend CI'
+    steps:
+      - name: Trigger Backend Deploy Hook
+        run: |
+          curl -X POST ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK_URL }}
+        env:
+          RENDER_BACKEND_DEPLOY_HOOK_URL: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK_URL }}
+
+  deploy-frontend:
+    name: Deploy Frontend to Render
+    runs-on: ubuntu-latest
+    if: |
+      github.event.workflow_run.conclusion == 'success' && 
+      github.event.workflow_run.name == 'Frontend CI'
+    steps:
+      - name: Trigger Frontend Deploy Hook
+        run: |
+          curl -X POST ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK_URL }}
+        env:
+          RENDER_FRONTEND_DEPLOY_HOOK_URL: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK_URL }} 

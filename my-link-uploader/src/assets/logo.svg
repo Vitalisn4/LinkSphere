@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="248" fill="#3B82F6" fill-opacity="0.1" stroke="#3B82F6" stroke-width="16"/>
+  
+  <!-- Link Symbol -->
+  <g transform="translate(128, 128) scale(1.2)">
+    <path d="M100 172c-6.6 0-12-5.4-12-12v-8c0-6.6 5.4-12 12-12h84v-20H100c-22.1 0-40 17.9-40 40v8c0 22.1 17.9 40 40 40h84v-20h-84zm156-92h-84v20h84c6.6 0 12 5.4 12 12v8c0 6.6-5.4 12-12 12h-84v20h84c22.1 0 40-17.9 40-40v-8c0-22.1-17.9-40-40-40z" 
+          fill="#3B82F6"/>
+    <path d="M100 172c-6.6 0-12-5.4-12-12v-8c0-6.6 5.4-12 12-12h84v-20H100c-22.1 0-40 17.9-40 40v8c0 22.1 17.9 40 40 40h84v-20h-84zm156-92h-84v20h84c6.6 0 12 5.4 12 12v8c0 6.6-5.4 12-12 12h-84v20h84c22.1 0 40-17.9 40-40v-8c0-22.1-17.9-40-40-40z" 
+          fill="#3B82F6" fill-opacity="0.3"/>
+  </g>
+</svg> 

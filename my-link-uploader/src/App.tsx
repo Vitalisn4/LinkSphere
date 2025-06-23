@@ -1,51 +1,35 @@
-"use client"
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { AuthProvider } from './contexts/AuthContext';
+import Layout from './components/Layout';
+import RegisterPage from './pages/auth/RegisterPage';
+import LoginPage from './pages/auth/LoginPage';
+import VerifyEmailPage from './pages/auth/VerifyEmailPage';
+import DashboardPage from './pages/dashboard/DashboardPage';
+import UploadPage from './pages/dashboard/UploadPage';
+import MyAccountPage from './pages/dashboard/MyAccountPage';
+import LandingPage from './pages/LandingPage';
 
-import { useState, useEffect } from "react"
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
-import { ThemeProvider } from "./contexts/ThemeContext"
-import Layout from "./components/Layout"
-import HomePage from "./components/HomePage"
-import UploadForm from "./components/UploadForm"
-import AdminDashboard from "./components/AdminDashboard"
-import { AnimatePresence } from "framer-motion"
-
-export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-
-  // Simulate authentication check
-  useEffect(() => {
-    const checkAuth = () => {
-      const auth = localStorage.getItem("isAuthenticated")
-      setIsAuthenticated(auth === "true")
-    }
-
-    checkAuth()
-
-    // For demo purposes only - in a real app, use proper authentication
-    window.addEventListener("storage", checkAuth)
-    return () => window.removeEventListener("storage", checkAuth)
-  }, [])
-
-  // For demo purposes - toggle authentication
-  const toggleAuth = () => {
-    const newState = !isAuthenticated
-    localStorage.setItem("isAuthenticated", String(newState))
-    setIsAuthenticated(newState)
-  }
-
+function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
-        <AnimatePresence mode="wait">
-          <Layout toggleAuth={toggleAuth} isAuthenticated={isAuthenticated}>
+        <AuthProvider>
+          <Layout>
             <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/upload" element={<UploadForm />} />
-              <Route path="/admin" element={isAuthenticated ? <AdminDashboard /> : <Navigate to="/" />} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/verify-email" element={<VerifyEmailPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/dashboard/upload" element={<UploadPage />} />
+              <Route path="/dashboard/my-account" element={<MyAccountPage />} />
             </Routes>
           </Layout>
-        </AnimatePresence>
+        </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
-  )
+  );
 }
+
+export default App;
