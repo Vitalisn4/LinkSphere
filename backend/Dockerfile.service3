@@ -14,7 +14,7 @@ RUN apt-get update \
         pkg-config \
         libssl-dev \
         curl \
-        binutils-dev \
+        binutils-dev # binutils-dev often provides `strip` if it's not present by default \
     && rm -rf /var/lib/apt/lists/*
 
 # IMPORTANT: Update rustup and cargo to ensure compatibility with your Cargo.lock file.
@@ -31,9 +31,13 @@ ARG HOST
 ARG JWT_SECRET
 ARG SMTP_USERNAME
 ARG SMTP_PASSWORD
-ARG SMTP_SERVER
+ARG SMTP_PORT
+ARG SMTP_FROM_EMAIL
+ARG SMTP_FROM_NAME
+ARG SMTP_HOST
 ARG UPSTASH_REDIS_REST_URL
 ARG UPSTASH_REDIS_REST_TOKEN
+ARG ADMIN_SECRET_KEY
 
 # --- Start of Rust dependency caching strategy ---
 # Copy only Cargo.toml and Cargo.lock first to leverage Docker's build cache.
@@ -101,9 +105,13 @@ ARG HOST
 ARG JWT_SECRET
 ARG SMTP_USERNAME
 ARG SMTP_PASSWORD
-ARG SMTP_SERVER
+ARG SMTP_PORT
+ARG SMTP_FROM_EMAIL
+ARG SMTP_FROM_NAME
+ARG SMTP_HOST
 ARG UPSTASH_REDIS_REST_URL
 ARG UPSTASH_REDIS_REST_TOKEN
+ARG ADMIN_SECRET_KEY
 
 # Set runtime environment variables using the ARG values.
 # These will be the actual environment variables available to your running application.
@@ -115,9 +123,13 @@ ENV HOST=${HOST}
 ENV JWT_SECRET=${JWT_SECRET}
 ENV SMTP_USERNAME=${SMTP_USERNAME}
 ENV SMTP_PASSWORD=${SMTP_PASSWORD}
-ENV SMTP_SERVER=${SMTP_SERVER}
+ENV SMTP_PORT=${SMTP_PORT}
+ENV SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL}
+ENV SMTP_FROM_NAME=${SMTP_FROM_NAME}
+ENV SMTP_HOST=${SMTP_HOST}
 ENV UPSTASH_REDIS_REST_URL=${UPSTASH_REDIS_REST_URL}
 ENV UPSTASH_REDIS_REST_TOKEN=${UPSTASH_REDIS_REST_TOKEN}
+ENV ADMIN_SECRET_KEY=${ADMIN_SECRET_KEY}
 
 # Change ownership of the /app directory to the non-root user
 RUN chown -R app:app /app
@@ -126,7 +138,7 @@ RUN chown -R app:app /app
 USER app
 
 # Expose the port your application listens on
-EXPOSE 8003
+EXPOSE 8002
 
 # Define the command to run your application
 CMD ["./backend"]
