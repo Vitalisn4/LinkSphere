@@ -138,7 +138,7 @@ RUN chown -R app:app /app
 USER app
 
 # Expose the port your application listens on
-EXPOSE 8000
+EXPOSE 8081
 
 # Define the command to run your application
 CMD ["./backend"]
