@@ -29,7 +29,5 @@ dist-ssr
 *.sln
 *.sw?
 *.zip
-*.lock
-Cargo.lock
 build.sh
 .dockerignore
