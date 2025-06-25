@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Docker configuration for backend service
 - Fixed SQLx offline mode configuration in CI
 - Added environment variables handling for database connection
-- Set up PostgreSQL database structure
+- Set up PostgresSQL database structure
 - Created database migrations
 - Added error handling middleware
 - Implemented basic API endpoints structure
