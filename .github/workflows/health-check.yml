@@ -2,7 +2,7 @@ name: Database Health Check
 
 on:
   schedule:
-    - cron: '0 0 1 */2 *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:
