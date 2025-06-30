@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BACKEND_URL: ${{ secrets.RENDER_BACKEND_URL }}
-      ADMIN_TOKEN: ${{ secrets.ADMIN_SECRET_KEY }}
+      ADMIN_TOKEN: ${{ secrets.ADMIN_SECRET }}
     steps:
       - name: Check database health
         uses: fjogeleit/http-request-action@v1
@@ -18,4 +18,4 @@ jobs:
           url: '${{ env.BACKEND_URL }}/api/admin/db/health'
           method: 'GET'
           timeout: 5000
-          headers: '{"X-Admin-Token": "${{ env.ADMIN_SECRET }}"}' 
+          headers: '{"X-Admin-Token": "${{ env.ADMIN_TOKEN }}"}' 
