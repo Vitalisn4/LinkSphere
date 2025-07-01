@@ -105,10 +105,7 @@ async fn fetch_youtube_preview(client: &Client, url: &Url) -> Result<LinkPreview
     let video_id = extract_youtube_video_id(url)?;
 
     // First try the YouTube Data API v3 public endpoint
-    let api_url = format!(
-        "https://www.googleapis.com/youtube/v3/videos?part=snippet&id={}&key=AIzaSyDqOtZx4Tq8h9J-uG9-1cxNNmj_iE8cRb4",
-        video_id
-    );
+    let api_url = format!("https://www.googleapis.com/youtube/v3/videos?part=snippet&id={video_id}&key=AIzaSyDqOtZx4Tq8h9J-uG9-1cxNNmj_iE8cRb4");
 
     let api_response = client.get(&api_url).send().await;
 
@@ -151,8 +148,7 @@ async fn fetch_youtube_preview(client: &Client, url: &Url) -> Result<LinkPreview
 
     // Fallback to oEmbed if API fails
     let oembed_url = format!(
-        "https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={}&format=json",
-        video_id
+        "https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={video_id}&format=json"
     );
 
     let oembed_response = client
@@ -165,7 +161,7 @@ async fn fetch_youtube_preview(client: &Client, url: &Url) -> Result<LinkPreview
         let oembed_data: serde_json::Value = oembed_response.json().await?;
 
         // Get high quality thumbnail
-        let thumbnail_url = format!("https://i.ytimg.com/vi/{}/maxresdefault.jpg", video_id);
+        let thumbnail_url = format!("https://i.ytimg.com/vi/{video_id}/maxresdefault.jpg");
 
         // Check if maxresdefault exists
         let thumb_response = client
@@ -177,7 +173,7 @@ async fn fetch_youtube_preview(client: &Client, url: &Url) -> Result<LinkPreview
         let image = if thumb_response.status().is_success() {
             thumbnail_url
         } else {
-            format!("https://i.ytimg.com/vi/{}/hqdefault.jpg", video_id)
+            format!("https://i.ytimg.com/vi/{video_id}/hqdefault.jpg")
         };
 
         Ok(LinkPreview {
@@ -194,7 +190,7 @@ async fn fetch_youtube_preview(client: &Client, url: &Url) -> Result<LinkPreview
         Ok(LinkPreview {
             title: Some(format!("YouTube Video ({})", video_id)),
             description: None,
-            image: Some(format!("https://i.ytimg.com/vi/{}/hqdefault.jpg", video_id)),
+            image: Some(format!("https://i.ytimg.com/vi/{video_id}/hqdefault.jpg")),
             favicon: Some("https://www.youtube.com/favicon.ico".to_string()),
         })
     }

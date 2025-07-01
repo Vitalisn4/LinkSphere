@@ -291,7 +291,7 @@ impl EmailService {
                 .await
             {
                 Ok(_) => continue,
-                Err(e) => println!("Warning: Failed to delete key {}: {}", url, e),
+                Err(e) => println!("Warning: Failed to delete key {url}: {e}"),
             }
         }
 
@@ -348,7 +348,7 @@ impl EmailService {
                     let service = self.clone();
                     tokio::spawn(async move {
                         if let Err(e) = service.delete_otp(&email).await {
-                            tracing::error!("Failed to delete used OTP: {}", e);
+                            tracing::error!("Failed to delete used OTP: {e}");
                         }
                     });
                 }

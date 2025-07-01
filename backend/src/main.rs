@@ -70,13 +70,13 @@ async fn main() {
         .parse::<u16>()
         .expect("PORT must be a valid number");
     let host = env::var("HOST").expect("HOST must be set");
-    let addr: SocketAddr = format!("{}:{}", host, port)
+    let addr: SocketAddr = format!("{host}:{port}")
         .parse()
         .expect("Invalid HOST:PORT combination");
     let listener = tokio::net::TcpListener::bind(addr)
         .await
         .expect("Failed to bind to address");
-    tracing::info!("Server listening on {}", addr);
+    tracing::info!("Server listening on {addr}");
 
     axum::serve(listener, app).await.expect("Server failed");
 }

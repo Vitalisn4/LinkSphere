@@ -38,7 +38,7 @@ impl CreateLinkRequest {
         match Url::parse(&self.url) {
             Ok(url) if url.scheme() == "http" || url.scheme() == "https" => Ok(url),
             Ok(_) => Err("URL must use http or https protocol".to_string()),
-            Err(e) => Err(format!("Invalid URL: {}", e)),
+            Err(e) => Err(format!("Invalid URL: {e}")),
         }
     }
 }
