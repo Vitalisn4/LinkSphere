@@ -18,4 +18,5 @@ jobs:
           url: '${{ env.BACKEND_URL }}/api/admin/db/health'
           method: 'GET'
           timeout: 5000
-          headers: '{"X-Admin-Token": "${{ env.ADMIN_TOKEN }}"}' 
+          customHeaders: |
+            X-Admin-Token: ${{ env.ADMIN_TOKEN }}
