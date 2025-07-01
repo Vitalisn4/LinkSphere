@@ -188,7 +188,7 @@ async fn fetch_youtube_preview(client: &Client, url: &Url) -> Result<LinkPreview
     } else {
         // Last resort fallback
         Ok(LinkPreview {
-            title: Some(format!("YouTube Video ({})", video_id)),
+            title: Some(format!("YouTube Video ({video_id})")),
             description: None,
             image: Some(format!("https://i.ytimg.com/vi/{video_id}/hqdefault.jpg")),
             favicon: Some("https://www.youtube.com/favicon.ico".to_string()),
