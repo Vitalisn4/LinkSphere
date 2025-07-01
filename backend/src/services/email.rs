@@ -157,7 +157,7 @@ impl EmailService {
                 }
                 Err(e) if attempt == MAX_RETRY_ATTEMPTS - 1 => {
                     tracing::error!("Failed to send email after all attempts: {}", e);
-                    return Err(format!("Failed to send email: {}", e).into());
+                    return Err(format!("Failed to send email: {e}").into());
                 }
                 Err(e) => {
                     tracing::warn!("Failed to send email (attempt {}): {}", attempt + 1, e);
@@ -219,7 +219,7 @@ impl EmailService {
                 Err(e) => {
                     tracing::error!("Error storing OTP (attempt {}): {}", attempt + 1, e);
                     if attempt == MAX_RETRY_ATTEMPTS - 1 {
-                        return Err(format!("Failed to store OTP: {}", e).into());
+                        return Err(format!("Failed to store OTP: {e}").into());
                     }
                     sleep(Duration::from_millis(RETRY_DELAY_MS * attempt as u64)).await;
                 }
