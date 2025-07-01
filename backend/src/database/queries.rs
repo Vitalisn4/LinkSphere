@@ -1,4 +1,4 @@
-use super::models::{JsonLinkPreview, Link, LinkPreview, OptionalJsonUser};
+use super::models::{JsonLinkPreview, Link, LinkPreview};
 use chrono::Utc;
 use sqlx::PgPool;
 use uuid::Uuid;

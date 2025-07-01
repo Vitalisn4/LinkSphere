@@ -2,7 +2,7 @@ use crate::{
     api::{ApiResponse, ErrorResponse},
     auth::routes::AppState,
     models::auth::{
-        LoginRequest, RegisterRequest, ResendOtpRequest, User, UserStatus, VerifyEmailRequest,
+        LoginRequest, RegisterRequest, ResendOtpRequest, UserStatus, VerifyEmailRequest,
     },
 };
 use axum::{
