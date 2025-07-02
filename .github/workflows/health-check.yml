@@ -8,16 +8,13 @@ on:
 jobs:
   health_check:
     runs-on: ubuntu-latest
-    env:
-      BACKEND_URL: ${{ secrets.RENDER_BACKEND_URL }}
-      ADMIN_TOKEN: ${{ secrets.ADMIN_SECRET }}
     steps:
       - name: Check DB Health
         uses: fjogeleit/http-request-action@v1
         with:
-          url: ${{ secrets.BACKEND_URL }}/api/admin/db/health
+          url: ${{ secrets.RENDER_BACKEND_URL }}/api/admin/db/health
           method: GET
           timeout: 5000
-          customHeaders: '{"X-Admin-Token": "${{ secrets.ADMIN_TOKEN }}"}'
+          customHeaders: '{"X-Admin-Token": "${{ secrets.ADMIN_SECRET }}"}'
           maskResponse: false
           ignoreSsl: false
