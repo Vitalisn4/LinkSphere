@@ -29,9 +29,30 @@ interface LinkCardProps {
 const LinkCard: React.FC<LinkCardProps> = ({ link }) => {
   const [imageError, setImageError] = useState(false);
   const [faviconError, setFaviconError] = useState(false);
+  const [clickCount, setClickCount] = useState(link.click_count);
 
-  const handleClick = () => {
+  const handleClick = async () => {
     window.open(link.url, '_blank');
+    try {
+      const response = await fetch(`/api/links/${link.id}/click`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (typeof data.click_count === 'number') {
+          setClickCount(data.click_count);
+        } else {
+          setClickCount((prev) => prev + 1);
+        }
+      } else {
+        setClickCount((prev) => prev + 1);
+      }
+    } catch (error) {
+      setClickCount((prev) => prev + 1);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -85,7 +106,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ link }) => {
         </p>
         <div className="mt-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
           <span>{formatDate(link.created_at)}</span>
-          <span>{link.click_count} clicks</span>
+          <span>{clickCount} clicks</span>
         </div>
       </div>
     </div>
