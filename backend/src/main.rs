@@ -49,7 +49,7 @@ async fn main() {
     
     // CORS configuration
     let cors = CorsLayer::new()
-        .allow_origin([frontend_request_url1.parse().unwrap(), frontend_request_url2.parse().unwrap()])
+        .allow_origin([frontend_request_url1.parse().unwrap()])
         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
         .allow_headers([
             HeaderName::from_static("authorization"),
