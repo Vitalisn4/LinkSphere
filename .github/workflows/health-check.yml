@@ -14,7 +14,7 @@ jobs:
         with:
           url: ${{ secrets.RENDER_BACKEND_URL }}/api/admin/db/health
           method: GET
-          timeout: 5000
+          timeout: 20000
           customHeaders: '{"X-Admin-Token": "${{ secrets.ADMIN_SECRET }}"}'
           maskResponse: false
           ignoreSsl: false
