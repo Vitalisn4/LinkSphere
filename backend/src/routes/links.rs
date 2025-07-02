@@ -142,8 +142,17 @@ pub async fn track_click(
 ) -> impl IntoResponse {
     match increment_click_count(&pool, link_id).await {
         Ok(_) => {
-            let response = ApiResponse::success(());
-            (StatusCode::OK, Json(response)).into_response()
+            // Fetch the updated link and return the new click_count
+            match database::queries::get_link_by_id(&pool, link_id).await {
+                Ok(Some(link)) => {
+                    let response = serde_json::json!({ "click_count": link.click_count });
+                    (StatusCode::OK, Json(response)).into_response()
+                }
+                _ => (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(serde_json::json!({ "error": "Failed to fetch updated link" })),
+                ).into_response(),
+            }
         }
         Err(e) => {
             let error = ErrorResponse::new(format!("Failed to track click: {}", e))
