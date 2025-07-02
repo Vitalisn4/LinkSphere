@@ -12,7 +12,7 @@ jobs:
       - name: Check DB Health
         uses: fjogeleit/http-request-action@v1
         with:
-          url: "${{ secrets.RENDER_BACKEND_URL }}/api/admin/db/health"
+          url: "${{ secrets.RENDER_BACKEND_URL1 }}/api/admin/db/health"
           method: GET
           timeout: 20000
           customHeaders: |
@@ -21,7 +21,3 @@ jobs:
             }
           maskResponse: false
           ignoreSsl: false
-      - name: Debug print
-        run: |
-          echo "Backend URL: ${{ secrets.RENDER_BACKEND_URL }}"
-          echo "Admin Secret: ${{ secrets.ADMIN_SECRET }}"
