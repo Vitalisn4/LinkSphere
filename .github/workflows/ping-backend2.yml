@@ -1,0 +1,13 @@
+name: Keep Backend Service2 Active
+
+on:
+  schedule:
+    - cron: '*/3 * * * *'
+  workflow_dispatch:
+
+jobs:
+  health_check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend
+        run: curl -f ${{ secrets.RENDER_BACKEND_URL2 }}/health
