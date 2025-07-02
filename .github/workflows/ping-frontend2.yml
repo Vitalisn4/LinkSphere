@@ -1,0 +1,13 @@
+name: Keep Frontend Service2 Active
+
+on:
+  schedule:
+    - cron: '*/1 * * * *'
+  workflow_dispatch:
+
+jobs:
+  health_check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping frontend
+        run: curl -f ${{ secrets.RENDER_FRONTEND_URL2 }} 
