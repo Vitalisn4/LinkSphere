@@ -47,8 +47,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
 
   const handleVisit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log(`Visiting link: ${link.url}`);
-    // window.open(link.url, '_blank');
+    window.open(link.url, '_blank', 'noopener,noreferrer');
   };
 
   const formatDate = (dateString: string) => {
@@ -85,6 +84,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
           <p className="mb-2 text-gray-400 line-clamp-2">{link.description}</p>
           <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
             <span>{formatDate(link.created_at)}</span>
+            <span>{link.click_count} clicks</span>
           </div>
           <div className="mt-auto flex flex-col gap-2">
             <button
@@ -118,6 +118,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
           <p className="mb-2 text-gray-400 line-clamp-2">{link.description}</p>
           <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
             <span>{formatDate(link.created_at)}</span>
+            <span>{link.click_count} clicks</span>
           </div>
           <button
             className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg transition-all duration-300 bg-[#231942] text-purple-400 hover:bg-[#2d2350]"
@@ -167,6 +168,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
         <p className="mb-2 text-gray-400 line-clamp-2">{link.description}</p>
         <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
           <span>{formatDate(link.created_at)}</span>
+          <span>{link.click_count} clicks</span>
         </div>
         <button
           className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg transition-all duration-300 bg-[#231942] text-purple-400 hover:bg-[#2d2350]"
