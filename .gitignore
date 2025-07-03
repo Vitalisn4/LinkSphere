@@ -28,3 +28,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+*.zip
+*.lock
+Cargo.lock
+build.sh
+.dockerignore

@@ -1,0 +1,21 @@
+name: Database Health Check
+
+on:
+  schedule:
+    - cron: '0 0 1 */2 *'
+  workflow_dispatch:
+
+jobs:
+  health_check:
+    runs-on: ubuntu-latest
+    env:
+      BACKEND_URL: ${{ secrets.RENDER_BACKEND_URL }}
+      ADMIN_TOKEN: ${{ secrets.ADMIN_SECRET_KEY }}
+    steps:
+      - name: Check database health
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: '${{ env.BACKEND_URL }}/api/admin/db/health'
+          method: 'GET'
+          timeout: 5000
+          headers: '{"X-Admin-Token": "${{ env.ADMIN_TOKEN }}"}' 
