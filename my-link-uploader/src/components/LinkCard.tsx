@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LinkIcon, ExternalLink, User as UserIcon, Calendar, Clock } from 'lucide-react';
 import { formatInTimeZone } from 'date-fns-tz';
+import ConfirmationModal from './ConfirmationModal';
 
 interface LinkPreview {
   title?: string;
@@ -35,14 +36,23 @@ interface LinkCardProps {
 const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
   const [imageError, setImageError] = useState(false);
   const [faviconError, setFaviconError] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const isOwner = currentUser && link.user_id === currentUser.id;
   const hasImage = !!link.preview?.image && !imageError;
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log(`Deleting link: ${link.id}`);
+    setShowModal(true);
+  };
+
+  const handleConfirmDelete = () => {
     if (onDelete) onDelete(link.id);
+    setShowModal(false);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
   };
 
   const handleVisit = (e: React.MouseEvent) => {
@@ -122,6 +132,12 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
             >
               Delete
             </button>
+            <ConfirmationModal
+              isOpen={showModal}
+              onClose={handleCloseModal}
+              onConfirm={handleConfirmDelete}
+              message="Are you sure you want to delete this link?"
+            />
           </div>
         </div>
       </div>
@@ -168,6 +184,12 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
           >
             Delete
           </button>
+          <ConfirmationModal
+            isOpen={showModal}
+            onClose={handleCloseModal}
+            onConfirm={handleConfirmDelete}
+            message="Are you sure you want to delete this link?"
+          />
         </div>
       </div>
     );
