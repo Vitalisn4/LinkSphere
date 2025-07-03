@@ -41,7 +41,7 @@ pub async fn get_links(State(pool): State<PgPool>) -> impl IntoResponse {
             (StatusCode::OK, Json(response)).into_response()
         }
         Err(e) => {
-            let error = ErrorResponse::new(format!("Failed to fetch links: {}", e))
+            let error = ErrorResponse::new(format!("Failed to fetch links: {e}"))
                 .with_code("LINKS_FETCH_ERROR");
             (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response()
         }
@@ -75,15 +75,15 @@ pub async fn handle_create_link(
 ) -> impl IntoResponse {
     // Validate the request payload
     if let Err(validation_errors) = payload.validate() {
-        let error = ErrorResponse::new(format!("Validation error: {}", validation_errors))
+        let error = ErrorResponse::new(format!("Validation error: {validation_errors}"))
             .with_code("VALIDATION_ERROR");
         return (StatusCode::UNPROCESSABLE_ENTITY, Json(error)).into_response();
     }
 
     // Validate URL format
     if let Err(url_error) = payload.validate_url() {
-        let error = ErrorResponse::new(format!("Invalid URL format: {}", url_error))
-            .with_code("INVALID_URL");
+        let error =
+            ErrorResponse::new(format!("Invalid URL format: {url_error}")).with_code("INVALID_URL");
         return (StatusCode::UNPROCESSABLE_ENTITY, Json(error)).into_response();
     }
 
@@ -100,7 +100,7 @@ pub async fn handle_create_link(
     {
         Ok(link) => link,
         Err(e) => {
-            let error = ErrorResponse::new(format!("Failed to create link: {}", e))
+            let error = ErrorResponse::new(format!("Failed to create link: {e}"))
                 .with_code("LINK_CREATE_ERROR");
             return (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response();
         }
@@ -146,7 +146,7 @@ pub async fn track_click(
             (StatusCode::OK, Json(response)).into_response()
         }
         Err(e) => {
-            let error = ErrorResponse::new(format!("Failed to track click: {}", e))
+            let error = ErrorResponse::new(format!("Failed to track click: {e}"))
                 .with_code("CLICK_TRACK_ERROR");
             (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response()
         }
@@ -264,7 +264,7 @@ pub async fn delete_link(
                     (StatusCode::OK, Json(response)).into_response()
                 }
                 Err(e) => {
-                    let error = ErrorResponse::new(format!("Failed to delete link: {}", e))
+                    let error = ErrorResponse::new(format!("Failed to delete link: {e}"))
                         .with_code("LINK_DELETE_ERROR");
                     (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response()
                 }
@@ -275,7 +275,7 @@ pub async fn delete_link(
             (StatusCode::NOT_FOUND, Json(error)).into_response()
         }
         Err(e) => {
-            let error = ErrorResponse::new(format!("Failed to fetch link: {}", e))
+            let error = ErrorResponse::new(format!("Failed to fetch link: {e}"))
                 .with_code("LINK_FETCH_ERROR");
             (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response()
         }

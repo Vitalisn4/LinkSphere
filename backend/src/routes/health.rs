@@ -83,7 +83,7 @@ pub async fn health_check(State(pool): State<PgPool>, headers: HeaderMap) -> imp
         Err(e) => {
             let response = ApiResponse {
                 success: false,
-                message: format!("Database connection failed: {}", e),
+                message: format!("Database connection failed: {e}"),
                 data: json!({
                     "status": "unhealthy",
                     "database": "disconnected",

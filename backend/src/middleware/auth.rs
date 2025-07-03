@@ -52,7 +52,7 @@ pub async fn auth(
         &Validation::default(),
     )
     .map_err(|e| {
-        let error = ErrorResponse::new(format!("Invalid token: {}", e)).with_code("INVALID_TOKEN");
+        let error = ErrorResponse::new(format!("Invalid token: {e}")).with_code("INVALID_TOKEN");
         (StatusCode::UNAUTHORIZED, error)
     })?;
 

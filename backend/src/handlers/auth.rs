@@ -23,7 +23,7 @@ pub async fn register(
 ) -> impl IntoResponse {
     // Validate the request first - this must be synchronous
     if let Err(validation_errors) = payload.validate() {
-        let error = ErrorResponse::new(format!("Validation error: {}", validation_errors))
+        let error = ErrorResponse::new(format!("Validation error: {validation_errors}"))
             .with_code("VALIDATION_ERROR");
         return (StatusCode::UNPROCESSABLE_ENTITY, Json(error)).into_response();
     }
@@ -68,7 +68,7 @@ pub async fn register(
                     .initiate_otp_process(&email_clone)
                     .await
                 {
-                    tracing::error!("Failed to send OTP to existing pending user: {}", e);
+                    tracing::error!("Failed to send OTP to existing pending user: {e}");
                 }
             });
 
@@ -100,10 +100,10 @@ pub async fn register(
                             .initiate_otp_process(&new_user.email)
                             .await
                         {
-                            tracing::error!("Failed to send OTP to new user: {}", e);
+                            tracing::error!("Failed to send OTP to new user: {e}");
                         }
                     }
-                    Err(e) => tracing::error!("Failed to register new user: {}", e),
+                    Err(e) => tracing::error!("Failed to register new user: {e}"),
                 }
             });
 
@@ -124,7 +124,7 @@ pub async fn register(
         }
         Err(e) => {
             let error =
-                ErrorResponse::new(format!("Database error: {}", e)).with_code("DATABASE_ERROR");
+                ErrorResponse::new(format!("Database error: {e}")).with_code("DATABASE_ERROR");
             (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response()
         }
     }
@@ -145,7 +145,7 @@ pub async fn login(
             (StatusCode::OK, Json(response)).into_response()
         }
         Err(e) => {
-            let error = ErrorResponse::new(format!("Login failed: {}", e)).with_code("LOGIN_ERROR");
+            let error = ErrorResponse::new(format!("Login failed: {e}")).with_code("LOGIN_ERROR");
             (StatusCode::UNAUTHORIZED, Json(error)).into_response()
         }
     }
@@ -161,8 +161,8 @@ pub async fn verify_email(
 
     // Validate the request
     if let Err(validation_errors) = payload.validate() {
-        println!("Validation error: {}", validation_errors);
-        let error = ErrorResponse::new(format!("Validation error: {}", validation_errors))
+        println!("Validation error: {validation_errors}");
+        let error = ErrorResponse::new(format!("Validation error: {validation_errors}"))
             .with_code("VALIDATION_ERROR");
         return (StatusCode::BAD_REQUEST, Json(error)).into_response();
     }
@@ -196,8 +196,8 @@ pub async fn verify_email(
             (StatusCode::OK, Json(response)).into_response()
         }
         Err(e) => {
-            println!("Verification failed for {}: {}", payload.email, e);
-            let error = ErrorResponse::new(format!("Verification failed: {}", e))
+            println!("Verification failed for {0}: {e}", payload.email);
+            let error = ErrorResponse::new(format!("Verification failed: {e}"))
                 .with_code("VERIFICATION_ERROR");
             (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response()
         }
@@ -213,7 +213,7 @@ pub async fn resend_otp(
     if let Err(validation_errors) = payload.validate() {
         let response = ApiResponse {
             success: false,
-            message: format!("Validation error: {}", validation_errors),
+            message: format!("Validation error: {validation_errors}"),
             data: json!({ "code": "VALIDATION_ERROR" }),
             pagination: None,
             timestamp: chrono::Utc::now(),
@@ -256,7 +256,7 @@ pub async fn resend_otp(
         Err(e) => {
             let response = ApiResponse {
                 success: false,
-                message: format!("Database error: {}", e),
+                message: format!("Database error: {e}"),
                 data: json!({ "code": "DATABASE_ERROR" }),
                 pagination: None,
                 timestamp: chrono::Utc::now(),
@@ -293,7 +293,7 @@ pub async fn resend_otp(
         Err(e) => {
             let response = ApiResponse {
                 success: false,
-                message: format!("Failed to send OTP: {}", e),
+                message: format!("Failed to send OTP: {e}"),
                 data: json!({ "code": "EMAIL_ERROR" }),
                 pagination: None,
                 timestamp: chrono::Utc::now(),
@@ -312,7 +312,7 @@ pub async fn reset_otp_attempts(
     if let Err(validation_errors) = payload.validate() {
         let response = ApiResponse {
             success: false,
-            message: format!("Validation error: {}", validation_errors),
+            message: format!("Validation error: {validation_errors}"),
             data: json!({ "code": "VALIDATION_ERROR" }),
             pagination: None,
             timestamp: chrono::Utc::now(),
@@ -355,7 +355,7 @@ pub async fn reset_otp_attempts(
         Err(e) => {
             let response = ApiResponse {
                 success: false,
-                message: format!("Database error: {}", e),
+                message: format!("Database error: {e}"),
                 data: json!({ "code": "DATABASE_ERROR" }),
                 pagination: None,
                 timestamp: chrono::Utc::now(),
@@ -372,7 +372,7 @@ pub async fn reset_otp_attempts(
     {
         let response = ApiResponse {
             success: false,
-            message: format!("Failed to reset attempts: {}", e),
+            message: format!("Failed to reset attempts: {e}"),
             data: json!({ "code": "RESET_ERROR" }),
             pagination: None,
             timestamp: chrono::Utc::now(),
@@ -408,7 +408,7 @@ pub async fn admin_reset_otp_attempts(
     if let Err(validation_errors) = payload.validate() {
         let response = ApiResponse {
             success: false,
-            message: format!("Validation error: {}", validation_errors),
+            message: format!("Validation error: {validation_errors}"),
             data: json!({ "code": "VALIDATION_ERROR" }),
             pagination: None,
             timestamp: chrono::Utc::now(),
@@ -451,7 +451,7 @@ pub async fn admin_reset_otp_attempts(
     {
         let response = ApiResponse {
             success: false,
-            message: format!("Failed to reset attempts: {}", e),
+            message: format!("Failed to reset attempts: {e}"),
             data: json!({ "code": "RESET_ERROR" }),
             pagination: None,
             timestamp: chrono::Utc::now(),

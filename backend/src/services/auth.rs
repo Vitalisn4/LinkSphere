@@ -37,7 +37,7 @@ impl AuthService {
 
     pub async fn register(&self, req: RegisterRequest) -> Result<User, sqlx::Error> {
         let password_hash = hash(req.password.as_bytes(), DEFAULT_COST)
-            .map_err(|e| sqlx::Error::Protocol(format!("Failed to hash password: {}", e)))?;
+            .map_err(|e| sqlx::Error::Protocol(format!("Failed to hash password: {e}")))?;
 
         sqlx::query_as!(
             User,
@@ -89,7 +89,7 @@ impl AuthService {
         .await?;
 
         if !verify(password.as_bytes(), &user.password_hash)
-            .map_err(|e| sqlx::Error::Protocol(format!("Failed to verify password: {}", e)))?
+            .map_err(|e| sqlx::Error::Protocol(format!("Failed to verify password: {e}")))?
         {
             return Err(sqlx::Error::Protocol("Invalid password".to_string()));
         }
@@ -130,6 +130,6 @@ impl AuthService {
             &claims,
             &EncodingKey::from_secret(self.jwt_secret.as_bytes()),
         )
-        .map_err(|e| sqlx::Error::Protocol(format!("Failed to create token: {}", e)))
+        .map_err(|e| sqlx::Error::Protocol(format!("Failed to create token: {e}")))
     }
 }
