@@ -1,12 +1,14 @@
+use crate::middleware::auth::AuthUser;
 use crate::{
     api::{ApiResponse, ErrorResponse},
     auth::routes::AppState,
     models::auth::{
-        LoginRequest, RegisterRequest, ResendOtpRequest, User, UserStatus, VerifyEmailRequest,
+        LoginRequest, RegisterRequest, ResendOtpRequest, UpdateUsernameRequest, User, UserStatus,
+        VerifyEmailRequest,
     },
 };
 use axum::{
-    extract::State,
+    extract::{Extension, State},
     http::{HeaderMap, StatusCode},
     response::IntoResponse,
     Json,
@@ -467,4 +469,39 @@ pub async fn admin_reset_otp_attempts(
         "OTP attempts reset successfully by admin. User can now request a new OTP.",
     );
     (StatusCode::OK, Json(response))
+}
+
+/// Update username for authenticated user
+pub async fn update_username(
+    State(state): State<AppState>,
+    Extension(auth_user): Extension<AuthUser>,
+    Json(payload): Json<UpdateUsernameRequest>,
+) -> impl IntoResponse {
+    let user_id = auth_user.id;
+    // Validate new username
+    if let Err(validation_errors) = payload.validate() {
+        let error = ErrorResponse::new(format!("Validation error: {}", validation_errors))
+            .with_code("VALIDATION_ERROR");
+        return (StatusCode::UNPROCESSABLE_ENTITY, Json(error)).into_response();
+    }
+
+    // Update username
+    match state
+        .auth_service
+        .update_username(user_id, &payload.username)
+        .await
+    {
+        Ok(_) => {
+            let response = ApiResponse::success_with_message(
+                json!({ "username": payload.username }),
+                "Username updated successfully",
+            );
+            (StatusCode::OK, Json(response)).into_response()
+        }
+        Err(e) => {
+            let error = ErrorResponse::new(format!("Failed to update username: {}", e))
+                .with_code("UPDATE_FAILED");
+            (StatusCode::BAD_REQUEST, Json(error)).into_response()
+        }
+    }
 }

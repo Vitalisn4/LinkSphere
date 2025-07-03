@@ -1,5 +1,9 @@
+use crate::handlers::auth::update_username;
+use crate::middleware::auth::auth;
+use axum::middleware::from_fn_with_state;
 use crate::handlers::auth::{admin_reset_otp_attempts, login, register, resend_otp, verify_email};
 use crate::services::{auth::AuthService, email::EmailService};
+use axum::routing::put;
 use axum::{routing::post, Router};
 use sqlx::PgPool;
 use std::env;
@@ -27,6 +31,10 @@ pub fn create_router(pool: PgPool) -> Router {
         .route(
             "/api/admin/auth/reset-otp-attempts",
             post(admin_reset_otp_attempts),
+        )
+        .route(
+            "/api/update-username",
+            put(update_username).route_layer(from_fn_with_state(state.auth_service.clone(), auth)),
         )
         .with_state(state)
 }

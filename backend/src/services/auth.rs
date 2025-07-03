@@ -2,6 +2,7 @@ use bcrypt::{hash, verify, DEFAULT_COST};
 use chrono::{Duration, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use sqlx::PgPool;
+use uuid;
 
 use crate::{
     database::queries,
@@ -110,6 +111,14 @@ impl AuthService {
 
     pub async fn complete_verification(&self, email: &str) -> Result<(), sqlx::Error> {
         queries::complete_registration(&self.pool, email).await
+    }
+
+    pub async fn update_username(
+        &self,
+        user_id: uuid::Uuid,
+        new_username: &str,
+    ) -> Result<(), sqlx::Error> {
+        queries::update_username(&self.pool, user_id, new_username).await
     }
 
     fn create_token(&self, user: &User) -> Result<String, sqlx::Error> {

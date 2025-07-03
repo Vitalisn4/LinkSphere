@@ -52,25 +52,28 @@ interface ApiError {
   message: string;
   error?: string;
   status: number;
-  }
+}
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   validateStatus: (status) => status < 500,
 });
 
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = localStorage.getItem('token');
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
+api.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const token = localStorage.getItem("token");
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
+);
 
 api.interceptors.response.use(
   (response) => response,
@@ -81,39 +84,47 @@ api.interceptors.response.use(
 
 const handleApiError = (error: AxiosError<ApiError>) => {
   if (error.response?.data) {
-    const message = error.response.data.message || 
-                   error.response.data.error ||
-                   'Server error occurred';
+    const message =
+      error.response.data.message ||
+      error.response.data.error ||
+      "Server error occurred";
     throw new Error(message);
   }
   if (error.request) {
-    throw new Error('No response from server. Please check your connection.');
+    throw new Error("No response from server. Please check your connection.");
   }
-  throw new Error(error.message || 'An unexpected error occurred');
+  throw new Error(error.message || "An unexpected error occurred");
 };
 
 export const ApiService = {
-  async register(email: string, username: string, password: string, gender: Gender): Promise<void> {
+  async register(
+    email: string,
+    username: string,
+    password: string,
+    gender: Gender
+  ): Promise<void> {
     // Fire and forget - don't wait for response
-    api.post('/auth/register', {
+    api
+      .post("/auth/register", {
         email,
         username,
         password,
-        gender
-    }).catch(error => {
-      console.error('Registration error:', error);
-    });
+        gender,
+      })
+      .catch((error) => {
+        console.error("Registration error:", error);
+      });
   },
 
   async verifyEmail(email: string, otp: string): Promise<void> {
     try {
-      const response = await api.post<ApiResponse>('/auth/verify', {
+      const response = await api.post<ApiResponse>("/auth/verify", {
         email,
-        otp
+        otp,
       });
-      
+
       if (!response.data.success) {
-        throw new Error(response.data.message || 'Verification failed');
+        throw new Error(response.data.message || "Verification failed");
       }
     } catch (error) {
       handleApiError(error as AxiosError<ApiError>);
@@ -121,21 +132,26 @@ export const ApiService = {
     }
   },
 
-  async login(email: string, password: string): Promise<{ token: string; user: User }> {
+  async login(
+    email: string,
+    password: string
+  ): Promise<{ token: string; user: User }> {
     try {
-      const response = await api.post<ApiResponse<{ token: string; user: User }>>('/auth/login', {
+      const response = await api.post<
+        ApiResponse<{ token: string; user: User }>
+      >("/auth/login", {
         email,
-        password
+        password,
       });
-      
+
       if (!response.data.success || !response.data.data) {
-        throw new Error('Invalid credentials');
+        throw new Error("Invalid credentials");
       }
-      
+
       return response.data.data;
     } catch (error) {
-      console.error('Login error:', error);
-      throw new Error('Invalid credentials');
+      console.error("Login error:", error);
+      throw new Error("Invalid credentials");
     }
   },
 
@@ -146,7 +162,7 @@ export const ApiService = {
 
   async resendOtp(email: string): Promise<void> {
     try {
-      await api.post<ApiResponse>('/auth/resend-otp', { email });
+      await api.post<ApiResponse>("/auth/resend-otp", { email });
     } catch (error) {
       handleApiError(error as AxiosError<ApiError>);
     }
@@ -154,12 +170,12 @@ export const ApiService = {
 
   async getAllLinks(): Promise<Link[]> {
     try {
-      const response = await api.get<ApiResponse<Link[]>>('/links');
-      
+      const response = await api.get<ApiResponse<Link[]>>("/links");
+
       if (!response.data.success || !response.data.data) {
-        throw new Error(response.data.message || 'Failed to fetch links');
+        throw new Error(response.data.message || "Failed to fetch links");
       }
-      
+
       return response.data.data;
     } catch (error) {
       handleApiError(error as AxiosError<ApiError>);
@@ -167,32 +183,38 @@ export const ApiService = {
     }
   },
 
-  async createLink(data: { url: string; title: string; description: string }): Promise<Link> {
+  async createLink(data: {
+    url: string;
+    title: string;
+    description: string;
+  }): Promise<Link> {
     try {
       // Get the token from localStorage
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error('Authentication required');
+        throw new Error("Authentication required");
       }
 
-      const response = await api.post<ApiResponse<Link>>('/links', {
+      const response = await api.post<ApiResponse<Link>>("/links", {
         url: data.url,
         title: data.title,
-        description: data.description
+        description: data.description,
       });
-      
+
       if (!response.data.success || !response.data.data) {
-        throw new Error(response.data.message || 'Failed to create link');
+        throw new Error(response.data.message || "Failed to create link");
       }
-      
+
       return response.data.data;
     } catch (error) {
       const axiosError = error as AxiosError<ApiError>;
       if (axiosError.response?.status === 401) {
-        throw new Error('Authentication required. Please log in again.');
+        throw new Error("Authentication required. Please log in again.");
       }
       if (axiosError.response?.status === 422) {
-        throw new Error(axiosError.response.data.message || 'Invalid link data');
+        throw new Error(
+          axiosError.response.data.message || "Invalid link data"
+        );
       }
       handleApiError(axiosError);
       throw error;
@@ -211,7 +233,7 @@ export const ApiService = {
   async incrementLinkClick(id: string): Promise<void> {
     try {
       const response = await api.post<ApiResponse>(`/links/${id}/click`, null);
-      
+
       if (!response.data.success) {
         throw new Error(response.data.message || "Failed to track click");
       }
@@ -219,6 +241,21 @@ export const ApiService = {
       handleApiError(error as AxiosError<ApiError>);
     }
   },
+
+  async updateUsername(newUsername: string): Promise<User> {
+    try {
+      const response = await api.put<ApiResponse<User>>("/update-username", {
+        username: newUsername,
+      });
+      if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || "Failed to update username");
+      }
+      return response.data.data;
+    } catch (error) {
+      handleApiError(error as AxiosError<ApiError>);
+      throw error;
+    }
+  },
 };
 
-export default ApiService; 
+export default ApiService;

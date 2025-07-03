@@ -118,6 +118,17 @@ pub struct Claims {
     pub username: String,
 }
 
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct UpdateUsernameRequest {
+    #[validate(length(min = 3, max = 50))]
+    #[validate(custom(
+        function = "validate_username",
+        message = "Username must be alphanumeric with underscores only"
+    ))]
+    #[schema(example = "new_username")]
+    pub username: String,
+}
+
 fn validate_username(username: &str) -> Result<(), validator::ValidationError> {
     let username_regex = regex::Regex::new(r"^[a-zA-Z0-9_]{3,50}$").unwrap();
     if username_regex.is_match(username) {

@@ -265,3 +265,33 @@ pub async fn is_user_verified(pool: &PgPool, email: &str) -> Result<bool, sqlx::
 
     Ok(result.map(|r| r.is_verified).unwrap_or(false))
 }
+
+pub async fn update_username(
+    pool: &PgPool,
+    user_id: Uuid,
+    new_username: &str,
+) -> Result<(), sqlx::Error> {
+    // Check if the username already exists
+    let count: i64 = sqlx::query_scalar!(
+        r#"SELECT COUNT(*) FROM users WHERE username = $1 AND id != $2"#,
+        new_username,
+        user_id
+    )
+    .fetch_one(pool)
+    .await?
+    .unwrap_or(0);
+
+    if count > 0 {
+        // This is an application-level error, not a protocol error, but sqlx::Error::Protocol is used as a workaround.
+        return Err(sqlx::Error::Protocol("username already exists".into()));
+    }
+
+    sqlx::query!(
+        r#"UPDATE users SET username = $1, updated_at = NOW() WHERE id = $2"#,
+        new_username,
+        user_id
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
