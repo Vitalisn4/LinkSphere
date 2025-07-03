@@ -2,7 +2,7 @@ name: Keep Backend Service Active
 
 on:
   schedule:
-    - cron: '*/2 * * * *'
+    - cron: '0 0 1 */2 *'
   workflow_dispatch:
 
 jobs:
