@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LinkIcon } from 'lucide-react';
+import { LinkIcon, ExternalLink } from 'lucide-react';
 import { formatInTimeZone } from 'date-fns-tz';
 
 interface LinkPreview {
@@ -88,10 +88,11 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
           </div>
           <div className="mt-auto flex flex-col gap-2">
             <button
-              className="w-full px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition"
+              className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg transition-all duration-300 bg-[#231942] text-purple-400 hover:bg-[#2d2350]"
               onClick={handleVisit}
             >
-              Visit Link
+              <ExternalLink size={20} />
+              <span>Visit Link</span>
             </button>
             <button
               className="w-full px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm"
@@ -119,10 +120,11 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
             <span>{formatDate(link.created_at)}</span>
           </div>
           <button
-            className="w-full px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition"
+            className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg transition-all duration-300 bg-[#231942] text-purple-400 hover:bg-[#2d2350]"
             onClick={handleVisit}
           >
-            Visit Link
+            <ExternalLink size={20} />
+            <span>Visit Link</span>
           </button>
           <button
             className="w-full mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm"
@@ -167,10 +169,11 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
           <span>{formatDate(link.created_at)}</span>
         </div>
         <button
-          className="w-full px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition"
+          className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg transition-all duration-300 bg-[#231942] text-purple-400 hover:bg-[#2d2350]"
           onClick={handleVisit}
         >
-          Visit Link
+          <ExternalLink size={20} />
+          <span>Visit Link</span>
         </button>
       </div>
     </div>
