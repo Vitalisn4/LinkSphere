@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { LinkIcon, ExternalLink, User as UserIcon, Calendar, Clock } from 'lucide-react';
 import { formatInTimeZone } from 'date-fns-tz';
 import ConfirmationModal from './ConfirmationModal';
+import SuccessModal from './SuccessModal';
 
 interface LinkPreview {
   title?: string;
@@ -37,6 +38,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
   const [imageError, setImageError] = useState(false);
   const [faviconError, setFaviconError] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const isOwner = currentUser && link.user_id === currentUser.id;
   const hasImage = !!link.preview?.image && !imageError;
@@ -49,10 +51,16 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
   const handleConfirmDelete = () => {
     if (onDelete) onDelete(link.id);
     setShowModal(false);
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 2000);
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
+  };
+
+  const handleCloseSuccess = () => {
+    setShowSuccess(false);
   };
 
   const handleVisit = (e: React.MouseEvent) => {
@@ -138,6 +146,11 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
               onConfirm={handleConfirmDelete}
               message="Are you sure you want to delete this link?"
             />
+            <SuccessModal
+              isOpen={showSuccess}
+              onClose={handleCloseSuccess}
+              message="Link deleted successfully!"
+            />
           </div>
         </div>
       </div>
@@ -189,6 +202,11 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
             onClose={handleCloseModal}
             onConfirm={handleConfirmDelete}
             message="Are you sure you want to delete this link?"
+          />
+          <SuccessModal
+            isOpen={showSuccess}
+            onClose={handleCloseSuccess}
+            message="Link deleted successfully!"
           />
         </div>
       </div>
