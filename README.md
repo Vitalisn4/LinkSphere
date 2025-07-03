@@ -1,7 +1,5 @@
 [![Frontend CI](https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/actions/workflows/frontend-ci.yml)
 [![Backend CI](https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/actions/workflows/backend-ci.yml)
-[![Keep Backend Service Active](https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/actions/workflows/ping-render.yml/badge.svg)](https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/actions/workflows/ping-render.yml)
-[![Keep Frontend Service Active](https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/actions/workflows/ping-frontend.yml/badge.svg)](https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/actions/workflows/ping-frontend.yml)
 
 # LinkSphere - Your Personal Link Management Platform
 
