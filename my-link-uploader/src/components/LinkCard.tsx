@@ -85,20 +85,19 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
           <p className="mb-2 text-gray-400 line-clamp-2">{link.description}</p>
           <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
             <span>{formatDate(link.created_at)}</span>
-            <span>{link.click_count} clicks</span>
           </div>
           <div className="mt-auto flex flex-col gap-2">
-            <button
-              className="ml-auto px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-              onClick={handleDelete}
-            >
-              Delete
-            </button>
             <button
               className="w-full px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition"
               onClick={handleVisit}
             >
               Visit Link
+            </button>
+            <button
+              className="w-full px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm"
+              onClick={handleDelete}
+            >
+              Delete
             </button>
           </div>
         </div>
@@ -109,13 +108,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
   // Layout for owned links without images
   if (isOwner && !hasImage) {
     return (
-      <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden flex flex-col relative">
-        <button
-          className="absolute top-2 right-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition z-10"
-          onClick={handleDelete}
-        >
-          Delete
-        </button>
+      <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden flex flex-col">
         <div className="flex-1 flex flex-col p-4">
           <div className="w-full h-32 flex items-center justify-center bg-gradient-to-br from-purple-600 to-pink-500 rounded mb-4">
             <LinkIcon size={48} className="text-white" />
@@ -124,13 +117,18 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
           <p className="mb-2 text-gray-400 line-clamp-2">{link.description}</p>
           <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
             <span>{formatDate(link.created_at)}</span>
-            <span>{link.click_count} clicks</span>
           </div>
           <button
-            className="w-full mt-auto px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition"
+            className="w-full px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition"
             onClick={handleVisit}
           >
             Visit Link
+          </button>
+          <button
+            className="w-full mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm"
+            onClick={handleDelete}
+          >
+            Delete
           </button>
         </div>
       </div>
@@ -167,10 +165,9 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
         <p className="mb-2 text-gray-400 line-clamp-2">{link.description}</p>
         <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
           <span>{formatDate(link.created_at)}</span>
-          <span>{link.click_count} clicks</span>
         </div>
         <button
-          className="w-full mt-auto px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition"
+          className="w-full px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition"
           onClick={handleVisit}
         >
           Visit Link
