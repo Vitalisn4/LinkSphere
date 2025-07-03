@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LinkIcon, ExternalLink } from 'lucide-react';
+import { LinkIcon, ExternalLink, User as UserIcon, Calendar, Clock } from 'lucide-react';
 import { formatInTimeZone } from 'date-fns-tz';
 
 interface LinkPreview {
@@ -53,9 +53,18 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
-      return formatInTimeZone(date, 'Africa/Douala', 'MMM d, yyyy HH:mm');
+      return formatInTimeZone(date, 'Africa/Douala', 'MMM d, yyyy');
     } catch (error) {
       return 'Invalid date';
+    }
+  };
+
+  const formatTime = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return formatInTimeZone(date, 'Africa/Douala', 'HH:mm');
+    } catch (error) {
+      return 'Invalid time';
     }
   };
 
@@ -82,9 +91,22 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
         <div className="p-4 flex-1 flex flex-col">
           <h3 className="text-xl font-semibold mb-1 text-gray-100">{link.title}</h3>
           <p className="mb-2 text-gray-400 line-clamp-2">{link.description}</p>
-          <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
-            <span>{formatDate(link.created_at)}</span>
-            <span>{link.click_count} clicks</span>
+          <div className="flex items-center gap-4 mb-2 text-sm text-gray-400">
+            <div className="flex items-center gap-1">
+              <UserIcon size={16} />
+              <span>{link.user?.username || 'Unknown user'}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Calendar size={16} />
+              <span>{formatDate(link.created_at)}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Clock size={16} />
+              <span>{formatTime(link.created_at)}</span>
+            </div>
+          </div>
+          <div className="mb-4 text-sm text-gray-400">
+            {link.click_count} clicks
           </div>
           <div className="mt-auto flex flex-col gap-2">
             <button
@@ -116,9 +138,22 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
           </div>
           <h3 className="text-xl font-semibold mb-1 text-gray-100">{link.title}</h3>
           <p className="mb-2 text-gray-400 line-clamp-2">{link.description}</p>
-          <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
-            <span>{formatDate(link.created_at)}</span>
-            <span>{link.click_count} clicks</span>
+          <div className="flex items-center gap-4 mb-2 text-sm text-gray-400">
+            <div className="flex items-center gap-1">
+              <UserIcon size={16} />
+              <span>{link.user?.username || 'Unknown user'}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Calendar size={16} />
+              <span>{formatDate(link.created_at)}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Clock size={16} />
+              <span>{formatTime(link.created_at)}</span>
+            </div>
+          </div>
+          <div className="mb-4 text-sm text-gray-400">
+            {link.click_count} clicks
           </div>
           <button
             className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg transition-all duration-300 bg-[#231942] text-purple-400 hover:bg-[#2d2350]"
@@ -166,9 +201,22 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
       <div className="p-4 flex-1 flex flex-col">
         <h3 className="text-xl font-semibold mb-1 text-gray-100">{link.title}</h3>
         <p className="mb-2 text-gray-400 line-clamp-2">{link.description}</p>
-        <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
-          <span>{formatDate(link.created_at)}</span>
-          <span>{link.click_count} clicks</span>
+        <div className="flex items-center gap-4 mb-2 text-sm text-gray-400">
+          <div className="flex items-center gap-1">
+            <UserIcon size={16} />
+            <span>{link.user?.username || 'Unknown user'}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Calendar size={16} />
+            <span>{formatDate(link.created_at)}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Clock size={16} />
+            <span>{formatTime(link.created_at)}</span>
+          </div>
+        </div>
+        <div className="mb-4 text-sm text-gray-400">
+          {link.click_count} clicks
         </div>
         <button
           className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg transition-all duration-300 bg-[#231942] text-purple-400 hover:bg-[#2d2350]"
