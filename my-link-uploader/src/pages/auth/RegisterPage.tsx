@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
-import { UserPlus, Mail, Lock, User, ArrowRight } from "lucide-react"
+import { UserPlus, Mail, Lock, User, ArrowRight, Eye, EyeOff } from "lucide-react"
 import ApiService, { Gender } from "../../services/api"
 
 interface ValidationErrors {
@@ -21,6 +21,8 @@ export default function RegisterPage() {
   const [gender, setGender] = useState<Gender>("Other")
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<ValidationErrors>({})
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate()
 
   const validateEmail = (email: string): string | undefined => {
@@ -245,13 +247,22 @@ export default function RegisterPage() {
             <div className="relative">
               <Lock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={handlePasswordChange}
                 placeholder="Password"
                 required
-                className={`w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 bg-white/50 dark:bg-gray-900/50 border ${errors.password ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50 text-sm sm:text-base`}
+                className={`w-full pl-10 sm:pl-12 pr-12 sm:pr-14 py-3 sm:py-4 bg-white/50 dark:bg-gray-900/50 border ${errors.password ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50 text-sm sm:text-base`}
               />
+              <button
+                type="button"
+                tabIndex={-1}
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-purple-500 dark:hover:text-purple-400 focus:outline-none"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
             {errors.password && (
               <p className="mt-1 text-xs sm:text-sm text-red-500">{errors.password}</p>
@@ -262,13 +273,22 @@ export default function RegisterPage() {
             <div className="relative">
               <Lock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={handleConfirmPasswordChange}
                 placeholder="Confirm password"
                 required
-                className={`w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 bg-white/50 dark:bg-gray-900/50 border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50 text-sm sm:text-base`}
+                className={`w-full pl-10 sm:pl-12 pr-12 sm:pr-14 py-3 sm:py-4 bg-white/50 dark:bg-gray-900/50 border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:border-purple-500/50 text-sm sm:text-base`}
               />
+              <button
+                type="button"
+                tabIndex={-1}
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-purple-500 dark:hover:text-purple-400 focus:outline-none"
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              >
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
             {errors.confirmPassword && (
               <p className="mt-1 text-xs sm:text-sm text-red-500">{errors.confirmPassword}</p>
