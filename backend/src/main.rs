@@ -46,7 +46,7 @@ async fn main() {
         env::var("FRONTEND_REQUEST_URL1").expect("FRONTEND_REQUEST_URL1 must be set");
     // let frontend_request_url2 =
     //     env::var("FRONTEND_REQUEST_URL2").expect("FRONTEND_REQUEST_URL2 must be set");
-    
+
     // CORS configuration
     let cors = CorsLayer::new()
         .allow_origin([frontend_request_url1.parse().unwrap()])
