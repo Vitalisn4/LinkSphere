@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
 import ApiService, { Link } from "../../services/api";
+import LinkCard from '../../components/LinkCard';
 
 export default function DashboardPage() {
   const [query, setQuery] = useState<string>("")
@@ -74,6 +75,17 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('Error incrementing click count:', error);
       window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleDeleteLink = async (id: string) => {
+    try {
+      await ApiService.deleteLink(id);
+      setLinks((prev) => prev.filter((l) => l.id !== id));
+      setFilteredLinks((prev) => prev.filter((l) => l.id !== id));
+    } catch (error) {
+      console.error('Failed to delete link:', error);
+      // Optionally show a toast or error message here
     }
   };
 
@@ -176,64 +188,11 @@ export default function DashboardPage() {
                     : "bg-gray-100/60 border-gray-200/60 hover:border-purple-400/20"
                 }`}
               >
-                {/* Link Preview Image */}
-                {link.preview?.image && (
-                  <div className="relative aspect-[16/9] w-full overflow-hidden">
-                    <img
-                      src={link.preview.image}
-                      alt={link.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                  </div>
-                )}
-
-                <div className="p-6">
-                  {/* Link Title */}
-                  <h3 className={`text-xl font-semibold mb-3 ${
-                    isDark ? "text-gray-100" : "text-gray-600"
-                  }`}>
-                    {link.title}
-                  </h3>
-
-                  {/* Link Description */}
-                  <p className={`mb-4 line-clamp-2 ${
-                    isDark ? "text-gray-400" : "text-gray-500/90"
-                  }`}>
-                    {link.description}
-                  </p>
-
-                  {/* Link Metadata */}
-                  <div className={`flex flex-wrap gap-4 mb-4 text-sm ${
-                    isDark ? "text-gray-400" : "text-gray-500/80"
-                  }`}>
-                    <div className="flex items-center gap-1">
-                      <User size={16} />
-                      <span>{link.user?.username || 'Unknown user'}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Calendar size={16} />
-                      <span>{formatDate(link.created_at)}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock size={16} />
-                      <span>{formatTime(link.created_at)}</span>
-                    </div>
-                  </div>
-
-                  {/* Visit Link Button */}
-                  <button
-                    onClick={() => handleLinkClick(link.id, link.url)}
-                    className={`w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg transition-all duration-300 ${
-                      isDark
-                        ? "bg-purple-500/10 text-purple-400 hover:bg-purple-500/20"
-                        : "bg-purple-50/40 text-purple-500/80 hover:bg-purple-100/40"
-                    }`}
-                  >
-                    <ExternalLink size={20} />
-                    <span>Visit Link</span>
-                  </button>
-                </div>
+                <LinkCard
+                  link={link}
+                  currentUser={auth?.user ? { id: auth.user.id, username: auth.user.username } : null}
+                  onDelete={handleDeleteLink}
+                />
               </motion.div>
             ))
           )}
