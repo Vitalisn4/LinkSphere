@@ -42,14 +42,14 @@ async fn main() {
     // JWT secret
     let jwt_secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
     let auth_service = AuthService::new(pool.clone(), jwt_secret.clone());
-    let frontend_request_url1 =
-        env::var("FRONTEND_REQUEST_URL1").expect("FRONTEND_REQUEST_URL1 must be set");
+    let frontend_request_url =
+        env::var("FRONTEND_REQUEST_URL").expect("FRONTEND_REQUEST_URL must be set");
     // let frontend_request_url2 =
     //     env::var("FRONTEND_REQUEST_URL2").expect("FRONTEND_REQUEST_URL2 must be set");
 
     // CORS configuration
     let cors = CorsLayer::new()
-        .allow_origin([frontend_request_url1.parse().unwrap()])
+        .allow_origin([frontend_request_url.parse().unwrap()])
         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
         .allow_headers([
             HeaderName::from_static("authorization"),
