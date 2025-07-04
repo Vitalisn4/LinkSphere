@@ -15,7 +15,11 @@ export default function MyAccountPage() {
         isDark ? "bg-gray-800" : "bg-white"
       } shadow-lg`}>
         <div className="flex items-center space-x-4 mb-6">
-          <User size={48} className={isDark ? "text-gray-300" : "text-gray-700"} />
+          <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-pink-500 shadow-lg">
+            <span className="text-4xl font-bold text-white">
+              {user?.username ? user.username.charAt(0).toUpperCase() : '?'}
+            </span>
+          </div>
           <div>
             <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
               My Account
