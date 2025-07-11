@@ -21,24 +21,6 @@ RUN apt-get update \
 # This fixes the "lock file version" error and ensures latest tools.
 RUN rustup update stable && rustup default stable
 
-# Define build arguments (these are only available during the build process)
-# Note: These ARGs are distinct from the runtime ENVs below.
-ARG DATABASE_URL
-ARG FRONTEND_REQUEST_URL
-ARG VITE_API_URL
-ARG PORT
-ARG HOST
-ARG JWT_SECRET
-ARG SMTP_USERNAME
-ARG SMTP_PASSWORD
-ARG SMTP_PORT
-ARG SMTP_FROM_EMAIL
-ARG SMTP_FROM_NAME
-ARG SMTP_HOST
-ARG UPSTASH_REDIS_REST_URL
-ARG UPSTASH_REDIS_REST_TOKEN
-ARG ADMIN_SECRET_KEY
-
 # --- Start of Rust dependency caching strategy ---
 # Copy only Cargo.toml and Cargo.lock first to leverage Docker's build cache.
 # This layer only changes if your project dependencies change.
