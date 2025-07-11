@@ -1,6 +1,6 @@
 mod auth;
-mod links;
 mod health;
+mod links;
 
 use crate::api::models::VerifyEmailRequest;
 use crate::api::{ApiResponse, ErrorResponse};
