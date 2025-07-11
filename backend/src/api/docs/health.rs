@@ -1,5 +1,4 @@
 use crate::api::{ApiResponse, ErrorResponse};
-use utoipa::ToSchema;
 use serde_json::Value;
 
 /// Public health check endpoint
@@ -27,4 +26,4 @@ pub fn root_docs() {}
     ),
     tag = "admin"
 )]
-pub fn admin_db_health_docs() {} 
+pub fn admin_db_health_docs() {}
