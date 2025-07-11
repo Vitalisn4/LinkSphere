@@ -44,10 +44,6 @@ async fn main() {
     let auth_service = AuthService::new(pool.clone(), jwt_secret.clone());
     let frontend_request_url =
         env::var("FRONTEND_REQUEST_URL").expect("FRONTEND_REQUEST_URL must be set");
-    // let frontend_request_url2 =
-    //     env::var("FRONTEND_REQUEST_URL2").expect("FRONTEND_REQUEST_URL2 must be set");
-
-    // CORS configuration
     let cors = CorsLayer::new()
         .allow_origin([frontend_request_url.parse().unwrap()])
         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
