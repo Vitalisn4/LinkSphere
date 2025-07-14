@@ -1,4 +1,5 @@
 mod auth;
+mod health;
 mod links;
 
 use crate::api::models::VerifyEmailRequest;
@@ -21,7 +22,10 @@ type LinksResponse = ApiResponse<Vec<Link>>;
         crate::api::docs::auth::login_docs,
         crate::api::docs::links::get_links_docs,
         crate::api::docs::links::create_link_docs,
-        crate::api::docs::links::delete_link_docs
+        crate::api::docs::links::delete_link_docs,
+        crate::api::docs::links::track_click_docs,
+        crate::api::docs::health::root_docs,
+        crate::api::docs::health::admin_db_health_docs
     ),
     components(schemas(
         RegisterRequest,
