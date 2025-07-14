@@ -58,3 +58,18 @@ pub fn create_link_docs() {}
     tag = "links"
 )]
 pub fn delete_link_docs() {}
+
+#[utoipa::path(
+    post,
+    path = "/api/links/{id}/click",
+    params(
+        ("id" = Uuid, Path, description = "ID of the link to track click for")
+    ),
+    responses(
+        (status = 200, description = "Click tracked successfully", body = EmptyResponse),
+        (status = 404, description = "Link not found", body = ErrorResponse),
+        (status = 500, description = "Server error", body = ErrorResponse)
+    ),
+    tag = "links"
+)]
+pub fn track_click_docs() {}

@@ -7,22 +7,7 @@ FROM rust:slim AS builder
 # Set the working directory inside the container for the backend source
 WORKDIR /usr/src/backend
 
-# Install build dependencies in a single RUN command to create fewer layers
-# and ensure apt cache is cleaned immediately.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        pkg-config \
-        libssl-dev \
-        curl \
-        binutils-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# IMPORTANT: Update rustup and cargo to ensure compatibility with your Cargo.lock file.
-# This fixes the "lock file version" error and ensures latest tools.
-RUN rustup update stable && rustup default stable
-
-# Define build arguments (these are only available during the build process)
-# Note: These ARGs are distinct from the runtime ENVs below.
+# Accept build-time environment variables for all config
 ARG DATABASE_URL
 ARG FRONTEND_REQUEST_URL
 ARG VITE_API_URL
@@ -38,6 +23,36 @@ ARG SMTP_HOST
 ARG UPSTASH_REDIS_REST_URL
 ARG UPSTASH_REDIS_REST_TOKEN
 ARG ADMIN_SECRET_KEY
+
+ENV DATABASE_URL=${DATABASE_URL}
+ENV FRONTEND_REQUEST_URL=${FRONTEND_REQUEST_URL}
+ENV VITE_API_URL=${VITE_API_URL}
+ENV PORT=${PORT}
+ENV HOST=${HOST}
+ENV JWT_SECRET=${JWT_SECRET}
+ENV SMTP_USERNAME=${SMTP_USERNAME}
+ENV SMTP_PASSWORD=${SMTP_PASSWORD}
+ENV SMTP_PORT=${SMTP_PORT}
+ENV SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL}
+ENV SMTP_FROM_NAME=${SMTP_FROM_NAME}
+ENV SMTP_HOST=${SMTP_HOST}
+ENV UPSTASH_REDIS_REST_URL=${UPSTASH_REDIS_REST_URL}
+ENV UPSTASH_REDIS_REST_TOKEN=${UPSTASH_REDIS_REST_TOKEN}
+ENV ADMIN_SECRET_KEY=${ADMIN_SECRET_KEY}
+
+# Install build dependencies in a single RUN command to create fewer layers
+# and ensure apt cache is cleaned immediately.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        pkg-config \
+        libssl-dev \
+        curl \
+        binutils-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# IMPORTANT: Update rustup and cargo to ensure compatibility with your Cargo.lock file.
+# This fixes the "lock file version" error and ensures latest tools.
+RUN rustup update stable && rustup default stable
 
 # --- Start of Rust dependency caching strategy ---
 # Copy only Cargo.toml and Cargo.lock first to leverage Docker's build cache.
@@ -96,7 +111,7 @@ COPY --from=builder /usr/src/backend/target/release/backend /app/backend
 # Ensure this path is correct if your Rust app needs to access `migrations` at runtime.
 COPY --from=builder /usr/src/backend/migrations /app/migrations
 
-# Define runtime arguments (these should ideally be passed at `docker run` or in `docker-compose.yml`)
+# # Define runtime arguments (these should ideally be passed at `docker run` or in `docker-compose.yml`)
 ARG DATABASE_URL
 ARG FRONTEND_REQUEST_URL
 ARG VITE_API_URL
@@ -113,8 +128,8 @@ ARG UPSTASH_REDIS_REST_URL
 ARG UPSTASH_REDIS_REST_TOKEN
 ARG ADMIN_SECRET_KEY
 
-# Set runtime environment variables using the ARG values.
-# These will be the actual environment variables available to your running application.
+# # Set runtime environment variables using the ARG values.
+# # These will be the actual environment variables available to your running application.
 ENV DATABASE_URL=${DATABASE_URL}
 ENV FRONTEND_REQUEST_URL=${FRONTEND_REQUEST_URL}
 ENV VITE_API_URL=${VITE_API_URL}

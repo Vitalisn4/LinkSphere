@@ -407,14 +407,14 @@ fn create_html_template() -> String {
             </p>
             
             <!-- OTP Display -->
-            <div style="background-color: #f3e8ff; border-radius: 16px; padding: 32px; margin: 32px 0; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div style="background-color: #f3e8ff; border-radius: 16px; padding: 24px 8px; margin: 24px 0; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                 <p style="color: #6b21a8; font-size: 18px; margin-bottom: 16px; font-weight: 500;">Your OTP code:</p>
-                <div style="background-color: #ffffff; border-radius: 12px; display: inline-block; padding: 20px 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #e9d5ff;">
-                    <span style="font-size: 48px; font-weight: 800; color: #000000; letter-spacing: 0.1em; line-height: 1;">
+                <div style="background-color: #ffffff; border-radius: 12px; display: inline-block; padding: 16px 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #e9d5ff; max-width: 90vw; width: 100%; box-sizing: border-box;">
+                    <span style="font-size: 36px; font-weight: 800; color: #000000; letter-spacing: 0.1em; line-height: 1;">
                         {otp}
                     </span>
                 </div>
-                <p style="margin-top: 24px; font-size: 16px; color: #6b21a8; font-weight: 500;">
+                <p style="margin-top: 20px; font-size: 15px; color: #6b21a8; font-weight: 500;">
                     This code will expire in <span style="font-weight: 800; color: #581c87;">5 minutes</span>. Please don't share it with anyone.
                 </p>
             </div>
