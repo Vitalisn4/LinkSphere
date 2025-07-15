@@ -1,6 +1,8 @@
  # ---- Build Stage ----
 FROM quay.io/keycloak/keycloak:latest AS builder 
 
+ENV KC_DB=postgres
+
 WORKDIR /opt/keycloak
 
 # Build Keycloak with the current config
