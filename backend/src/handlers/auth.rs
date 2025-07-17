@@ -1,10 +1,13 @@
+use crate::services::auth::AuthService;
 use crate::{
     api::{ApiResponse, ErrorResponse},
     auth::routes::AppState,
     models::auth::{
-        LoginRequest, RegisterRequest, ResendOtpRequest, User, UserStatus, VerifyEmailRequest, AuthResponse,
+        AuthResponse, LoginRequest, RegisterRequest, ResendOtpRequest, User, UserStatus,
+        VerifyEmailRequest,
     },
 };
+use axum::extract::Json as AxumJson;
 use axum::{
     extract::State,
     http::{HeaderMap, StatusCode},
@@ -12,12 +15,10 @@ use axum::{
     Json,
 };
 use axum_macros::debug_handler;
+use chrono::Utc;
 use serde::Deserialize;
 use serde_json::json;
 use validator::Validate;
-use chrono::Utc;
-use axum::extract::Json as AxumJson;
-use crate::services::auth::AuthService;
 
 #[derive(Deserialize)]
 pub struct RefreshRequest {
@@ -514,15 +515,28 @@ pub async fn refresh_token(
             match user {
                 Ok(user) => {
                     // Optionally rotate refresh token (invalidate old, issue new)
-                    let _ = crate::database::queries::delete_refresh_token(pool, &payload.refresh_token).await;
-                    let (new_refresh_token, new_refresh_expires_at) = AuthService::generate_refresh_token_and_expiry();
-                    let _ = crate::database::queries::insert_refresh_token(pool, user.id, &new_refresh_token, new_refresh_expires_at).await;
+                    let _ = crate::database::queries::delete_refresh_token(
+                        pool,
+                        &payload.refresh_token,
+                    )
+                    .await;
+                    let (new_refresh_token, new_refresh_expires_at) =
+                        AuthService::generate_refresh_token_and_expiry();
+                    let _ = crate::database::queries::insert_refresh_token(
+                        pool,
+                        user.id,
+                        &new_refresh_token,
+                        new_refresh_expires_at,
+                    )
+                    .await;
                     // Issue new access token
                     let token = match state.auth_service.create_token(&user) {
                         Ok(t) => t,
                         Err(e) => {
-                            let error = ErrorResponse::new(format!("Token error: {e}")).with_code("TOKEN_ERROR");
-                            return (StatusCode::INTERNAL_SERVER_ERROR, AxumJson(error)).into_response();
+                            let error = ErrorResponse::new(format!("Token error: {e}"))
+                                .with_code("TOKEN_ERROR");
+                            return (StatusCode::INTERNAL_SERVER_ERROR, AxumJson(error))
+                                .into_response();
                         }
                     };
                     let resp = AuthResponse {
