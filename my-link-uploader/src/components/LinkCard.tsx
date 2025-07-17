@@ -32,9 +32,10 @@ interface LinkCardProps {
   link: Link;
   currentUser: User | null;
   onDelete?: (id: string) => void;
+  onClick?: (id: string, url: string) => void;
 }
 
-const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
+const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete, onClick }) => {
   const [imageError, setImageError] = useState(false);
   const [faviconError, setFaviconError] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -65,7 +66,11 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
 
   const handleVisit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.open(link.url, '_blank', 'noopener,noreferrer');
+    if (onClick) {
+      onClick(link.id, link.url);
+    } else {
+      window.open(link.url, '_blank', 'noopener,noreferrer');
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -123,7 +128,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete }) => {
               <span>{formatTime(link.created_at)}</span>
             </div>
           </div>
-          <div className="mb-4 text-sm text-gray-400">
+          <div className="mb-4 text-sm font-semibold text-blue-500 bg-blue-50 rounded px-2 py-1 w-fit shadow-sm">
             {link.click_count} clicks
           </div>
           <div className="mt-auto flex flex-col gap-2">
