@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE links \n        SET click_count = click_count + 1 \n        WHERE id = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "331e8379848ed523f02d7bacc2938f13a6d07758ebab75c6dc417c134005b730"
+}

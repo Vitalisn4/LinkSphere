@@ -3,10 +3,11 @@ use crate::{
     api::{ApiResponse, ErrorResponse},
     auth::routes::AppState,
     models::auth::{
-        AuthResponse, LoginRequest, RegisterRequest, ResendOtpRequest, User, UserStatus,
+        AuthResponse, LoginRequest, RegisterRequest, ResendOtpRequest, UserStatus,
         VerifyEmailRequest,
     },
 };
+use crate::models::auth::User;
 use axum::extract::Json as AxumJson;
 use axum::{
     extract::State,

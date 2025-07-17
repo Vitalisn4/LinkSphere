@@ -2,8 +2,7 @@ use base64::{engine::general_purpose, Engine as _};
 use bcrypt::{hash, verify, DEFAULT_COST};
 use chrono::{Duration, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
-use rand::thread_rng;
-use rand::Rng;
+use rand::rng;
 use rand::RngCore;
 use sqlx::PgPool;
 
@@ -127,7 +126,7 @@ impl AuthService {
     /// Generate a secure random refresh token and expiry (30 days)
     pub fn generate_refresh_token_and_expiry() -> (String, chrono::DateTime<chrono::Utc>) {
         let mut bytes = [0u8; 32];
-        thread_rng().fill_bytes(&mut bytes);
+        rng().fill_bytes(&mut bytes);
         let token = general_purpose::URL_SAFE_NO_PAD.encode(&bytes);
         let expires_at = Utc::now() + Duration::days(2); // 2 days expiry
         (token, expires_at)

@@ -1,0 +1,74 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT \n            l.id,\n            l.url as \"url!\",\n            l.title as \"title!\",\n            l.description as \"description!\",\n            l.user_id as \"user_id!\",\n            l.click_count as \"click_count!\",\n            l.created_at as \"created_at!\",\n            l.updated_at as \"updated_at!\",\n            l.preview as \"preview: JsonLinkPreview\",\n            COALESCE(\n                jsonb_build_object('username', u.username)::jsonb,\n                'null'::jsonb\n            ) as \"user!: OptionalJsonUser\"\n        FROM links l\n        LEFT JOIN users u ON l.user_id = u.id\n        ORDER BY l.created_at DESC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "url!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "title!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "description!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "user_id!",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 5,
+        "name": "click_count!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 7,
+        "name": "updated_at!",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "preview: JsonLinkPreview",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 9,
+        "name": "user!: OptionalJsonUser",
+        "type_info": "Jsonb"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "f8fc3f2c9f137a53e20ec204b31afa31b85dbdd91fec9306e0f63da6ad49e19c"
+}
