@@ -20,6 +20,7 @@ use std::net::SocketAddr;
 use tower_http::cors::CorsLayer;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
+use tokio::time::{sleep, Duration as TokioDuration};
 
 #[tokio::main]
 async fn main() {
@@ -52,6 +53,18 @@ async fn main() {
             HeaderName::from_static("content-type"),
         ])
         .allow_credentials(true);
+
+    // Start background task to clean up expired refresh tokens every 3 days
+    let pool_for_cleanup = pool.clone();
+    tokio::spawn(async move {
+        loop {
+            match AuthService::cleanup_expired_refresh_tokens(&pool_for_cleanup).await {
+                Ok(count) => tracing::info!("Cleaned up {count} expired refresh tokens"),
+                Err(e) => tracing::error!("Failed to clean up expired refresh tokens: {e}"),
+            }
+            sleep(TokioDuration::from_secs(3 * 24 * 60 * 60)).await; // 3 days
+        }
+    });
 
     // Build our application with routes
     let app = Router::new()
