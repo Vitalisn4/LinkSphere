@@ -291,7 +291,7 @@ impl EmailService {
                 .await
             {
                 Ok(_) => continue,
-                Err(e) => println!("Warning: Failed to delete key {url}: {e}"),
+                Err(e) => tracing::error!("Failed to delete key {url}: {e}"),
             }
         }
 
