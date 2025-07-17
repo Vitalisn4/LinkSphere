@@ -47,6 +47,7 @@ anyhow = "1.0.98"
 
 # Add resend client
 resend = "0.1.4"
+base64 = "0.22.1"
 
 [workspace]
 members = ["."]
