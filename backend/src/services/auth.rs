@@ -2,8 +2,9 @@ use bcrypt::{hash, verify, DEFAULT_COST};
 use chrono::{Duration, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use sqlx::PgPool;
+use rand::Rng;
 use rand::RngCore;
-use rand::rngs::OsRng;
+use rand::thread_rng;
 use base64::{engine::general_purpose, Engine as _};
 
 use crate::{
@@ -120,9 +121,9 @@ impl AuthService {
     }
 
     /// Generate a secure random refresh token and expiry (30 days)
-    fn generate_refresh_token_and_expiry() -> (String, chrono::DateTime<chrono::Utc>) {
+    pub fn generate_refresh_token_and_expiry() -> (String, chrono::DateTime<chrono::Utc>) {
         let mut bytes = [0u8; 32];
-        OsRng.fill_bytes(&mut bytes);
+        thread_rng().fill_bytes(&mut bytes);
         let token = general_purpose::URL_SAFE_NO_PAD.encode(&bytes);
         let expires_at = Utc::now() + Duration::days(30);
         (token, expires_at)
@@ -132,7 +133,7 @@ impl AuthService {
         queries::complete_registration(&self.pool, email).await
     }
 
-    fn create_token(&self, user: &User) -> Result<String, sqlx::Error> {
+    pub fn create_token(&self, user: &User) -> Result<String, sqlx::Error> {
         let expiration = Utc::now()
             .checked_add_signed(Duration::hours(24))
             .expect("Valid timestamp")
