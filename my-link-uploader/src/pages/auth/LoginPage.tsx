@@ -22,14 +22,15 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const { token, user } = await ApiService.login(email, password);
+      const { token, refresh_token, user } = await ApiService.login(email, password);
       
-      if (!token || !user) {
+      if (!token || !refresh_token || !user) {
         throw new Error('Invalid credentials');
       }
 
-      // Set token and user in localStorage
+      // Set tokens and user in localStorage
       localStorage.setItem('token', token);
+      localStorage.setItem('refresh_token', refresh_token);
       localStorage.setItem('user', JSON.stringify(user));
       
       // Update context state
@@ -46,6 +47,7 @@ export default function LoginPage() {
       setUser(null);
       setIsAuthenticated(false);
       localStorage.removeItem('token');
+      localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
     } finally {
       setIsLoading(false);
