@@ -2,6 +2,9 @@ use bcrypt::{hash, verify, DEFAULT_COST};
 use chrono::{Duration, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use sqlx::PgPool;
+use rand::RngCore;
+use rand::rngs::OsRng;
+use base64::{engine::general_purpose, Engine as _};
 
 use crate::{
     database::queries,
@@ -105,7 +108,24 @@ impl AuthService {
         }
 
         let token = self.create_token(&user)?;
-        Ok(AuthResponse { token, user })
+        let (refresh_token, refresh_expires_at) = Self::generate_refresh_token_and_expiry();
+        crate::database::queries::insert_refresh_token(
+            &self.pool,
+            user.id,
+            &refresh_token,
+            refresh_expires_at,
+        )
+        .await?;
+        Ok(AuthResponse { token, refresh_token, user })
+    }
+
+    /// Generate a secure random refresh token and expiry (30 days)
+    fn generate_refresh_token_and_expiry() -> (String, chrono::DateTime<chrono::Utc>) {
+        let mut bytes = [0u8; 32];
+        OsRng.fill_bytes(&mut bytes);
+        let token = general_purpose::URL_SAFE_NO_PAD.encode(&bytes);
+        let expires_at = Utc::now() + Duration::days(30);
+        (token, expires_at)
     }
 
     pub async fn complete_verification(&self, email: &str) -> Result<(), sqlx::Error> {
