@@ -121,9 +121,9 @@ export const ApiService = {
     }
   },
 
-  async login(email: string, password: string): Promise<{ token: string; user: User }> {
+  async login(email: string, password: string): Promise<{ token: string; refresh_token: string; user: User }> {
     try {
-      const response = await api.post<ApiResponse<{ token: string; user: User }>>('/auth/login', {
+      const response = await api.post<ApiResponse<{ token: string; refresh_token: string; user: User }>>('/auth/login', {
         email,
         password
       });
