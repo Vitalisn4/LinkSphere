@@ -1,3 +1,4 @@
+use crate::models::auth::User;
 use crate::services::auth::AuthService;
 use crate::{
     api::{ApiResponse, ErrorResponse},
@@ -7,7 +8,6 @@ use crate::{
         VerifyEmailRequest,
     },
 };
-use crate::models::auth::User;
 use axum::extract::Json as AxumJson;
 use axum::{
     extract::State,
