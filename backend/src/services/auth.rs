@@ -125,7 +125,7 @@ impl AuthService {
         let mut bytes = [0u8; 32];
         thread_rng().fill_bytes(&mut bytes);
         let token = general_purpose::URL_SAFE_NO_PAD.encode(&bytes);
-        let expires_at = Utc::now() + Duration::days(30); // 30 days expiry
+        let expires_at = Utc::now() + Duration::days(2); // 2 days expiry
         (token, expires_at)
     }
 
