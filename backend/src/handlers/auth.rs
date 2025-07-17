@@ -24,6 +24,11 @@ pub struct RefreshRequest {
     pub refresh_token: String,
 }
 
+#[derive(Deserialize)]
+pub struct LogoutRequest {
+    pub refresh_token: String,
+}
+
 /// Register a new user
 pub async fn register(
     State(state): State<AppState>,
@@ -545,6 +550,24 @@ pub async fn refresh_token(
         }
         Err(e) => {
             let error = ErrorResponse::new(format!("DB error: {e}")).with_code("DB_ERROR");
+            (StatusCode::INTERNAL_SERVER_ERROR, AxumJson(error)).into_response()
+        }
+    }
+}
+
+/// Logout user by deleting the refresh token from the database
+pub async fn logout(
+    State(state): State<AppState>,
+    AxumJson(payload): AxumJson<LogoutRequest>,
+) -> impl IntoResponse {
+    let pool = state.auth_service.get_pool();
+    match crate::database::queries::delete_refresh_token(pool, &payload.refresh_token).await {
+        Ok(_) => {
+            let response = ApiResponse::success_with_message(json!({}), "Logged out successfully");
+            (StatusCode::OK, AxumJson(response)).into_response()
+        }
+        Err(e) => {
+            let error = ErrorResponse::new(format!("Logout failed: {e}")).with_code("LOGOUT_ERROR");
             (StatusCode::INTERNAL_SERVER_ERROR, AxumJson(error)).into_response()
         }
     }
