@@ -265,3 +265,54 @@ pub async fn is_user_verified(pool: &PgPool, email: &str) -> Result<bool, sqlx::
 
     Ok(result.map(|r| r.is_verified).unwrap_or(false))
 }
+
+/// Inserts a new refresh token for a user
+pub async fn insert_refresh_token(
+    pool: &PgPool,
+    user_id: Uuid,
+    token: &str,
+    expires_at: chrono::DateTime<chrono::Utc>,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        r#"
+        INSERT INTO refresh_tokens (user_id, token, expires_at)
+        VALUES ($1, $2, $3)
+        "#,
+        user_id,
+        token,
+        expires_at
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+/// Gets a refresh token record by token string
+pub async fn get_refresh_token(
+    pool: &PgPool,
+    token: &str,
+) -> Result<Option<(Uuid, chrono::DateTime<chrono::Utc>)>, sqlx::Error> {
+    let rec = sqlx::query!(
+        r#"
+        SELECT user_id, expires_at FROM refresh_tokens WHERE token = $1
+        "#,
+        token
+    )
+    .fetch_optional(pool)
+    .await?;
+    Ok(rec.map(|r| (r.user_id, r.expires_at)))
+}
+
+/// Deletes a refresh token (for rotation or logout)
+pub async fn delete_refresh_token(
+    pool: &PgPool,
+    token: &str,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        r#"DELETE FROM refresh_tokens WHERE token = $1"#,
+        token
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
