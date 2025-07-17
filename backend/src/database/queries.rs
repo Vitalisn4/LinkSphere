@@ -304,15 +304,9 @@ pub async fn get_refresh_token(
 }
 
 /// Deletes a refresh token (for rotation or logout)
-pub async fn delete_refresh_token(
-    pool: &PgPool,
-    token: &str,
-) -> Result<(), sqlx::Error> {
-    sqlx::query!(
-        r#"DELETE FROM refresh_tokens WHERE token = $1"#,
-        token
-    )
-    .execute(pool)
-    .await?;
+pub async fn delete_refresh_token(pool: &PgPool, token: &str) -> Result<(), sqlx::Error> {
+    sqlx::query!(r#"DELETE FROM refresh_tokens WHERE token = $1"#, token)
+        .execute(pool)
+        .await?;
     Ok(())
 }
