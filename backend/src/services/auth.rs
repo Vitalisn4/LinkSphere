@@ -1,11 +1,11 @@
+use base64::{engine::general_purpose, Engine as _};
 use bcrypt::{hash, verify, DEFAULT_COST};
 use chrono::{Duration, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
-use sqlx::PgPool;
+use rand::thread_rng;
 use rand::Rng;
 use rand::RngCore;
-use rand::thread_rng;
-use base64::{engine::general_purpose, Engine as _};
+use sqlx::PgPool;
 
 use crate::{
     database::queries,
@@ -117,7 +117,11 @@ impl AuthService {
             refresh_expires_at,
         )
         .await?;
-        Ok(AuthResponse { token, refresh_token, user })
+        Ok(AuthResponse {
+            token,
+            refresh_token,
+            user,
+        })
     }
 
     /// Generate a secure random refresh token and expiry (30 days)
@@ -131,11 +135,9 @@ impl AuthService {
 
     /// Delete all expired refresh tokens from the database
     pub async fn cleanup_expired_refresh_tokens(pool: &PgPool) -> Result<u64, sqlx::Error> {
-        let result = sqlx::query!(
-            r#"DELETE FROM refresh_tokens WHERE expires_at < NOW()"#
-        )
-        .execute(pool)
-        .await?;
+        let result = sqlx::query!(r#"DELETE FROM refresh_tokens WHERE expires_at < NOW()"#)
+            .execute(pool)
+            .await?;
         Ok(result.rows_affected())
     }
 
