@@ -129,13 +129,23 @@ impl AuthService {
         (token, expires_at)
     }
 
+    /// Delete all expired refresh tokens from the database
+    pub async fn cleanup_expired_refresh_tokens(pool: &PgPool) -> Result<u64, sqlx::Error> {
+        let result = sqlx::query!(
+            r#"DELETE FROM refresh_tokens WHERE expires_at < NOW()"#
+        )
+        .execute(pool)
+        .await?;
+        Ok(result.rows_affected())
+    }
+
     pub async fn complete_verification(&self, email: &str) -> Result<(), sqlx::Error> {
         queries::complete_registration(&self.pool, email).await
     }
 
     pub fn create_token(&self, user: &User) -> Result<String, sqlx::Error> {
         let expiration = Utc::now()
-            .checked_add_signed(Duration::hours(24))
+            .checked_add_signed(Duration::seconds(30)) // 30 seconds expiry for testing
             .expect("Valid timestamp")
             .timestamp();
 
