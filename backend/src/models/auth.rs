@@ -89,6 +89,7 @@ pub struct LoginRequest {
 pub struct AuthResponse {
     #[schema(example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")]
     pub token: String,
+    pub refresh_token: String,
     pub user: User,
 }
 
