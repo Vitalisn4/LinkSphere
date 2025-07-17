@@ -45,6 +45,7 @@ export interface User {
 
 export interface AuthResponse {
   token: string;
+  refresh_token: string;
   user: User;
 }
 
@@ -72,9 +73,65 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return Promise.reject(error);
 });
 
+// Add refreshToken method
+async function refreshToken(): Promise<{ token: string; refresh_token: string; user: User }> {
+  const refresh_token = localStorage.getItem('refresh_token');
+  if (!refresh_token) throw new Error('No refresh token');
+  const response = await api.post<ApiResponse<{ token: string; refresh_token: string; user: User }>>('/auth/refresh', { refresh_token });
+  if (!response.data.success || !response.data.data) throw new Error('Failed to refresh token');
+  return response.data.data;
+}
+
+// Update axios interceptor for 401
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+function processQueue(error: any, token: string | null = null) {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+}
+
 api.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<ApiError>) => {
+  async (error: AxiosError<ApiError>) => {
+    const originalRequest = error.config;
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise(function(resolve, reject) {
+          failedQueue.push({ resolve, reject });
+        })
+        .then((token) => {
+          if (originalRequest.headers) originalRequest.headers['Authorization'] = 'Bearer ' + token;
+          return api(originalRequest);
+        })
+        .catch((err) => Promise.reject(err));
+      }
+      originalRequest._retry = true;
+      isRefreshing = true;
+      try {
+        const data = await refreshToken();
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('refresh_token', data.refresh_token);
+        if (originalRequest.headers) originalRequest.headers['Authorization'] = 'Bearer ' + data.token;
+        processQueue(null, data.token);
+        return api(originalRequest);
+      } catch (err) {
+        processQueue(err, null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
+      }
+    }
     return Promise.reject(error);
   }
 );
@@ -219,6 +276,8 @@ export const ApiService = {
       handleApiError(error as AxiosError<ApiError>);
     }
   },
+
+  refreshToken,
 };
 
 export default ApiService; 
