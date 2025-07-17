@@ -15,9 +15,9 @@ use axum_macros::debug_handler;
 use serde::Deserialize;
 use serde_json::json;
 use validator::Validate;
-use crate::models::auth::AuthResponse;
 use chrono::Utc;
 use axum::extract::Json as AxumJson;
+use crate::services::auth::AuthService;
 
 #[derive(Deserialize)]
 pub struct RefreshRequest {
@@ -515,7 +515,7 @@ pub async fn refresh_token(
                 Ok(user) => {
                     // Optionally rotate refresh token (invalidate old, issue new)
                     let _ = crate::database::queries::delete_refresh_token(pool, &payload.refresh_token).await;
-                    let (new_refresh_token, new_refresh_expires_at) = state.auth_service.generate_refresh_token_and_expiry();
+                    let (new_refresh_token, new_refresh_expires_at) = AuthService::generate_refresh_token_and_expiry();
                     let _ = crate::database::queries::insert_refresh_token(pool, user.id, &new_refresh_token, new_refresh_expires_at).await;
                     // Issue new access token
                     let token = match state.auth_service.create_token(&user) {
@@ -527,7 +527,7 @@ pub async fn refresh_token(
                     };
                     let resp = AuthResponse {
                         token,
-                        refresh_token: new_refresh_token,
+                        refresh_token: new_refresh_token.to_string(),
                         user,
                     };
                     let response = ApiResponse::success_with_message(resp, "Token refreshed");
