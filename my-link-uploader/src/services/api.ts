@@ -197,7 +197,16 @@ export const ApiService = {
   },
 
   async logout(): Promise<void> {
+    const refresh_token = localStorage.getItem('refresh_token');
+    if (refresh_token) {
+      try {
+        await api.post('/auth/logout', { refresh_token });
+      } catch (e) {
+        // Ignore errors, proceed to clear local storage
+      }
+    }
     localStorage.removeItem("token");
+    localStorage.removeItem("refresh_token");
     localStorage.removeItem("user");
   },
 
