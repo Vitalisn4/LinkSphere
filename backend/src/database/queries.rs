@@ -1,8 +1,8 @@
 use super::models::{JsonLinkPreview, Link, LinkPreview};
+use crate::database::models::OptionalJsonUser;
 use chrono::Utc;
 use sqlx::PgPool;
 use uuid::Uuid;
-use crate::database::models::OptionalJsonUser;
 
 /// Retrieves all links from the database
 ///
