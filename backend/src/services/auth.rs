@@ -145,7 +145,7 @@ impl AuthService {
 
     pub fn create_token(&self, user: &User) -> Result<String, sqlx::Error> {
         let expiration = Utc::now()
-            .checked_add_signed(Duration::seconds(30)) // 30 seconds expiry for testing
+            .checked_add_signed(Duration::hours(24)) // 24 hours expiry (default)
             .expect("Valid timestamp")
             .timestamp();
 
