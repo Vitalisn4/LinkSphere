@@ -17,10 +17,10 @@ use axum::{
 use dotenv::dotenv;
 use std::env;
 use std::net::SocketAddr;
+use tokio::time::{sleep, Duration as TokioDuration};
 use tower_http::cors::CorsLayer;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
-use tokio::time::{sleep, Duration as TokioDuration};
 
 #[tokio::main]
 async fn main() {
