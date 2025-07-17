@@ -169,12 +169,9 @@ pub async fn verify_email(
     State(state): State<AppState>,
     Json(payload): Json<VerifyEmailRequest>,
 ) -> impl IntoResponse {
-    // Log verification attempt
-    println!("Starting email verification for: {}", payload.email);
-
     // Validate the request
     if let Err(validation_errors) = payload.validate() {
-        println!("Validation error: {validation_errors}");
+        tracing::error!("Validation error: {validation_errors}");
         let error = ErrorResponse::new(format!("Validation error: {validation_errors}"))
             .with_code("VALIDATION_ERROR");
         return (StatusCode::BAD_REQUEST, Json(error)).into_response();
@@ -187,12 +184,10 @@ pub async fn verify_email(
         .await;
 
     if !otp_valid {
-        println!("Invalid OTP for email: {}", payload.email);
+        tracing::error!("Invalid OTP for email: {}", payload.email);
         let error = ErrorResponse::new("Invalid or expired OTP").with_code("INVALID_OTP");
         return (StatusCode::BAD_REQUEST, Json(error)).into_response();
     }
-
-    println!("OTP verified successfully for: {}", payload.email);
 
     // Complete verification
     match state
@@ -201,7 +196,7 @@ pub async fn verify_email(
         .await
     {
         Ok(_) => {
-            println!("Email verification completed for: {}", payload.email);
+            tracing::info!("Email verification completed for: {}", payload.email);
             let response = ApiResponse::success_with_message(
                 json!({"email": payload.email}),
                 "Email verified successfully. You can now login to your account.",
@@ -209,7 +204,7 @@ pub async fn verify_email(
             (StatusCode::OK, Json(response)).into_response()
         }
         Err(e) => {
-            println!("Verification failed for {0}: {e}", payload.email);
+            tracing::error!("Verification failed for {0}: {e}", payload.email);
             let error = ErrorResponse::new(format!("Verification failed: {e}"))
                 .with_code("VERIFICATION_ERROR");
             (StatusCode::INTERNAL_SERVER_ERROR, Json(error)).into_response()
