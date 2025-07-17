@@ -2,7 +2,7 @@ use crate::{
     api::{ApiResponse, ErrorResponse},
     auth::routes::AppState,
     models::auth::{
-        LoginRequest, RegisterRequest, ResendOtpRequest, User, UserStatus, VerifyEmailRequest,
+        LoginRequest, RegisterRequest, ResendOtpRequest, User, UserStatus, VerifyEmailRequest, AuthResponse,
     },
 };
 use axum::{
@@ -15,6 +15,14 @@ use axum_macros::debug_handler;
 use serde::Deserialize;
 use serde_json::json;
 use validator::Validate;
+use crate::models::auth::AuthResponse;
+use chrono::Utc;
+use axum::extract::Json as AxumJson;
+
+#[derive(Deserialize)]
+pub struct RefreshRequest {
+    pub refresh_token: String,
+}
 
 /// Register a new user
 pub async fn register(
@@ -467,4 +475,77 @@ pub async fn admin_reset_otp_attempts(
         "OTP attempts reset successfully by admin. User can now request a new OTP.",
     );
     (StatusCode::OK, Json(response))
+}
+
+/// Refresh access token using a valid refresh token
+pub async fn refresh_token(
+    State(state): State<AppState>,
+    AxumJson(payload): AxumJson<RefreshRequest>,
+) -> impl IntoResponse {
+    // Lookup refresh token in DB
+    let pool = state.auth_service.get_pool();
+    match crate::database::queries::get_refresh_token(pool, &payload.refresh_token).await {
+        Ok(Some((user_id, expires_at))) => {
+            if expires_at < Utc::now() {
+                // Expired
+                let error = ErrorResponse::new("Refresh token expired").with_code("TOKEN_EXPIRED");
+                return (StatusCode::UNAUTHORIZED, AxumJson(error)).into_response();
+            }
+            // Get user
+            let user = sqlx::query_as!(
+                User,
+                r#"
+                SELECT 
+                    id, email, username, password_hash, 
+                    gender as "gender: _",
+                    status as "status: _",
+                    is_verified,
+                    verification_attempts,
+                    verified_at,
+                    created_at, 
+                    updated_at
+                FROM users
+                WHERE id = $1
+                "#,
+                user_id
+            )
+            .fetch_one(pool)
+            .await;
+            match user {
+                Ok(user) => {
+                    // Optionally rotate refresh token (invalidate old, issue new)
+                    let _ = crate::database::queries::delete_refresh_token(pool, &payload.refresh_token).await;
+                    let (new_refresh_token, new_refresh_expires_at) = state.auth_service.generate_refresh_token_and_expiry();
+                    let _ = crate::database::queries::insert_refresh_token(pool, user.id, &new_refresh_token, new_refresh_expires_at).await;
+                    // Issue new access token
+                    let token = match state.auth_service.create_token(&user) {
+                        Ok(t) => t,
+                        Err(e) => {
+                            let error = ErrorResponse::new(format!("Token error: {e}")).with_code("TOKEN_ERROR");
+                            return (StatusCode::INTERNAL_SERVER_ERROR, AxumJson(error)).into_response();
+                        }
+                    };
+                    let resp = AuthResponse {
+                        token,
+                        refresh_token: new_refresh_token,
+                        user,
+                    };
+                    let response = ApiResponse::success_with_message(resp, "Token refreshed");
+                    (StatusCode::OK, AxumJson(response)).into_response()
+                }
+                Err(_) => {
+                    let error = ErrorResponse::new("User not found").with_code("USER_NOT_FOUND");
+                    (StatusCode::UNAUTHORIZED, AxumJson(error)).into_response()
+                }
+            }
+        }
+        Ok(None) => {
+            let error = ErrorResponse::new("Invalid refresh token").with_code("INVALID_TOKEN");
+            (StatusCode::UNAUTHORIZED, AxumJson(error)).into_response()
+        }
+        Err(e) => {
+            let error = ErrorResponse::new(format!("DB error: {e}")).with_code("DB_ERROR");
+            (StatusCode::INTERNAL_SERVER_ERROR, AxumJson(error)).into_response()
+        }
+    }
 }
