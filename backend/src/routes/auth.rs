@@ -4,7 +4,7 @@ use axum::{
 };
 
 use crate::{
-    handlers::auth::{register, login, verify_email, resend_otp, refresh_token},
+    handlers::auth::{register, login, verify_email, resend_otp, refresh_token, logout},
     services::{auth::AuthService, email::EmailService},
 };
 
@@ -26,5 +26,6 @@ pub fn create_router(auth_service: AuthService, email_service: EmailService) -> 
         .route("/verify", post(verify_email))
         .route("/resend-otp", post(resend_otp))
         .route("/refresh", post(refresh_token))
+        .route("/logout", post(logout))
         .with_state(state)
 } 
