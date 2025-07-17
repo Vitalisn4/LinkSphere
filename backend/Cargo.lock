@@ -229,6 +229,7 @@ dependencies = [
  "anyhow",
  "axum",
  "axum-macros",
+ "base64",
  "bcrypt",
  "chrono",
  "derive_more 2.0.1",
