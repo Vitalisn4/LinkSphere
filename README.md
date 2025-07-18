@@ -1,6 +1,5 @@
-[![Frontend CI](https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/actions/workflows/frontend-ci.yml)
-[![Backend CI](https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/Nkwenti-Severian-Ndongtsop/LinkSphere/actions/workflows/backend-ci.yml)
-
+[![Backend CI](https://github.com/Vitalisn4/LinkSphere/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/Vitalisn4/LinkSphere/actions/workflows/backend-ci.yml)
+[![Frontend CI](https://github.com/Vitalisn4/LinkSphere/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/Vitalisn4/LinkSphere/actions/workflows/frontend-ci.yml)
 # LinkSphere - Your Personal Link Management Platform
 
 LinkSphere is a modern, user-friendly web application that helps you organize, manage, and share your links efficiently. Built with React and TypeScript for the frontend, and Rust with SQLx for the backend, it offers a beautiful and intuitive interface with both light and dark mode support.
