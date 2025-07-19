@@ -168,7 +168,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete, onClic
       <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden flex flex-col">
         <div className="flex-1 flex flex-col p-4">
           <div className="w-full h-32 flex items-center justify-center bg-gradient-to-br from-purple-600 to-pink-500 rounded mb-4">
-            <LinkIcon size={48} className="text-white" />
+      <LinkIcon size={48} className="text-white" />
           </div>
           <h3 className="text-xl font-semibold mb-1 text-gray-100">{link.title}</h3>
           <p className="mb-2 text-gray-400 line-clamp-2">{link.description}</p>
@@ -214,8 +214,8 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete, onClic
             message="Link deleted successfully!"
           />
         </div>
-      </div>
-    );
+    </div>
+  );
   }
 
   // Layout for links not owned by the user
@@ -253,7 +253,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete, onClic
           </div>
           <div className="flex items-center gap-1">
             <Calendar size={16} />
-            <span>{formatDate(link.created_at)}</span>
+          <span>{formatDate(link.created_at)}</span>
           </div>
           <div className="flex items-center gap-1">
             <Clock size={16} />
