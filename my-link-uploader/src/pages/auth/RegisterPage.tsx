@@ -63,8 +63,8 @@ export default function RegisterPage() {
     if (!/(?=.*\d)/.test(password)) {
       return "Password must contain at least one number";
     }
-    if (!/(?=.*[@$!%*?&])/.test(password)) {
-      return "Password must contain at least one special character (@$!%*?&)";
+    if (!/(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~])/.test(password)) {
+      return "Password must contain at least one special character (!@#$%^&*()_+-=[]{};':\"\\|,.<>/?`~)";
     }
     return undefined;
   };
