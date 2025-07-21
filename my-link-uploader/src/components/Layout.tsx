@@ -17,7 +17,7 @@ export default function Layout({ children }: LayoutProps) {
 
   if (!user) {
     // Render a simple layout for logged-out users
-    return (
+  return (
        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <motion.div
           key="logged-out"
