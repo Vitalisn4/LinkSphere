@@ -9,9 +9,12 @@ import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
 import ApiService, { Link } from "../../services/api";
 import LinkCard from '../../components/LinkCard';
+import { useSearch } from '../../contexts/search';
 
 export default function DashboardPage() {
-  const [query, setQuery] = useState<string>("")
+  // Remove local search state
+  // const [query, setQuery] = useState<string>("")
+  const { query } = useSearch();
   const [links, setLinks] = useState<Link[]>([])
   const [filteredLinks, setFilteredLinks] = useState<Link[]>([])
   const [isSearchFocused, setIsSearchFocused] = useState(false)
@@ -44,10 +47,9 @@ export default function DashboardPage() {
     fetchLinks();
   }, [fetchLinks]);
 
-  // Handle search
+  // Handle search using context query
   useEffect(() => {
-    if (!links) return; // Guard against null links
-    
+    if (!links) return;
     const timer = setTimeout(() => {
       if (query) {
         const results = links.filter(
@@ -60,7 +62,6 @@ export default function DashboardPage() {
         setFilteredLinks(links);
       }
     }, 300);
-
     return () => clearTimeout(timer);
   }, [query, links]);
 
