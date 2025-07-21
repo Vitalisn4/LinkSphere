@@ -17,11 +17,11 @@ export default function Sidebar() {
   ] : [];
 
   return (
-    <aside className={`h-screen sticky top-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col transition-all duration-300 ${collapsed ? 'w-24 p-4' : 'w-64 p-6'}`}>
-      {/* Logo and Collapse Button */}
+    <aside className={`h-screen sticky top-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col p-4 transition-all duration-300 ${collapsed ? 'w-24' : 'w-64'}`}>
+      {/* Logo */}
       <div className="mb-8">
-        <Link to={user ? "/dashboard" : "/"} className={`flex items-center group ${collapsed ? 'justify-center' : ''}`}>
-          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-400 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
+        <Link to={user ? "/dashboard" : "/"} className={`flex items-center group overflow-hidden ${collapsed ? 'justify-center' : ''}`}>
+          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-400 rounded-xl flex items-center justify-center flex-shrink-0">
             <LinkIcon size={20} className="text-white" />
           </div>
           {!collapsed && (
@@ -30,15 +30,6 @@ export default function Sidebar() {
             </h1>
           )}
         </Link>
-        <div className={`flex ${collapsed ? 'justify-center' : 'justify-end'}`}>
-            <button
-              className="mt-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              onClick={() => setCollapsed((c) => !c)}
-              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-              <Menu size={20} />
-            </button>
-        </div>
       </div>
 
       {/* Navigation */}
@@ -59,6 +50,18 @@ export default function Sidebar() {
           </Link>
         ))}
       </nav>
+
+      {/* Collapse Button */}
+      <div className="mt-auto">
+        <button
+          className={`flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full ${collapsed ? 'justify-center' : ''}`}
+          onClick={() => setCollapsed((c) => !c)}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          <Menu size={20} />
+          {!collapsed && <span>Menu</span>}
+        </button>
+      </div>
     </aside>
   );
 }
