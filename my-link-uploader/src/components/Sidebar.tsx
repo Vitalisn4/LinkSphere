@@ -17,11 +17,11 @@ export default function Sidebar() {
   ] : [];
 
   return (
-    <aside className={`h-screen sticky top-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col p-6 transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'}`}>
-      {/* Logo */}
-      <div className="mb-4 flex flex-col items-center">
-        <Link to={user ? "/dashboard" : "/"} className="flex items-center justify-center group">
-          <div className={`transition-all duration-300 ${collapsed ? 'w-10 h-10' : 'w-10 h-10 mr-0' } bg-gradient-to-br from-purple-500 to-pink-400 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20`}>
+    <aside className={`h-screen sticky top-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col transition-all duration-300 ${collapsed ? 'w-24 p-4' : 'w-64 p-6'}`}>
+      {/* Logo and Collapse Button */}
+      <div className="mb-8">
+        <Link to={user ? "/dashboard" : "/"} className={`flex items-center group ${collapsed ? 'justify-center' : ''}`}>
+          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-400 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
             <LinkIcon size={20} className="text-white" />
           </div>
           {!collapsed && (
@@ -30,18 +30,19 @@ export default function Sidebar() {
             </h1>
           )}
         </Link>
-        {/* Collapse Button */}
-        <button
-          className="mt-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          onClick={() => setCollapsed((c) => !c)}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          <Menu size={20} />
-        </button>
+        <div className={`flex ${collapsed ? 'justify-center' : 'justify-end'}`}>
+            <button
+              className="mt-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              onClick={() => setCollapsed((c) => !c)}
+              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              <Menu size={20} />
+            </button>
+        </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 flex flex-col space-y-2 items-center">
+      <nav className="flex-1 flex flex-col space-y-2">
         {navLinks.map(link => (
           <Link
             key={link.path}
@@ -51,6 +52,7 @@ export default function Sidebar() {
                 ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300'
                 : 'hover:bg-gray-100 dark:hover:bg-gray-800'
             }`}
+            title={collapsed ? link.label : ''}
           >
             {link.icon}
             {!collapsed && <span>{link.label}</span>}
