@@ -1,8 +1,7 @@
 "use client"
 
-import { formatInTimeZone } from 'date-fns-tz';
 import { motion } from "framer-motion";
-import { Calendar, Clock, ExternalLink, Search, User } from "lucide-react";
+import { Search } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -68,16 +67,6 @@ export default function DashboardPage() {
     setQuery(searchQuery);
   };
 
-  const handleLinkClick = async (id: string, url: string) => {
-    try {
-      await ApiService.incrementLinkClick(id);
-      window.open(url, '_blank', 'noopener,noreferrer');
-    } catch (error) {
-      console.error('Error incrementing click count:', error);
-      window.open(url, '_blank', 'noopener,noreferrer');
-    }
-  };
-
   const handleDeleteLink = async (id: string) => {
     try {
       await ApiService.deleteLink(id);
@@ -86,30 +75,6 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('Failed to delete link:', error);
       // Optionally show a toast or error message here
-    }
-  };
-
-  const formatDate = (dateString: string | null | undefined): string => {
-    if (!dateString) return 'N/A';
-    try {
-      // Parse the date string directly, it's already in UTC format from the backend
-      const date = new Date(dateString);
-      return formatInTimeZone(date, 'Africa/Douala', 'MMM d, yyyy');
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return 'Invalid date';
-    }
-  };
-
-  const formatTime = (dateString: string | null | undefined): string => {
-    if (!dateString) return 'N/A';
-    try {
-      // Parse the date string directly, it's already in UTC format from the backend
-      const date = new Date(dateString);
-      return formatInTimeZone(date, 'Africa/Douala', 'HH:mm');
-    } catch (error) {
-      console.error('Error formatting time:', error);
-      return 'Invalid time';
     }
   };
 
