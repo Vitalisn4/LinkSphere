@@ -1,12 +1,16 @@
 name: PR Description Auto-Close
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, edited, labeled, unlabeled, synchronize]
     branches: [dev, master]
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * *' # every 24 hours
   workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
 
 jobs:
   close-invalid-description-prs:
@@ -21,10 +25,8 @@ jobs:
               if (!['dev', 'master'].includes(pr.base.ref)) return;
               const labels = pr.labels.map(l => l.name);
               if (labels.includes('invalid-description')) {
-                // Find attempt count
                 const attemptLabel = labels.find(l => l.startsWith('description-attempt-'));
                 const attempts = attemptLabel ? parseInt(attemptLabel.replace('description-attempt-', '')) : 0;
-                // Find last updated time
                 const now = new Date();
                 const updated = new Date(pr.updated_at);
                 const minutesSinceUpdate = (now - updated) / 60000;
@@ -46,10 +48,8 @@ jobs:
             }
 
             if (context.payload.pull_request) {
-              // Event-driven: single PR
               await closeIfInvalid(context.payload.pull_request);
             } else {
-              // Scheduled: check all open PRs
               const prs = await github.rest.pulls.list({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
