@@ -19,7 +19,7 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
       <header className="sticky top-0 z-50 backdrop-blur-md border-b bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-3 flex items-center justify-between">
+        <div className="w-full px-4 sm:px-6 py-3 flex items-center justify-between">
           {/* Left: Sidebar */}
           <div className="flex items-center flex-1">
             {user && <Sidebar />}
