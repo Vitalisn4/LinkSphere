@@ -1,10 +1,14 @@
 name: PR Title Auto-Close
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, edited, labeled, unlabeled, synchronize]
     branches: [dev, master]
   workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
 
 jobs:
   close-invalid-title-prs:
@@ -19,10 +23,8 @@ jobs:
             if (!['dev', 'master'].includes(pr.base.ref)) return;
             const labels = pr.labels.map(l => l.name);
             if (labels.includes('invalid-title')) {
-              // Find attempt count
               const attemptLabel = labels.find(l => l.startsWith('title-attempt-'));
               const attempts = attemptLabel ? parseInt(attemptLabel.replace('title-attempt-', '')) : 0;
-              // Find last updated time
               const now = new Date();
               const updated = new Date(pr.updated_at);
               const minutesSinceUpdate = (now - updated) / 60000;
