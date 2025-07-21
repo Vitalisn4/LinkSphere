@@ -2,9 +2,10 @@ import React, { useRef, useState } from 'react';
 import { Bell, Search } from 'lucide-react';
 import ProfileDropdown from './ProfileDropdown';
 import { useTheme } from '../hooks/useTheme';
+import { useSearch } from '../contexts/search';
 
 export default function Header() {
-  const [query, setQuery] = useState("");
+  const { query, setQuery } = useSearch();
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { isDark } = useTheme();
