@@ -1,0 +1,45 @@
+name: PR Title Auto-Close
+
+on:
+  pull_request_target:
+    types: [opened, edited, labeled, unlabeled, synchronize]
+    branches: [dev, master]
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  close-invalid-title-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close PRs with invalid titles
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) return;
+            if (!['dev', 'master'].includes(pr.base.ref)) return;
+            const labels = pr.labels.map(l => l.name);
+            if (labels.includes('invalid-title')) {
+              const attemptLabel = labels.find(l => l.startsWith('title-attempt-'));
+              const attempts = attemptLabel ? parseInt(attemptLabel.replace('title-attempt-', '')) : 0;
+              const now = new Date();
+              const updated = new Date(pr.updated_at);
+              const minutesSinceUpdate = (now - updated) / 60000;
+              if (attempts >= 5 || minutesSinceUpdate > 30) {
+                await github.rest.pulls.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number,
+                  state: 'closed'
+                });
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body: `🚫 This PR was closed because the title was not updated after ${attempts} attempts or within 30 minutes. Please open a new PR with a valid title.`
+                });
+              }
+            } 
