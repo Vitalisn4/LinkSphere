@@ -1,0 +1,30 @@
+name: PR Welcome Comment
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post welcome comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prPoster = context.payload.pull_request.user.login;
+            const message = `
+            Hi @${prPoster}! 👋
+            
+            Thank you so much for your contribution to LinkSphere! 🚀 The entire LinkSphere team truly appreciates your effort and dedication in helping us improve the project.
+            
+            Your PR is now in our review queue, and we'll get back to you with feedback as soon as possible. If you have any questions or want to discuss your changes, feel free to reply here.
+            
+            Welcome to the LinkSphere community! 💜
+            `;
+            github.rest.issues.createComment({
+              issue_number: context.payload.pull_request.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
