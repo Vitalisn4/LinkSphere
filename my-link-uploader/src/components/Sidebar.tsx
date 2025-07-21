@@ -19,7 +19,7 @@ export default function Sidebar() {
 
   return (
     <div>
-      <button onClick={() => setIsOpen(true)} className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800">
+      <button onClick={() => setIsOpen(true)} className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-purple-100/70 dark:hover:bg-purple-900/40 hover:text-purple-700 dark:hover:text-purple-300 transition-colors">
         <Menu size={24} />
       </button>
 
