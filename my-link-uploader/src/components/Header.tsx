@@ -9,15 +9,12 @@ export default function Header() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { isDark } = useTheme();
 
-  // Optionally, you can lift the search state up if you want to filter links globally
-
   return (
     <header className="sticky top-0 z-40 backdrop-blur-md border-b bg-white/80 dark:bg-gray-800/80 border-gray-200 dark:border-gray-700">
-      <div className="w-full px-4 sm:px-6 py-3 flex items-center justify-end">
-        {/* Right: Search, Notifications, Profile */}
-        <div className="flex items-center flex-1 justify-end space-x-4">
-          {/* Large Styled Search Bar */}
-          <div className="relative w-80">
+      <div className="w-full px-4 sm:px-6 py-3 flex items-center justify-between">
+        {/* Centered Wide Search Bar */}
+        <div className="flex-1 flex justify-center">
+          <div className="relative w-full max-w-3xl">
             <input
               ref={searchInputRef}
               type="text"
@@ -46,11 +43,12 @@ export default function Header() {
               size={20}
             />
           </div>
-          {/* Notifications Bell */}
+        </div>
+        {/* Right: Notifications, Profile */}
+        <div className="flex items-center space-x-4 ml-4">
           <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
             <Bell size={22} className="text-gray-500 dark:text-gray-300" />
           </button>
-          {/* Profile Dropdown */}
           <ProfileDropdown />
         </div>
       </div>
