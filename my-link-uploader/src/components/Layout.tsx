@@ -46,8 +46,8 @@ export default function Layout({ children }: LayoutProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-            >
-              {children}
+    >
+      {children}
             </motion.div>
           </main>
         </div>
