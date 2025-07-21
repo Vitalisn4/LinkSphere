@@ -131,40 +131,6 @@ export default function DashboardPage() {
           </p>
         </motion.div>
 
-        {/* Search Bar */}
-        <div className="mb-10">
-          <div className="relative">
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={query}
-              onChange={(e) => handleSearch(e.target.value)}
-              onFocus={() => setIsSearchFocused(true)}
-              onBlur={() => setIsSearchFocused(false)}
-              placeholder="Search links by title or description..."
-              className={`
-                w-full px-6 py-4 rounded-2xl transition-all duration-300
-                ${isDark
-                  ? 'bg-gray-800/50 text-white placeholder-gray-500 focus:bg-gray-800'
-                  : 'bg-gray-100/50 text-gray-900 placeholder-gray-400 focus:bg-white'
-                }
-                ${isSearchFocused
-                  ? isDark
-                    ? 'shadow-lg shadow-purple-500/10'
-                    : 'shadow-lg shadow-purple-500/5'
-                  : ''
-                }
-              `}
-            />
-            <Search
-              className={`absolute right-6 top-1/2 transform -translate-y-1/2 ${
-                isDark ? 'text-gray-500' : 'text-gray-400'
-              }`}
-              size={20}
-            />
-          </div>
-        </div>
-
         {/* Links Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading ? (
