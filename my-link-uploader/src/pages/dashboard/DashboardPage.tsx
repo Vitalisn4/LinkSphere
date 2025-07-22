@@ -67,6 +67,20 @@ export default function DashboardPage() {
     setQuery(searchQuery);
   };
 
+  const handleLinkClick = async (id: string, url: string) => {
+    try {
+      await ApiService.incrementLinkClick(id);
+      // Fetch updated link
+      const updatedLink = await ApiService.getLinkById(id);
+      setLinks((prev) => prev.map((l) => l.id === id ? updatedLink : l));
+      setFilteredLinks((prev) => prev.map((l) => l.id === id ? updatedLink : l));
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      console.error('Error incrementing click count:', error);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+  
   const handleDeleteLink = async (id: string) => {
     try {
       await ApiService.deleteLink(id);
@@ -157,6 +171,7 @@ export default function DashboardPage() {
                   link={link}
                   currentUser={auth?.user ? { id: auth.user.id, username: auth.user.username } : null}
                   onDelete={handleDeleteLink}
+                  onClick={handleLinkClick}
                 />
               </motion.div>
             ))
