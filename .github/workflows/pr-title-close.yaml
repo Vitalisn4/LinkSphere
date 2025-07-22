@@ -3,7 +3,7 @@ name: PR Title Auto-Close
 on:
   pull_request_target:
     types: [opened, edited, labeled, unlabeled, synchronize]
-    branches: [dev, master, test]
+    branches: [dev, master]
   workflow_dispatch:
 
 permissions:
