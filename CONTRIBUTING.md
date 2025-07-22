@@ -31,8 +31,8 @@ To maintain a high-quality codebase and help reviewers, we have automated workfl
 ### What Happens If You Don’t Follow These?
 - If your PR title or description does not meet the requirements:
   - A friendly bot will comment and ask you to update it.
-  - You have up to 5 attempts or 30 minutes to fix the issue.
-  - If not fixed, your PR will be automatically closed. This can happen either when you next interact with the PR (such as editing or pushing changes), or during a daily scheduled check that runs every 24 hours.
+  - You have up to 5 attempts or 30 minutes from your last update to fix the issue.
+  - If not fixed, your PR will be closed.
   - You can always open a new PR with the correct information!
 
 **Tip:** Please address any feedback from the bot promptly to avoid your PR being auto-closed.
