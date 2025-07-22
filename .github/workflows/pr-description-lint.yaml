@@ -3,7 +3,7 @@ name: PR Description Lint
 on:
   pull_request_target:
     types: [opened, edited, synchronize]
-    branches: [dev, master]
+    branches: [dev, master, test]
 
 permissions:
   issues: write
