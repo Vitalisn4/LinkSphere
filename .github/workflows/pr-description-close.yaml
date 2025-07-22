@@ -3,7 +3,7 @@ name: PR Description Auto-Close
 on:
   pull_request_target:
     types: [opened, edited, labeled, unlabeled, synchronize]
-    branches: [dev, master]
+    branches: [dev, master, test]
   schedule:
     - cron: '0 0 * * *' # every 24 hours
   workflow_dispatch:
