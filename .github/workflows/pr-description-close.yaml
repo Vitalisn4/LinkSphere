@@ -5,7 +5,7 @@ on:
     types: [opened, edited, labeled, unlabeled, synchronize]
     branches: [dev, master]
   schedule:
-    - cron: '0 0 * * *' # every 24 hours
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 permissions:

@@ -59,7 +59,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `👋 Hi @${pr.user.login}, your PR description doesn't meet our guidelines. Please update it to provide enough context (at least 20 characters).\n\nYou have ${maxAttempts - attempts} attempts left. If not fixed within 30 minutes or after 5 failed attempts, this PR will be closed.`
+                body: `Hi @${pr.user.login} 👋, your PR description doesn't meet our guidelines. Please update it to provide enough context (at least 20 characters).\n\nYou have ${maxAttempts - attempts} attempts left. If not fixed within 30 minutes or after 5 failed attempts, this PR will be closed.`
               });
 
               core.setFailed('PR description is not valid.');
