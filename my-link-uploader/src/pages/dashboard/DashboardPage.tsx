@@ -80,7 +80,7 @@ export default function DashboardPage() {
       window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
-
+  
   const handleDeleteLink = async (id: string) => {
     try {
       await ApiService.deleteLink(id);
