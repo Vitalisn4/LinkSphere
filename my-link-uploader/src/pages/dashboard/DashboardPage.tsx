@@ -1,8 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
@@ -16,10 +15,8 @@ export default function DashboardPage() {
   const { query } = useSearch();
   const [links, setLinks] = useState<Link[]>([])
   const [filteredLinks, setFilteredLinks] = useState<Link[]>([])
-  const [isSearchFocused, setIsSearchFocused] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [, setError] = useState<string | null>(null)
-  const searchInputRef = useRef<HTMLInputElement>(null)
   const auth = useAuth()
   const { isDark } = useTheme()
   const navigate = useNavigate()
@@ -63,10 +60,6 @@ export default function DashboardPage() {
     }, 300);
     return () => clearTimeout(timer);
   }, [query, links]);
-
-  const handleSearch = (searchQuery: string) => {
-    setQuery(searchQuery);
-  };
 
   const handleLinkClick = async (id: string, url: string) => {
     try {
