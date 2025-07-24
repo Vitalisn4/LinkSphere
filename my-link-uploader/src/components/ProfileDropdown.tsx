@@ -97,6 +97,17 @@ export default function ProfileDropdown() {
                 {isDark ? <Sun size={16} /> : <Moon size={16} />}
                 <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
               </button>
+              <button
+                onClick={() => {
+                  logout();
+                  setIsOpen(false);
+                  setSettingsOpen(false);
+                }}
+                className="w-full flex items-center space-x-3 px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/50 mt-2"
+              >
+                <LogOut size={16} />
+                <span>Logout</span>
+              </button>
               {/* Add more settings options here if needed */}
             </div>
           </motion.div>
