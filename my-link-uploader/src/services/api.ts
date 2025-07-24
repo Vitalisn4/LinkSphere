@@ -219,6 +219,16 @@ export const ApiService = {
       handleApiError(error as AxiosError<ApiError>);
     }
   },
+
+  async getLinkById(id: string): Promise<Link> {
+    try {
+      const response = await api.get<Link>(`/links/${id}`);
+      return response.data;
+    } catch (error) {
+      handleApiError(error as AxiosError<ApiError>);
+      throw error;
+    }
+  },
 };
 
 export default ApiService; 

@@ -17,12 +17,16 @@ export default function LoginForm() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-    
+
     try {
       await login(email, password);
       navigate("/");
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Login failed. Please try again.");
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Login failed. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -72,7 +76,10 @@ export default function LoginForm() {
         transition={{ delay: 0.4, duration: 0.5 }}
       >
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Mail
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            size={20}
+          />
           <input
             type="email"
             value={email}
@@ -84,7 +91,10 @@ export default function LoginForm() {
         </div>
 
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Lock
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            size={20}
+          />
           <input
             type={showPassword ? "text" : "password"}
             value={password}
@@ -134,4 +144,4 @@ export default function LoginForm() {
       </motion.form>
     </motion.div>
   );
-} 
+}
