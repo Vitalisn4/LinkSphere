@@ -7,7 +7,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
 import ApiService, { Link } from "../../services/api";
 import LinkCard from '../../components/LinkCard';
-import { useSearch } from '../../contexts/search';
+import { useSearch } from '../../contexts/useSearch';
 
 export default function DashboardPage() {
   // Remove local search state
