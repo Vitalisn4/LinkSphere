@@ -62,9 +62,6 @@ export default function Header() {
         </div>
         {/* Right: Notifications, Profile */}
         <div className="flex items-center space-x-4 ml-4">
-          <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-            <Bell size={22} className="text-gray-500 dark:text-gray-300" />
-          </button>
           <ProfileDropdown />
         </div>
       </div>
