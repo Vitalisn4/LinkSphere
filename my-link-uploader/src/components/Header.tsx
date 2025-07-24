@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Bell, Search, LayoutDashboard } from 'lucide-react';
 import ProfileDropdown from './ProfileDropdown';
 import { useTheme } from '../hooks/useTheme';
-import { useSearch } from '../contexts/search';
+import { useSearch } from '../contexts/useSearch';
 import { useNavigate } from 'react-router-dom';
 
 export default function Header() {
