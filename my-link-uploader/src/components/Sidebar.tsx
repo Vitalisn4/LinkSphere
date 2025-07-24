@@ -17,7 +17,7 @@ export default function Sidebar() {
   ] : [];
 
   return (
-    <aside className={`h-screen sticky top-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col p-4 transition-all duration-300 ${collapsed ? 'w-16' : 'w-48'}`}>
+    <aside className={`h-screen sticky top-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col p-4 transition-all duration-300 ${collapsed ? 'w-24' : 'w-64'}`}>
       {/* Logo */}
       <div className="mb-8">
         <Link to={user ? "/dashboard" : "/"} className={`flex items-center group overflow-hidden ${collapsed ? 'justify-center' : ''}`}>
