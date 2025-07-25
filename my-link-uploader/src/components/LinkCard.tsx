@@ -94,7 +94,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete, onClic
   // Layout for owned links with images
   if (isOwner && hasImage) {
     return (
-      <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden flex flex-col">
+      <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden flex flex-col h-full min-h-[350px]">
         <div className="relative aspect-video">
           <img
             src={link.preview!.image}
@@ -165,7 +165,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete, onClic
   // Layout for owned links without images
   if (isOwner && !hasImage) {
     return (
-      <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden flex flex-col">
+      <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden flex flex-col h-full min-h-[350px]">
         <div className="relative aspect-video flex items-center justify-center bg-gradient-to-br from-purple-600 to-pink-500">
           <LinkIcon size={48} className="text-white" />
         </div>
@@ -222,7 +222,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, currentUser, onDelete, onClic
 
   // Layout for links not owned by the user
   return (
-    <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden flex flex-col">
+    <div className="bg-gray-800 rounded-lg shadow-lg overflow-hidden flex flex-col h-full min-h-[350px]">
       <div className="relative aspect-video">
         {hasImage ? (
           <img
