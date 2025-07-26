@@ -1,22 +1,22 @@
 "use client"
 
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
 import ApiService, { Link } from "../../services/api";
 import LinkCard from '../../components/LinkCard';
+import { useSearch } from '../../contexts/useSearch';
 
 export default function DashboardPage() {
-  const [query, setQuery] = useState<string>("")
+  // Remove local search state
+  // const [query, setQuery] = useState<string>("")
+  const { query } = useSearch();
   const [links, setLinks] = useState<Link[]>([])
   const [filteredLinks, setFilteredLinks] = useState<Link[]>([])
-  const [isSearchFocused, setIsSearchFocused] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [, setError] = useState<string | null>(null)
-  const searchInputRef = useRef<HTMLInputElement>(null)
   const auth = useAuth()
   const { isDark } = useTheme()
   const navigate = useNavigate()
@@ -43,10 +43,9 @@ export default function DashboardPage() {
     fetchLinks();
   }, [fetchLinks]);
 
-  // Handle search
+  // Handle search using context query
   useEffect(() => {
-    if (!links) return; // Guard against null links
-    
+    if (!links) return;
     const timer = setTimeout(() => {
       if (query) {
         const results = links.filter(
@@ -59,13 +58,8 @@ export default function DashboardPage() {
         setFilteredLinks(links);
       }
     }, 300);
-
     return () => clearTimeout(timer);
   }, [query, links]);
-
-  const handleSearch = (searchQuery: string) => {
-    setQuery(searchQuery);
-  };
 
   const handleLinkClick = async (id: string, url: string) => {
     try {
@@ -109,40 +103,6 @@ export default function DashboardPage() {
             Your personal link management dashboard
           </p>
         </motion.div>
-
-        {/* Search Bar */}
-        <div className="mb-10">
-          <div className="relative">
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={query}
-              onChange={(e) => handleSearch(e.target.value)}
-              onFocus={() => setIsSearchFocused(true)}
-              onBlur={() => setIsSearchFocused(false)}
-              placeholder="Search links by title or description..."
-              className={`
-                w-full px-6 py-4 rounded-2xl transition-all duration-300
-                ${isDark
-                  ? 'bg-gray-800/50 text-white placeholder-gray-500 focus:bg-gray-800'
-                  : 'bg-gray-100/50 text-gray-900 placeholder-gray-400 focus:bg-white'
-                }
-                ${isSearchFocused
-                  ? isDark
-                    ? 'shadow-lg shadow-purple-500/10'
-                    : 'shadow-lg shadow-purple-500/5'
-                  : ''
-                }
-              `}
-            />
-            <Search
-              className={`absolute right-6 top-1/2 transform -translate-y-1/2 ${
-                isDark ? 'text-gray-500' : 'text-gray-400'
-              }`}
-              size={20}
-            />
-          </div>
-        </div>
 
         {/* Links Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
